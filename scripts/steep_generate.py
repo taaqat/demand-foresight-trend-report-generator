@@ -83,7 +83,7 @@ def gen_trend_report(topic: str, start_date: str, end_date: str, user_name, user
         count = 1
         for name, trend in trends_basic.items():
             trend_message = json.dumps(trend)
-            in_messege = f'''
+            in_message = f'''
             總共有這些事件。請分類：\n\n{events_message}\n\n----\n\n*****主要趨勢{count}（{name}）*****：\n\n{trend_message}
             '''
             chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step4_prompt)

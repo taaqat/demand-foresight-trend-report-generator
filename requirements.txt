@@ -10,4 +10,4 @@ numpy
 python-pptx  # Correct package name for pptx
 st-gsheets-connection
 streamlit-authenticator
-yaml
+PyYAML

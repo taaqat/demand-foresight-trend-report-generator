@@ -159,7 +159,7 @@ def s1_filter_news():
     placeholder = st.empty()
     proceed, undo = False, False
     with placeholder.container():
-        if 'self_select_raw_data' != ' ':
+        if st.session_state['self_select_raw_data'] != ' ':
             l, r = st.columns((0.8, 0.2))
             with l:
                 proceed = st.button("Proceed", type = "primary", key = 'proceed')

@@ -7,7 +7,6 @@ from managers.prompt_manager import PromptManager
 import pandas as pd
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_anthropic import ChatAnthropic
-from origin import model, STEEPGSheetDB
 import datetime as dt
 import tqdm
 import time

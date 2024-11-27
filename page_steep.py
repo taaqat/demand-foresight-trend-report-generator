@@ -177,12 +177,12 @@ if submission:
 
                 st.success("Ppt slides created! You can download now💥")
                 for topic in topic_to_deal:
-                    st.markdown(DataManager.get_output_download_link(start_date, end_date, topic, 'pptx'), unsafe_allow_html = True)
+                    st.markdown(DataManager.get_output_download_link(start_date, end_date, topic, 'pptx', 'steep'), unsafe_allow_html = True)
 
             if excel:
                 
                 st.success("Excel file created! You can download now💥")
-                st.markdown(DataManager.get_output_download_link(start_date, end_date, '', 'xlsx'), unsafe_allow_html = True)
+                st.markdown(DataManager.get_output_download_link(start_date, end_date, '', 'xlsx', 'steep'), unsafe_allow_html = True)
 
             if summary_output:
                 st.success("Here is the daily summary for the period you requested💥")

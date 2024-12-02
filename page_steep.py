@@ -164,7 +164,7 @@ if submission:
                 with st.spinner("Processing..."):
                     # *** main function for inference and generating trend report ***
                     Executor.steep_run(
-                        user_name, user_email, start_date, end_date, topic_to_deal
+                        user_name, user_email, start_date, end_date, topic_to_deal, excel, ppt
                     )
             except:
                 SessionManager.send_notification_email(user_name, user_email, type = 'failed')

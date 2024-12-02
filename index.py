@@ -30,6 +30,17 @@ def main():
 
     pg.run()
 
+    with st.sidebar:
+        if st.button("清除所有暫存"):
+            st.cache_data.clear()
+            for var in st.session_state.keys():
+                if var not in ['authentication_status', 'authenticator', 'logout', 'init', 'config']:
+                    del st.session_state[var]
+            st.rerun()
+
+        if st.button("顯示所有暫存"):
+            with st.expander("session states"):
+                st.write(st.session_state.keys())
 
 
     

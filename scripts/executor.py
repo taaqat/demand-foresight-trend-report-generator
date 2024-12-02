@@ -32,6 +32,7 @@ class Executor:
         try:
             summary_data = st.session_state['steep_summary']
         except:
+            # todo 要修
             try:
                 summary_data = DataManager.b64_to_dataframe(DataManager.get_files(f"Summary_{start_date}-{end_date}.xlsx", 'xlsx'))
             except:
@@ -42,7 +43,15 @@ class Executor:
         st_bar = st.progress(0, sys_info(""))
         counter = 0
 
-        if [excel_output, ppt_output] != [False, False]:
+        if [excel_output, ppt_output] == [True, False]:
+            b64_excel = ExportManager.STEEP.create_excel(start_date, end_date, topics)
+            filename = f'{start_date}-{end_date}_STEEP.xlsx'
+            DataManager.post_files(filename,
+                                   b64_excel,
+                                   str(dt.datetime.today() + dt.timedelta(365)), 
+                                   user_name, 
+                                   user_email)
+        elif [excel_output, ppt_output] != [False, False]:
             
             # *** run trend report generator and generate powerpoint
             for i, topic in enumerate(topics):

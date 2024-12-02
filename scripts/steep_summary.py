@@ -48,8 +48,9 @@ def monthly_summary(start_date: str, end_date: str,  user_name, user_email):
     # while loop to iterate over all days within the given period
     st_bar = st.progress(0, "Summarizing news within a given period...")            # progress bar on streamlit UI
     while now < end:
-        st_bar.progress(counter/max, f"Summarizing news for {now}")
+        st_bar.progress(counter/max, f"Summarizing news for {now}") # !!!
 
+        # todo 這邊之後要改回來
         # first try to fetch the daily summary data from database
         try:
             response = DataManager.get_files(f"Daily_Summary_{now}.json", 'json') 
@@ -75,7 +76,7 @@ def monthly_summary(start_date: str, end_date: str,  user_name, user_email):
             DataManager.post_files(file_name = f"Daily_Summary_{now}.json", file_content = encoded_json_str, 
                         expiration = str(dt.datetime.today() + dt.timedelta(90)), user_name = user_name, user_email = user_email)
             
-        now += dt.timedelta(days = 1)
+        now += dt.timedelta(days = 1)   # !!!
         counter += 1
     
     st_bar.empty()

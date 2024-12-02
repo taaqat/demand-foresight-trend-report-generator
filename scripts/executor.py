@@ -32,10 +32,10 @@ class Executor:
         try:
             summary_data = st.session_state['steep_summary']
         except:
-            # try:
-                # summary_data = DataManager.b64_to_dataframe(DataManager.get_files(f"Summary_{start_date}-{end_date}.xlsx", 'xlsx'))
-                # st.write(summary_data)
-            # except:
+            try:
+                summary_data = DataManager.b64_to_dataframe(DataManager.get_files(f"Summary_{start_date}-{end_date}.xlsx", 'xlsx'))
+                st.write(summary_data)
+            except:
                 summary_data = monthly_summary(start_date, end_date, user_name, user_email)
 
         # *** generate trend report

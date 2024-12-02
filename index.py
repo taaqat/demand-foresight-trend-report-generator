@@ -1,7 +1,6 @@
 import streamlit as st
 import yaml
 import streamlit as st
-import yaml
 from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
 from streamlit_authenticator import Hasher

@@ -81,12 +81,12 @@ def monthly_summary(start_date: str, end_date: str,  user_name, user_email):
     st_bar.empty()
     st.write("Summary Completed!!")
 
-    # * update info to steep database
-    SessionManager.steep_database("update", start_date, end_date, "Summary", user_name, user_email, dt.date.today())
-
     # * transform the dictionary format into panda dataframe
     month_out = pd.DataFrame.from_dict(month_out, orient = 'index').reset_index()
     month_out.columns = ['date', 'social', 'technological', 'economic', 'environmental', 'political', 'business_and_investment']
+
+    # * update info to steep database
+    SessionManager.steep_database("update", start_date, end_date, "Summary", user_name, user_email, dt.date.today())
 
     # * store the monthly summary data in session state
     st.session_state['steep_summary'] = month_out

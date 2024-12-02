@@ -14,7 +14,6 @@ class SessionManager:
 
     # *** This function communicates with STEEP Google Sheet Database ***
     @staticmethod
-    @st.cache_data
     def steep_database(method: str, 
                        start_date = None, 
                        end_date = None, 
@@ -52,7 +51,6 @@ class SessionManager:
     
     # *** This function communicates with Self Select Google Sheet Database ***
     @staticmethod
-    @st.cache_data
     def self_select_database(method: str, 
                              project_name = None, 
                              keywords = None, 

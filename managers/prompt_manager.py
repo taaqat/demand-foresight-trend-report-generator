@@ -71,6 +71,7 @@ class PromptManager:
         **按照以上範例JSON格式回答，不要亂加子標題**
         **請確實針對內容裡的雙引號前面加上\進行轉義**
         **以上小括號請自行轉義成 json 的大括號**
+        **請注意字典的 key 必須要完全一樣，大小寫也要一樣**
         """
 
         # *** step 2: three versions trend report

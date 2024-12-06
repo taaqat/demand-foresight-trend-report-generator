@@ -26,7 +26,7 @@ class SessionManager:
 
         if method == 'fetch':
             conn = st.connection("gsheets2", type = GSheetsConnection)
-            df = conn.read()
+            df = conn.read(worksheet = '工作表1', ttl = 0)
             df['primary_key'] = df[['start_date', 'end_date', 'topic']].agg("_".join, axis = 1)
             st.session_state['gs_steep'] = df
             return df
@@ -34,7 +34,7 @@ class SessionManager:
         elif method == 'update':
             assert None not in [start_date, end_date, user_name, user_email, generated_date], "'update' method requires complete user inputs (start_date, end_date, ...)"
             conn = st.connection("gsheets2", type = GSheetsConnection)
-            df = conn.read()
+            df = conn.read(worksheet = '工作表1', ttl = 0)
 
             if f"{start_date}_{end_date}_{topic}" not in (df['start_date'] + "_" + df['end_date'] + "_" + df['topic']).tolist():
                 df_append = pd.DataFrame([{'start_date': start_date,
@@ -63,7 +63,7 @@ class SessionManager:
 
         if method == 'fetch':
             conn = st.connection("gsheets", type = GSheetsConnection)
-            df = conn.read()
+            df = conn.read(worksheet = 'worksheet1', ttl = 0)
             df['primary_key'] = df[['project_name', 'start_date', 'end_date']].agg("_".join, axis = 1)
             st.session_state['gs_self_select'] = df
             return df
@@ -72,7 +72,7 @@ class SessionManager:
             assert None not in [project_name, keywords, start_date, end_date, user_name, user_email, generated_date], "'update' method requires complete user inputs (start_date, end_date, ...)"
         
             conn = st.connection("gsheets", type = GSheetsConnection)
-            df = conn.read()
+            df = conn.read(worksheet = 'worksheet1', ttl = 0)
             df['primary_key'] = df[['project_name', 'start_date', 'end_date']].agg("_".join, axis = 1)
             st.session_state['gs_self_select'] = df
 

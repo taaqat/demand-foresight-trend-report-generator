@@ -69,7 +69,11 @@ class Executor:
 
                 res_pptx_bs = ExportManager.STEEP.create_pptx(topic, result)
                 filename = f"{topic}_trends_{start_date}-{end_date}.pptx"
-                DataManager.post_files(filename, res_pptx_bs, str(dt.datetime.today() + dt.timedelta(365)), user_name, user_email)
+                DataManager.post_files(filename, 
+                                       res_pptx_bs, 
+                                       str(dt.datetime.today() + dt.timedelta(365)), 
+                                       user_name, 
+                                       user_email)
                 
                 SessionManager.steep_database('update', start_date, end_date, topic, user_name, user_email, dt.date.today())
                 SessionManager.session_state_clear('steep')

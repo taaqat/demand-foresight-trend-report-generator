@@ -9,6 +9,7 @@ from managers.session_manager import SessionManager
 
 from scripts.executor import Executor
 import datetime as dt
+import pandas as pd
 
 # ********* config **********
 st.title("自選主題")
@@ -19,7 +20,7 @@ if 'stage' not in st.session_state:
     st.session_state['stage'] = 'step1'
 
 if 'self_select_raw_data' not in st.session_state:
-    st.session_state['self_select_raw_data'] = ' '
+    st.session_state['self_select_raw_data'] = pd.DataFrame()
 
 # button style setting
 st.markdown("""<style>
@@ -159,14 +160,14 @@ def s1_filter_news():
     placeholder = st.empty()
     proceed, undo = False, False
     with placeholder.container():
-        if st.session_state['self_select_raw_data'] != ' ':
+        if not st.session_state['self_select_raw_data'].empty:
             l, r = st.columns((0.8, 0.2))
             with l:
                 proceed = st.button("Proceed", type = "primary", key = 'proceed')
             with r:
                 undo = st.button("Undo", key = 'Undo')
     if undo:          
-        st.session_state['self_select_raw_data'] = ' '
+        st.session_state['self_select_raw_data'] = pd.DataFrame()
         placeholder.empty()
         step1_result.empty()
 

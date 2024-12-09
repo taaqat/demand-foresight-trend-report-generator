@@ -11,7 +11,6 @@ import re
 
 # from contextlib import contextmanager, redirect_stdout
 from time import sleep
-import streamlit as st
 
 import urllib3
 from urllib3.util.retry import Retry
@@ -20,7 +19,12 @@ import requests
 from io import BytesIO
 
 class DataManager:
+    
+    # *************************************************
+    # *** Functions that interact with III database ***
 
+    # --- Fetch processed news data from III database 
+    #     by keywords and date
     @staticmethod
     def fetch(
         start_date, 
@@ -169,85 +173,7 @@ class DataManager:
 
         return result_df
 
-
-
-    # This function maps the daily raw data from pd.DataFrame to string
-    @staticmethod
-    def return_daily_raw_str(
-        day: str, 
-        data: pd.DataFrame
-        ) -> str:
-
-        contents = []
-        if type(day) == str:
-            date = datetime.datetime.strptime(day, "%Y-%m-%d").date()
-        else:
-            date = day
-
-        for index, row in data.iterrows():
-            # print(f"Row {index}: date={row['date']}, 重點摘要={row['重點摘要']}, 關鍵數據={row['關鍵數據']}")
-            if row["重點摘要"] != "" and row["published_at"].date() == date:
-                contents.append(row["重點摘要"] + "\n" + str(row["關鍵數據"]))
-                
-            if index % 10 == 0:
-                contents.append("\n" + str(date) + "\n")
-        content = "\n" + f"**{str(date)}**'s news" + "\n\n" +"\n\n".join(contents) + "\n\n" + "*"*100
-
-        return content
-
-    # @staticmethod
-    # def find_json_object(input_string):
-    #     start_index = input_string.find('{')
-    #     end_index = input_string.rfind('}')
-
-    #     if start_index != -1 and end_index != -1:
-    #         json_string = input_string[start_index:end_index+1]
-    #         try:
-    #             json_object = json.loads(json_string)
-    #             return json_object
-    #         except json.JSONDecodeError:
-    #             return "DecodeError"
-
-    #     return None
-    @staticmethod
-    def find_json_object(input_string):
-        # Match JSON-like patterns
-        input_string = input_string.replace("\n", '').strip()
-        input_string = input_string.encode("utf-8").decode("utf-8")
-        start_index = input_string.find('{')
-        end_index = input_string.rfind('}')
-
-        if start_index != -1 and end_index != -1:
-            json_string = input_string[start_index:end_index+1]
-            try:
-                json_object = json.loads(json_string)
-                return json_object
-            except json.JSONDecodeError:
-                return "DecodeError"
-        # st.write(json_string)
-
-        return None  # Return None if no valid JSON is found
-
-# def gen_output_dir():
-#     dir_name = f'output'
-#     # current_directory = os.path.dirname(os.path.abspath(__file__))
-#     # directory_path = os.path.join(current_directory, dir_name)
-
-#     try:
-#         os.makedirs(dir_name, exist_ok=True)
-#     except OSError as e:
-#         print(f"Error creating directory: {e}")
-
-# gen_output_dir()
-
-    @staticmethod
-    def merge_dict(dict1, dict2):
-        return {**dict1, **dict2}
-    
-
-    # **********************************************************
-    # *** Functions that return files back to III's database ***
-    # *** and access & download files ***
+    # --- Post completed files back to III database
     @staticmethod
     def post_files(
             file_name, 
@@ -292,7 +218,7 @@ class DataManager:
         return response
     
 
-
+    # --- Get generated files from III database
     @staticmethod
     def get_files(
         filename, 
@@ -318,6 +244,87 @@ class DataManager:
         except:
             raise ValueError("No such file in the database!")
         
+    # *****************************************
+    # *** Functions for data transformation ***
+        
+    # --- Map the daily raw data from pd.DataFrame to string
+    @staticmethod
+    def return_daily_raw_str(
+        day: str, 
+        data: pd.DataFrame
+        ) -> str:
+
+        contents = []
+        if type(day) == str:
+            date = datetime.datetime.strptime(day, "%Y-%m-%d").date()
+        else:
+            date = day
+
+        for index, row in data.iterrows():
+            # print(f"Row {index}: date={row['date']}, 重點摘要={row['重點摘要']}, 關鍵數據={row['關鍵數據']}")
+            if row["重點摘要"] != "" and row["published_at"].date() == date:
+                contents.append(row["重點摘要"] + "\n" + str(row["關鍵數據"]))
+                
+            if index % 10 == 0:
+                contents.append("\n" + str(date) + "\n")
+        content = "\n" + f"**{str(date)}**'s news" + "\n\n" +"\n\n".join(contents) + "\n\n" + "*"*100
+
+        return content
+
+    # @staticmethod
+    # def find_json_object(input_string):
+    #     start_index = input_string.find('{')
+    #     end_index = input_string.rfind('}')
+
+    #     if start_index != -1 and end_index != -1:
+    #         json_string = input_string[start_index:end_index+1]
+    #         try:
+    #             json_object = json.loads(json_string)
+    #             return json_object
+    #         except json.JSONDecodeError:
+    #             return "DecodeError"
+
+    #     return None
+
+    # --- Find JSON object from a string 
+    #     (Used with LlmManager.llm_api_call())
+    @staticmethod
+    def find_json_object(input_string):
+        # Match JSON-like patterns
+        input_string = input_string.replace("\n", '').strip()
+        input_string = input_string.encode("utf-8").decode("utf-8")
+        start_index = input_string.find('{')
+        end_index = input_string.rfind('}')
+
+        if start_index != -1 and end_index != -1:
+            json_string = input_string[start_index:end_index+1]
+            try:
+                json_object = json.loads(json_string)
+                return json_object
+            except json.JSONDecodeError:
+                return "DecodeError"
+        # st.write(json_string)
+
+        return None  # Return None if no valid JSON is found
+
+# def gen_output_dir():
+#     dir_name = f'output'
+#     # current_directory = os.path.dirname(os.path.abspath(__file__))
+#     # directory_path = os.path.join(current_directory, dir_name)
+
+#     try:
+#         os.makedirs(dir_name, exist_ok=True)
+#     except OSError as e:
+#         print(f"Error creating directory: {e}")
+
+# gen_output_dir()
+
+    # --- Merge two dicts to one
+    @staticmethod
+    def merge_dict(dict1, dict2):
+        return {**dict1, **dict2}
+    
+    # --- Transform Base64 formatted spreadsheet to pd.Dataframe
     @staticmethod
     def b64_to_dataframe(b64_str):
         try:
@@ -330,7 +337,7 @@ class DataManager:
         except:
             raise UnicodeDecodeError("Encountered Errors while tranforming base64 to dataframe. Please ensure the original data format to be 'xlsx'.")
 
-
+    # --- Get output download link (to render on UI with st.markdown())
     @staticmethod
     def get_output_download_link(start_date, end_date, topic, ext, page):
         
@@ -378,6 +385,7 @@ class DataManager:
         comps = (mapping[page][ext]['type'], mapping[page][ext]['filename'], mapping[page][ext]['text'])
         return f'<a href = "data:application/{comps[0]};base64,{content_b64}" download = "{comps[1]}"> {comps[2]}</a>'
     
+    # --- Get summary output download link (to render on UI with st.markdown())
     @staticmethod
     def get_summary_download_link(start_date, end_date, topic = None):
         if topic:

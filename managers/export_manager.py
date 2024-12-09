@@ -554,40 +554,40 @@ class ExportManager:
 
 
 
-# *** Merge all dataframes of STEEP trend report into one excel file ***
-def steep_merge_as_one_Excel(start_time: str, end_time: str, topics: list, user_name: str, user_email: str):
-    summary_report = []
-    path = f'./output/{start_time}-{end_time}_STEEP.xlsx'
-    with pd.ExcelWriter(path) as writer:
-        for topic in topics:
-            try:
-                summary_report.append(json_to_df(start_time, end_time, topic)[1])
-                json_to_df(start_time, end_time, topic)[0].to_excel(writer, sheet_name = topic, index = False)
-            except:
-                pass
-        summary_report = pd.concat(summary_report, ignore_index = False)
-        summary_report.to_excel(writer, sheet_name = 'STEEP 趨勢報告與關鍵字', index = True)
+# # *** Merge all dataframes of STEEP trend report into one excel file ***
+# def steep_merge_as_one_Excel(start_time: str, end_time: str, topics: list, user_name: str, user_email: str):
+#     summary_report = []
+#     path = f'./output/{start_time}-{end_time}_STEEP.xlsx'
+#     with pd.ExcelWriter(path) as writer:
+#         for topic in topics:
+#             try:
+#                 summary_report.append(json_to_df(start_time, end_time, topic)[1])
+#                 json_to_df(start_time, end_time, topic)[0].to_excel(writer, sheet_name = topic, index = False)
+#             except:
+#                 pass
+#         summary_report = pd.concat(summary_report, ignore_index = False)
+#         summary_report.to_excel(writer, sheet_name = 'STEEP 趨勢報告與關鍵字', index = True)
 
-    with open(rf'./output/{start_time}-{end_time}_STEEP.xlsx', "rb") as file:
-        contents = file.read()
-        b64_excel = base64.b64encode(contents).decode()
-    response = postFiles(file_name = f"{start_time}-{end_time}_STEEP.xlsx", file_content = b64_excel, 
-                    expiration = str(dt.datetime.today() + dt.timedelta(90)), user_name = user_name, user_email = user_email)
+#     with open(rf'./output/{start_time}-{end_time}_STEEP.xlsx', "rb") as file:
+#         contents = file.read()
+#         b64_excel = base64.b64encode(contents).decode()
+#     response = postFiles(file_name = f"{start_time}-{end_time}_STEEP.xlsx", file_content = b64_excel, 
+#                     expiration = str(dt.datetime.today() + dt.timedelta(90)), user_name = user_name, user_email = user_email)
 
 
-    return response
+#     return response
 
-# *** SELF_SELECT_PAGE() Export as Excel ***
-def self_select_to_Excel(start_date: str, end_date: str, title: str, user_name: str, user_email: str):
-    path = f'./output/{title}_{start_date}-{end_date}_trend_report.xlsx'
-    with pd.ExcelWriter(path) as writer:
-        output = json_to_df(start_date, end_date, title)
-        output[1].to_excel(writer, sheet_name = '趨勢報告與關鍵字', index = False)
-        output[0].to_excel(writer, sheet_name = '細項', index = False)
+# # *** SELF_SELECT_PAGE() Export as Excel ***
+# def self_select_to_Excel(start_date: str, end_date: str, title: str, user_name: str, user_email: str):
+#     path = f'./output/{title}_{start_date}-{end_date}_trend_report.xlsx'
+#     with pd.ExcelWriter(path) as writer:
+#         output = json_to_df(start_date, end_date, title)
+#         output[1].to_excel(writer, sheet_name = '趨勢報告與關鍵字', index = False)
+#         output[0].to_excel(writer, sheet_name = '細項', index = False)
 
-    with open(rf'./output/{title}_{start_date}-{end_date}_trend_report.xlsx', "rb") as file:
-        contents = file.read()
-        b64_excel = base64.b64encode(contents).decode()
-    response = postFiles(file_name = f"{title}_{start_date}-{end_date}_trend_report.xlsx", file_content = b64_excel, 
-                    expiration = str(dt.datetime.today() + dt.timedelta(90)), user_name = user_name, user_email = user_email)
+#     with open(rf'./output/{title}_{start_date}-{end_date}_trend_report.xlsx', "rb") as file:
+#         contents = file.read()
+#         b64_excel = base64.b64encode(contents).decode()
+#     response = postFiles(file_name = f"{title}_{start_date}-{end_date}_trend_report.xlsx", file_content = b64_excel, 
+#                     expiration = str(dt.datetime.today() + dt.timedelta(90)), user_name = user_name, user_email = user_email)
 

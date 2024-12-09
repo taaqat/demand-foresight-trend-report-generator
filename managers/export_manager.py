@@ -7,6 +7,7 @@ import collections.abc
 import subprocess
 import sys
 import pandas as pd
+import requests
 import streamlit as st
 
 try:
@@ -309,6 +310,91 @@ class ExportManager:
                     title_font_size=32, content_font_size=28, rgb_color = rgb_color
                 )
 
+    
+    # Function that queries pics with project name as keyword, and downloads queried pictures
+    @staticmethod
+    def download_images(query, num_images):
+        # * query
+        url = "https://api.pexels.com/v1/search"
+        headers = {"Authorization": st.secrets["PEXEL_KEY"]}
+        params = {"query": query, "per_page": num_images}
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        results = response.json()
+        image_urls = [photo["src"]["original"] for photo in results["photos"]]
+
+        os.makedirs("images", exist_ok = True)
+        for i, url in enumerate(image_urls):
+            response = requests.get(url)
+            with open(f"images/image_{i+1}.jpg", "wb") as f:
+                f.write(response.content)
+    
+    # Function that add downloaded pics to ppt
+    @staticmethod
+    def add_image_slide(prs, image_file, title, title_font_size, background_color = RGBColor(240, 240, 240) , fixed_font_size=False, rgb_color = RGBColor(5, 5, 5),
+                        ):
+        slide_layout = prs.slide_layouts[0]  # Use title and content layout
+        slide = prs.slides.add_slide(slide_layout)
+
+        # Set background color
+        background = slide.background
+        fill = background.fill
+        fill.solid()
+        fill.fore_color.rgb = background_color
+
+        title_placeholder = slide.shapes.title
+        
+
+        # Adjust title placeholder size to avoid overlapping with the black line
+        title_placeholder.width = Inches(12.5)
+        title_placeholder.height = Inches(1.2)
+        title_placeholder.left = Inches(1)
+        title_placeholder.top = Inches(0.4)
+
+        # Set title and font size
+        title_placeholder.text = title
+        title_text_frame = title_placeholder.text_frame
+        title_text_frame.clear()
+        title_p = title_text_frame.add_paragraph()
+        title_p.text = title
+        title_p.font.size = Pt(title_font_size)
+        title_p.font.bold = True
+        title_p.font.name = 'Microsoft JhengHei'
+        title_p.font.color.rgb = rgb_color
+        title_p.alignment = PP_ALIGN.LEFT
+
+        # Add a black line below the title
+        line = slide.shapes.add_shape(
+            MSO_SHAPE.RECTANGLE, Inches(1), Inches(1.9), Inches(14), Inches(0.01)
+        )
+        line.fill.solid()
+        line.fill.fore_color.rgb = RGBColor(0, 0, 0)
+        line.line.color.rgb = RGBColor(0, 0, 0)
+        line.line.width = Inches(0)
+
+        # Add solid circle in the upper-right corner
+        solid_circle = slide.shapes.add_shape(
+            MSO_SHAPE.OVAL, Inches(13.7), Inches(0.9), Inches(0.8), Inches(0.8)
+        )
+        solid_circle.fill.solid()
+        solid_circle.fill.fore_color.rgb = rgb_color
+
+        # Add hollow circle in the upper-right corner
+        hollow_circle = slide.shapes.add_shape(
+            MSO_SHAPE.OVAL, Inches(14.5), Inches(0.9), Inches(0.8), Inches(0.8)
+        )
+        hollow_circle.line.color.rgb = RGBColor(0, 0, 0)
+        hollow_circle.line.width = Pt(1)
+        hollow_circle.fill.background()
+
+    
+
+        # Add pics
+
+        image_path = os.path.join("images", image_file)
+        slide.shapes.add_picture(image_path, Inches(4), Inches(2), Inches(8), Inches(6))  # 調整圖片大小和位置
+
+
     # todo *** EXCEL Utilities ***
     # Transform the final output json data into pd.DataFrame
     @staticmethod
@@ -476,6 +562,8 @@ class ExportManager:
                 except:
                     pass
 
+            
+
 
             buffer = io.BytesIO()
             prs.save(buffer)
@@ -528,6 +616,12 @@ class ExportManager:
                 except:
                     pass
                 i += 1
+            
+            ExportManager.download_images(topic, 5)
+            for i in range(1, 6):
+                ExportManager.add_image_slide(
+                    prs, f"image_{i}.jpg", 'TEST', 30
+                )
 
             buffer = io.BytesIO()
             prs.save(buffer)

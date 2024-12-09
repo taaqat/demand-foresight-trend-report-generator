@@ -35,7 +35,7 @@ This file displays the UI for SELF SELECT trend report generation. In addition t
 
 First, user filters desired raw news data by **querying III database with keyword boolean combination**. User would be informed with the queried raw news data and then decide whether proceed or redo the query step.
 
-Then, if user decided to proceed, the page that asks user to input options. Aside from output format, more customizable options are provided, including **desired analysis columns** and **theme color** of pptx slide.
+Then, if user decided to proceed, the page that asks user to input options would be shown. Aside from output format, more customizable options are provided, including **desired analysis columns** and **theme color** of pptx slide.
 
 Subsequent process of generation is basically the same with STEEP page.
 

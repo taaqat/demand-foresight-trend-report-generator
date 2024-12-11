@@ -17,6 +17,9 @@ if "config" not in st.session_state:
 def main():
     st.session_state['logged_in'] = True
     pg = st.navigation(pages = {
+        'DEMO': [
+            st.Page('page_demo.py', title = 'DEMO Videos', icon = ':material/add_circle:') 
+        ],
         'STEEP +B 趨勢報告': [
             st.Page('page_steep.py', title = 'STEEP +B Report Generator', icon = ':material/add_circle:') 
         ],

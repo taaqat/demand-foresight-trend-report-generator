@@ -32,7 +32,7 @@ class Executor:
         try:
             summary_data = st.session_state['steep_summary']
         except:
-            # todo 要修
+
             try:
                 summary_data = DataManager.b64_to_dataframe(DataManager.get_files(f"Summary_{start_date}-{end_date}.xlsx", 'xlsx'))
             except:
@@ -152,6 +152,5 @@ class Executor:
             SessionManager.self_select_database('update', title.replace(" ", "_"), keywords, start_date, end_date, user_name, user_email, dt.date.today())
         else:
             pass
-
-        st.success("Completed!!")
+        
         SessionManager.send_notification_email(user_name, user_email, type = 'completed')

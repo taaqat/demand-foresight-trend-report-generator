@@ -320,8 +320,10 @@ class ExportManager:
         params = {"query": query, "per_page": num_images}
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
+        st.write(response.content)
         results = response.json()
         image_urls = [photo["src"]["original"] for photo in results["photos"]]
+        
 
         os.makedirs("images", exist_ok = True)
         for i, url in enumerate(image_urls):
@@ -616,13 +618,18 @@ class ExportManager:
                 except:
                     pass
                 i += 1
+            try:
+                ExportManager.download_images(topic, 5)
+                for i in range(1, 6):
+                    ExportManager.add_image_slide(
+                        prs, f"image_{i}.jpg", topic, 30, 
+                        rgb_color = rgb_color
+                    )
+            except Exception as e:
+                st.info(f"Failed to add pictures for topic {topic}:")
+                with st.expander("See details"):
+                    st.code(e)
             
-            ExportManager.download_images(topic, 5)
-            for i in range(1, 6):
-                ExportManager.add_image_slide(
-                    prs, f"image_{i}.jpg", 'TEST', 30
-                )
-
             buffer = io.BytesIO()
             prs.save(buffer)
             buffer.seek(0)

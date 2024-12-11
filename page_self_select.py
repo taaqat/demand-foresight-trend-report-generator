@@ -211,7 +211,7 @@ def s2_customization():
         # *** User Flexible Output Format Selection ***
         st.subheader("其他調整")
         cols = st.multiselect("Choose all sections that you need for the inference (default: all)",
-                                ["<d>重要關係人", "<e>缺口", "<f>未來產品或服務機會點", "<g>關鍵驅動因素", "<h>微弱信號", "<i>時間尺度", "<j>趨勢總結洞察"],
+                                ["<f>未來產品或服務機會點", "<g>關鍵驅動因素", "<h>微弱信號", "<i>時間尺度", "<j>趨勢總結洞察"],
                                 default = ["<d>重要關係人", "<e>缺口", "<f>未來產品或服務機會點", "<g>關鍵驅動因素", "<h>微弱信號", "<i>時間尺度", "<j>趨勢總結洞察"])
         color_block, additional_prompt_block = st.columns((0.2, 0.8))
         with color_block:

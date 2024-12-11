@@ -40,10 +40,10 @@ with left_col:
     st.subheader("基本資料輸入")
     subcol1, subcol2 = st.columns((1/2, 1/2))
     with subcol1:
-        user_name = st.text_input("Please type in your nickname 👇")
+        user_name = st.text_input("你的暱稱")
     # st.info("Please type in your email address so that we can send the results to you when completed")
     with subcol2:
-        user_email = st.text_input("Please type in your email address 👇")
+        user_email = st.text_input("電子郵件地址")
     # *** Date input ***
     st.subheader("選擇新聞來源之時間範圍")
     subcol3, subcol4 = st.columns((1/2, 1/2))
@@ -57,7 +57,7 @@ with left_col:
     subcol5, subcol6 = st.columns((1/2, 1/2))
     # *** Output Format input ***
     with subcol5:
-        st.subheader("選擇輸出格式")
+        st.subheader("輸出格式")
         output_format = st.multiselect("You can choose multiple output formats", ["總結過後的新聞摘要（EXCEL；無趨勢報告）",
                                                                     "選取主題之趨勢報告（PPT；單一主題）",
                                                                     "選取主題之趨勢報告（EXCEL；所有主題）"])

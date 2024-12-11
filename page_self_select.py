@@ -42,9 +42,9 @@ with st.container(key = 'basic_info'):
     with box1_left:
         project_name = st.text_input("Name this project with a concise name 👇")
     with box1_mid:
-        user_name = st.text_input("Please type in your nickname 👇")
+        user_name = st.text_input("你的暱稱")
     with box1_right:
-        user_email = st.text_input("Please type in your email address 👇")
+        user_email = st.text_input("電子郵件地址")
         
 
 
@@ -281,6 +281,7 @@ def s2_customization():
                     st.success("Here is the daily summary for the period you requested💥")
                     st.markdown(DataManager.get_summary_download_link(start_date, end_date, project_name), unsafe_allow_html = True)
 
+            st.success("Completed!")
     
 
 

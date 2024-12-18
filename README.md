@@ -12,9 +12,11 @@
 |  ├── llm_manager.py
 |  ├── prompt_manager.py
 |  └── session_manager.py
-├── page_archive.py
-├── page_self_select.py
-├── page_steep.py
+├── pages
+|  ├── page_demo.py
+|  ├── page_archive.py
+|  ├── page_self_select.py
+|  └── page_steep.py
 ├── requirements.txt
 ├── scripts
 |  ├── executor.py
@@ -22,6 +24,7 @@
 |  ├── self_select_summary.py
 |  ├── steep_generate.py
 |  └── steep_summary.py
+├── pics
 ├── users.yaml
 ```
 

@@ -403,6 +403,7 @@ class DataManager:
         return f'<a href = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{content_b64}" download = {filename}> Download Summary Data </a>'
         
     # --- Transform Picture to Base64
+    @staticmethod
     def image_to_b64(image_path):
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode("utf-8")

@@ -15,6 +15,7 @@
 ├── page_archive.py
 ├── page_self_select.py
 ├── page_steep.py
+├── page_demo.py
 ├── requirements.txt
 ├── scripts
 |  ├── executor.py
@@ -27,6 +28,10 @@
 
 ### page files (front end)
 Page files are python scripts that display UIs by streamlit, including:
+
+#### `page_demo.py`: 
+This file demonstrates how to use the tool by youtube tutorial videos.
+
 #### `page_steep.py`: 
 This file displays the UI for STEEP trend report generation. User inputs include **nickname, email, desired period, topics, and output formats**. With such information, user can obtain trend reports in desired output format within 1 hour.
 

@@ -80,9 +80,41 @@ def main():
                     file_name = f"{st.secrets["INDEX_MONTH"]}-{topic}"
 
                     download_link = f"""
-                    <a href="{pptx_base64}" download="{file_name}">
-                        <img src="data:image/jpeg;base64,{image_base64}" alt="Download" >
-                    </a>
+                    <style>
+                    .hover-container {{
+                        position: relative;
+                        display: inline-block;
+                    }}
+                    .hover-container .hover-message {{
+                        visibility: hidden;
+                        background-color: rgba(0, 0, 0, 0.65);
+                        color: #fff;
+                        text-align: center;
+                        border-radius: 5px;
+                        padding: 5px 10px;
+                        position: absolute;
+                        bottom: 10%; /* 提示文字出現在圖片上方 */
+                        left: 50%;
+                        transform: translateX(-50%);
+                        opacity: 0;
+                        transition: opacity 0.8s;
+                    }}
+                    .hover-container:hover .hover-message {{
+                        visibility: visible;
+                        opacity: 1;
+                    }}
+                    .image:hover {{
+                        opacity: 0.8;
+                        filter: saturate(200%);
+                        transition: opacity 0.8s, filter 0.8s;
+                    }}
+                    </style>
+                    <div class="hover-container">
+                        <a href="data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,{pptx_base64}" download="{file_name}">
+                            <img class="image" src="data:image/jpeg;base64,{image_base64}" alt="Download" style="width:500px;">
+                        </a>
+                        <div class="hover-message">Click to download {st.secrets["INDEX_MONTH"]} {topic} trend report</div>
+                    </div>
                     """
                     st.markdown(download_link, unsafe_allow_html = True)
     load_steep_download_pics()

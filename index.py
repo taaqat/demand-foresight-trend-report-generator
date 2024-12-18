@@ -65,19 +65,19 @@ def main():
 
     st.caption(f"Click the pictures to download the **{st.secrets["INDEX_MONTH"]}** trend report")
     @st.cache_data
-    def load_steep_download_pics():
+    def load_steep_download_pics(start, end, ym):
         cols = [col for group in (st.columns(3), st.columns(3))for col in group]
         for col, topic in zip(cols, ["social", "technological", "economic", "environmental", "political", "business_and_investment"]):
             with col:
                 with st.container(border = False):
-                    link_html_obj = DataManager.get_output_download_link(st.secrets["INDEX_START_DATE"], 
-                                                                        st.secrets["INDEX_END_DATE"], 
+                    link_html_obj = DataManager.get_output_download_link(start,
+                                                                         end, 
                                                                         topic, 
                                                                         'pptx', 
                                                                         'steep')
                     pptx_base64 = re.search('href = "(.+)" download', link_html_obj).group(1)
                     image_base64 = DataManager.image_to_b64(f"./pics/{topic}.png")
-                    file_name = f"{st.secrets["INDEX_MONTH"]}-{topic}"
+                    file_name = f"{ym}-{topic}"
 
                     download_link = f"""
                     <style>
@@ -110,14 +110,16 @@ def main():
                     }}
                     </style>
                     <div class="hover-container">
-                        <a href="data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,{pptx_base64}" download="{file_name}">
+                        <a href="{pptx_base64}" download="{file_name}">
                             <img class="image" src="data:image/jpeg;base64,{image_base64}" alt="Download" style="width:500px;">
                         </a>
                         <div class="hover-message">Click to download {st.secrets["INDEX_MONTH"]} {topic} trend report</div>
                     </div>
                     """
                     st.markdown(download_link, unsafe_allow_html = True)
-    load_steep_download_pics()
+    
+
+    load_steep_download_pics(st.secrets["INDEX_START_DATE"], st.secrets["INDEX_END_DATE"], st.secrets["INDEX_MONTH"])
 
     
 

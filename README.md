@@ -28,8 +28,21 @@
 ├── users.yaml
 ```
 
+### index.py (entry point of the app)
+This file serves as the application's entry point and is primarily responsible for the following three functions:
+
+- User Authentication
+- Introduction
+- STEEP +B Trend Report Gallery
+
+**NOTE**: If you want to update the gallery with the latest version (the latest month's trend report), you need to manually edit the start time, end time, and year-month in the Streamlit secret settings. To verify whether the trend report has been generated and to confirm the exact start and end dates for the month you want to update, you can check the ARCHIVE page.
+
 ### pages (front end)
 Page files are python scripts that display UIs by streamlit, including:
+
+#### page_demo.py:
+This file demonstrates how to use the tool by youtube tutorial videos.
+
 #### `page_steep.py`: 
 This file displays the UI for STEEP trend report generation. User inputs include **nickname, email, desired period, topics, and output formats**. With such information, user can obtain trend reports in desired output format within 1 hour.
 

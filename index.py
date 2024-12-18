@@ -64,6 +64,7 @@ def main():
     # *** load download UI
 
     st.caption(f"Click the pictures to download the **{st.secrets["INDEX_MONTH"]}** trend report")
+    @st.cache_data
     def load_steep_download_pics():
         cols = [col for group in (st.columns(3), st.columns(3))for col in group]
         for col, topic in zip(cols, ["social", "technological", "economic", "environmental", "political", "business_and_investment"]):

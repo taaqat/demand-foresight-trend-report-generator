@@ -98,6 +98,7 @@ def main():
                         transform: translateX(-50%);
                         opacity: 0;
                         transition: opacity 0.8s;
+                        font-size: 12px;
                     }}
                     .hover-container:hover .hover-message {{
                         visibility: visible;

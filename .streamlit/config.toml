@@ -4,3 +4,8 @@ backgroundColor="#FFFFFF"
 secondaryBackgroundColor="#f0ebe1"
 textColor="#31333F"
 font="sans serif"
+
+[client]
+showErrorDetails = "full"
+toolbarMode = "auto"
+showSidebarNavigation = false

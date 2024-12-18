@@ -7,7 +7,6 @@ from streamlit_authenticator import Hasher
 from managers.session_manager import SessionManager
 
 # *********** Config ***********
-st.set_page_config(page_title='III Trend Report Generator', page_icon=":tada:", layout="wide")
 if "config" not in st.session_state:
     with open("users.yaml") as file:
         st.session_state.config = yaml.load(file, Loader=SafeLoader)
@@ -16,60 +15,50 @@ if "config" not in st.session_state:
 # *** entry point after login ***
 def main():
     st.session_state['logged_in'] = True
-    pg = st.navigation(pages = {
-        'DEMO': [
-            st.Page('page_demo.py', title = 'DEMO Videos', icon = ':material/add_circle:') 
-        ],
-        'STEEP +B 趨勢報告': [
-            st.Page('page_steep.py', title = 'STEEP +B Report Generator', icon = ':material/add_circle:') 
-        ],
-        '自選主題趨勢報告': [
-            st.Page('page_self_select.py', title = 'SELF SELECT Report Generator', icon = ':material/add_circle:')
-        ],
-        'ARCHIVE': [
-            st.Page('page_archive.py', title = '歷史紀錄查詢（下載典藏檔）', icon = ':material/bookmarks:')
-        ]})
-        
 
-    pg.run()
-
+    st.sidebar.subheader("趨勢報告產生器")
     with st.sidebar:
-        if st.button("清除所有暫存"):
-            st.cache_data.clear()
-            for var in st.session_state.keys():
-                if var not in ['authentication_status', 'authenticator', 'logout', 'init', 'config']:
-                    del st.session_state[var]
-            st.rerun()
+        st.page_link('pages/page_demo.py', label = 'DEMO Videos', icon = ':material/add_circle:')
+        st.page_link('pages/page_steep.py', label = 'STEEP +B', icon = ':material/add_circle:')
+        st.page_link('pages/page_self_select.py', label = 'SELF SELECT', icon = ':material/add_circle:')
+        st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
 
-        if st.button("顯示所有暫存"):
-            with st.expander("session states"):
-                st.write(st.session_state.keys())
 
+    st.sidebar.subheader("對話式工具")
+    st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", label = "RAG 與文件對話", icon = ':material/add_circle:')
+    
+    st.sidebar.subheader("視覺化界面")
+    # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
+    
 
     
-# *** Authentization ***
 
-authenticator = stauth.Authenticate(
-    st.session_state.config['credentials'],
-    st.session_state.config['cookie']['name'],
-    st.session_state.config['cookie']['key'],
-    st.session_state.config['cookie']['expiry_days'],
-)
-try:
-    l, m, r = st.columns((1/4, 1/2, 1/4))
-    with m:
-        placeholder = st.container()
-    with placeholder:
-        authenticator.login('main')
-except Exception as e:
-    st.error(e)
+# *** 目前因為我改了 navigation bar 的設定（是用自己設定的 page_link 設定），當 app 開啟後連入此 py 檔，會立刻導向 page_demo.py！
+# *** Authentication 邏輯因此遇到設計上的問題，先不處理
+    
+# *** Authentication ***
 
-if st.session_state.authentication_status:
-    st.session_state.authenticator = authenticator
-    main()
-    with st.sidebar:
-        authenticator.logout()
-elif st.session_state.authentication_status is False:
-    st.error('使用者名稱/密碼不正確')
+# authenticator = stauth.Authenticate(
+#     st.session_state.config['credentials'],
+#     st.session_state.config['cookie']['name'],
+#     st.session_state.config['cookie']['key'],
+#     st.session_state.config['cookie']['expiry_days'],
+# )
+# try:
+#     l, m, r = st.columns((1/4, 1/2, 1/4))
+#     with m:
+#         placeholder = st.container()
+#     with placeholder:
+#         authenticator.login('main')
+# except Exception as e:
+#     st.error(e)
+
+# if st.session_state.authentication_status:
+#     st.session_state.authenticator = authenticator
+#     main()
+#     with st.sidebar:
+#         authenticator.logout()
+# elif st.session_state.authentication_status is False:
+#     st.error('使用者名稱/密碼不正確')
 
 

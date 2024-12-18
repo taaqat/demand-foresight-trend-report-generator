@@ -8,8 +8,6 @@ import datetime as dt
 import base64
 import time
 import re
-
-# from contextlib import contextmanager, redirect_stdout
 from time import sleep
 
 import urllib3
@@ -17,6 +15,13 @@ from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 import requests
 from io import BytesIO
+
+from managers.module_manager import ModuleManager
+ModuleManager.import_modules()
+
+
+# from contextlib import contextmanager, redirect_stdout
+
 
 class DataManager:
     
@@ -397,3 +402,7 @@ class DataManager:
 
         return f'<a href = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{content_b64}" download = {filename}> Download Summary Data </a>'
         
+    # --- Transform Picture to Base64
+    def image_to_b64(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode("utf-8")

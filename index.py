@@ -1,12 +1,23 @@
 import streamlit as st
 import yaml
 import streamlit as st
+import re
 from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
 from streamlit_authenticator import Hasher
 from managers.session_manager import SessionManager
+from managers.data_manager import DataManager
+
+st.title("WELCOME")
+
+try:
+    st.set_page_config(page_title='Demand Foresight Tools', page_icon=":tada:", layout="wide")
+except:
+    pass
 
 # *********** Config ***********
+
+
 if "config" not in st.session_state:
     with open("users.yaml") as file:
         st.session_state.config = yaml.load(file, Loader=SafeLoader)
@@ -25,6 +36,8 @@ div.stButton > button {
 
 # *** entry point after login ***
 def main():
+
+    # *** navigation bar with st.page_link()
     st.session_state['logged_in'] = True
 
     st.sidebar.header("資策會 Demand Foresight Tools")
@@ -45,9 +58,30 @@ def main():
     st.sidebar.write("**視覺化界面**")
     # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
     
+    # *** load download UI
 
-    with st.container(border = True):
-        st.markdown("[![Foo](http://www.google.com.au/images/nav_logo7.png)](http://google.com.au/)")
+    st.caption(f"Click the pictures to download the **{st.secrets["INDEX_MONTH"]}** trend report")
+    def load_steep_download_pics():
+        cols = [col for group in (st.columns(3), st.columns(3))for col in group]
+        for col, topic in zip(cols, ["social", "technological", "economic", "environmental", "political", "business_and_investment"]):
+            with col:
+                with st.container(border = False):
+                    link_html_obj = DataManager.get_output_download_link(st.secrets["INDEX_START_DATE"], 
+                                                                        st.secrets["INDEX_END_DATE"], 
+                                                                        topic, 
+                                                                        'pptx', 
+                                                                        'steep')
+                    pptx_base64 = re.search('href = "(.+)" download', link_html_obj).group(1)
+                    image_base64 = DataManager.image_to_b64(f"./pics/{topic}.png")
+                    file_name = f"{st.secrets["INDEX_MONTH"]}-{topic}"
+
+                    download_link = f"""
+                    <a href="{pptx_base64}" download="{file_name}">
+                        <img src="data:image/jpeg;base64,{image_base64}" alt="Download" >
+                    </a>
+                    """
+                    st.markdown(download_link, unsafe_allow_html = True)
+    load_steep_download_pics()
 
     
 

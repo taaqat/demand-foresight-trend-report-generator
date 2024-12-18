@@ -3,7 +3,7 @@ import streamlit_authenticator as stauth
 from streamlit_authenticator import Hasher
 import yaml
 from yaml.loader import SafeLoader
-st.set_page_config(page_title='III Trend Report Generator', page_icon=":tada:", layout="wide")
+
 st.title("DEMO")
 
 

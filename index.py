@@ -8,12 +8,6 @@ from streamlit_authenticator import Hasher
 from managers.session_manager import SessionManager
 from managers.data_manager import DataManager
 
-st.title("WELCOME")
-
-try:
-    st.set_page_config(page_title='Demand Foresight Tools', page_icon=":tada:", layout="wide")
-except:
-    pass
 
 # *********** Config ***********
 
@@ -22,20 +16,29 @@ if "config" not in st.session_state:
     with open("users.yaml") as file:
         st.session_state.config = yaml.load(file, Loader=SafeLoader)
 
-# button style setting
-st.markdown("""<style>
-div.stButton > button {
-    width: 100%;  /* 設置按鈕寬度為頁面寬度的 50% */
-    height: 50px;
-    margin-left: 0;
-    margin-right: auto;
-}
-</style>
-""", unsafe_allow_html=True)
+
 
 
 # *** entry point after login ***
 def main():
+
+    st.title("WELCOME")
+
+    try:
+        st.set_page_config(page_title='Demand Foresight Tools', page_icon=":tada:", layout="wide")
+    except:
+        pass
+
+    # button style setting
+    st.markdown("""<style>
+    div.stButton > button {
+        width: 100%;  /* 設置按鈕寬度為頁面寬度的 50% */
+        height: 50px;
+        margin-left: 0;
+        margin-right: auto;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
     # *** navigation bar with st.page_link()
     st.session_state['logged_in'] = True

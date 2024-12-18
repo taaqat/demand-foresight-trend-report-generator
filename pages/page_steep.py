@@ -11,18 +11,24 @@ from scripts.executor import Executor
 import datetime as dt
 
 # *** SIDE BAR CONFIGURATION
-st.sidebar.subheader("趨勢報告產生器")
+st.sidebar.header("資策會 Demand Foresight Tools")
+with st.sidebar:
+    st.page_link('index.py', label = 'Home Page', icon = ':material/add_circle:')
+
+st.sidebar.write("**趨勢報告產生器**")
 with st.sidebar:
     st.page_link('pages/page_demo.py', label = 'DEMO Videos', icon = ':material/add_circle:')
-    st.page_link('pages/page_steep.py', label = 'STEEP +B', icon = ':material/add_circle:')
-    st.page_link('pages/page_self_select.py', label = 'SELF SELECT', icon = ':material/add_circle:')
+    st.page_link('pages/page_steep.py', label = 'STEEP +B 月報', icon = ':material/add_circle:')
+    st.page_link('pages/page_self_select.py', label = '自選主題', icon = ':material/add_circle:')
     st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
 
 
-st.sidebar.subheader("對話式工具")
-st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", label = "RAG chat box", icon = ':material/add_circle:')
+st.sidebar.write("**對話式工具**")
+st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", label = "RAG 與文件對話", icon = ':material/link:')
 
-st.sidebar.subheader("視覺化界面")
+st.sidebar.write("**視覺化界面**")
+# st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
+
 
 
 with st.sidebar:

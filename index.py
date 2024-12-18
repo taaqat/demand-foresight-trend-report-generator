@@ -8,6 +8,10 @@ from streamlit_authenticator import Hasher
 from managers.session_manager import SessionManager
 from managers.data_manager import DataManager
 
+if "page_config_set" not in st.session_state:
+    st.set_page_config(page_title='Demand Foresight Tools', page_icon=":tada:", layout="wide")
+    st.session_state["page_config_set"] = True
+
 
 # *********** Config ***********
 
@@ -23,11 +27,7 @@ if "config" not in st.session_state:
 def main():
 
     st.title("WELCOME")
-
-    try:
-        st.set_page_config(page_title='Demand Foresight Tools', page_icon=":tada:", layout="wide")
-    except:
-        pass
+    
 
     # button style setting
     st.markdown("""<style>

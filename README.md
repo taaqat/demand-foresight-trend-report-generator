@@ -28,7 +28,7 @@
 ├── users.yaml
 ```
 
-### page files (front end)
+### pages (front end)
 Page files are python scripts that display UIs by streamlit, including:
 #### `page_steep.py`: 
 This file displays the UI for STEEP trend report generation. User inputs include **nickname, email, desired period, topics, and output formats**. With such information, user can obtain trend reports in desired output format within 1 hour.
@@ -55,7 +55,7 @@ This page allows user to query the generated output files by project name. The f
 #### `index.py`:
 This page is the entrance of our application. It manages user login and the navigation across the three pages as mentioned above.
 
-### managers (back end) (folder)
+### managers (back end)
 This folder includes five python files for specific utilities. In each file, a class that has identical name with file name is established, with several tool functions defined by static method. 
 
 #### `data_manager.py` -> `DataManager`
@@ -127,7 +127,7 @@ This file manages functions associated with **st.session_state** management and 
 - `session_state_clear()`: Clear the session states based on the page parameter passed in.
 
 
-### scripts (back end) (folder)
+### scripts (back end) 
 This folders include five python scripts that control the workflow of trend report generation process.
 
 #### `steep_summary.py`

@@ -50,6 +50,10 @@ def main():
         margin-left: 0;
         margin-right: auto;
     }
+    div.stButton > button:hover {
+        transform: scale(1.02);
+        transition: transform 0.05s;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -111,7 +115,7 @@ def main():
                         left: 50%;
                         transform: translateX(-50%);
                         opacity: 0;
-                        transition: opacity 0.8s;
+                        transition: opacity 0.5s bottom 0.8s;
                         font-size: 12px;
                     }}
                     .hover-container:hover .hover-message {{
@@ -121,11 +125,12 @@ def main():
                     .image:hover {{
                         opacity: 0.8;
                         filter: saturate(150%);
-                        transition: opacity 0.6s, filter 0.6s;
+                        transition: opacity 0.5s, filter 0.5s;
                     }}
+
                     </style>
                     <div class="hover-container">
-                        <a class=img-container href="{pptx_base64}" download="{file_name}">
+                        <a class="img-container" href="{pptx_base64}" download="{file_name}">
                             <img class="image" src="data:image/jpeg;base64,{image_base64}" alt="Download" style="width:500px;">
                         </a>
                         <div class="hover-message">Click to download</div>

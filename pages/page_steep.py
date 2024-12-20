@@ -42,6 +42,31 @@ with st.sidebar:
         if st.button("顯示所有暫存"):
             with st.expander("session states"):
                 st.write(st.session_state.keys())
+
+# *** CSS style setting
+st.markdown("""<style>
+div[data-baseweb="select"]:hover {
+    border-color: #baad8d;
+}
+div.stButton > button {
+    width: 100%;  /* 設置按鈕寬度為頁面寬度的 50% */
+    height: 50px;
+    margin-left: 0;
+    margin-right: auto;
+}
+div.stButton > button:hover {
+    transform: scale(1.02);
+    transition: transform 0.05s;
+}
+div[data-testid="stTextAreaRootElement"]:hover {
+    border-color: #baad8d
+}
+div[data-baseweb="input"]:hover {
+    border-color: #baad8d;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ***************************************** Config****************************************
 st.title("STEEP +B")
 st.session_state['steep_start'] = None
@@ -143,6 +168,10 @@ div.stButton > button {
     height: 50px;
     font-size: 20px;
     align-items: center;
+}
+div.stButton > button:hover {
+    transform: scale(1.02);
+    transition: transform 0.05s;
 }
 </style>
 """, unsafe_allow_html=True)

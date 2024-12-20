@@ -26,7 +26,29 @@ st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", l
 st.sidebar.write("**視覺化界面**")
 # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
 
-
+# *** CSS style setting
+st.markdown("""<style>
+div[data-baseweb="select"]:hover {
+    border-color: #baad8d;
+}
+div.stButton > button {
+    width: 100%;  /* 設置按鈕寬度為頁面寬度的 50% */
+    height: 50px;
+    margin-left: 0;
+    margin-right: auto;
+}
+div.stButton > button:hover {
+    transform: scale(1.02);
+    transition: transform 0.05s;
+}
+div[data-testid="stTextAreaRootElement"]:hover {
+    border-color: #baad8d
+}
+div[data-baseweb="input"]:hover {
+    border-color: #baad8d;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
 

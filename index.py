@@ -82,9 +82,9 @@ def main():
     # *** load download UI
 
     @st.cache_data
-    def load_steep_download_pics(ym, seed):
+    def load_steep_download_pics(ym):
         cols = [col for group in (st.columns(3), st.columns(3))for col in group]
-        for col, topic in zip(cols, ["social", "technological", "economic", "environmental", "political", "business_and_investment"]):
+        for i, (col, topic) in enumerate(zip(cols, ["social", "technological", "economic", "environmental", "political", "business_and_investment"])):
             with col:
                 try:
                     link_html_obj = DataManager.get_output_download_link(st.session_state["ym_mapping"][ym][0],
@@ -93,7 +93,7 @@ def main():
                                                                         'pptx', 
                                                                         'steep')
                     pptx_base64 = re.search('href = "(.+)" download', link_html_obj).group(1)
-                    image_base64 = DataManager.image_to_b64(f"./pics/{topic}/{seed}.png")
+                    image_base64 = DataManager.image_to_b64(f"./pics/{topic}/{i % 3 + 1}.png")
                     file_name = f"{ym}-{topic}"
 
                     download_link = f"""
@@ -142,7 +142,7 @@ def main():
                     pass
     
     ym = st.selectbox("Choose a month to download the STEEP reports", st.session_state['ym_mapping'].keys())
-    load_steep_download_pics(ym, random.randint(1, 3))
+    load_steep_download_pics(ym)
 
     
 

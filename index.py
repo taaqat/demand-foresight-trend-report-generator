@@ -82,7 +82,7 @@ def main():
 
     st.caption(f"Click the pictures to download the **{st.secrets["INDEX_MONTH"]}** trend report")
     @st.cache_data
-    def load_steep_download_pics(ym, rand_int):
+    def load_steep_download_pics(ym):
         cols = [col for group in (st.columns(3), st.columns(3))for col in group]
         for col, topic in zip(cols, ["social", "technological", "economic", "environmental", "political", "business_and_investment"]):
             with col:
@@ -93,7 +93,7 @@ def main():
                                                                         'pptx', 
                                                                         'steep')
                     pptx_base64 = re.search('href = "(.+)" download', link_html_obj).group(1)
-                    image_base64 = DataManager.image_to_b64(f"./pics/{topic}/{rand_int}.png")
+                    image_base64 = DataManager.image_to_b64(f"./pics/{topic}/{random.randint(1, 3)}.png")
                     file_name = f"{ym}-{topic}"
 
                     download_link = f"""
@@ -142,7 +142,7 @@ def main():
                     pass
     
     ym = st.selectbox("Choose a month", st.session_state['ym_mapping'].keys())
-    load_steep_download_pics(ym, random.randint(1, 3))
+    load_steep_download_pics(ym)
 
     
 

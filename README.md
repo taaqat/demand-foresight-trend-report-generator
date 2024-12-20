@@ -160,3 +160,6 @@ This file links functions from the four python script files as mentioned above, 
 
 - `steep_run()`: Executor function fo STEEP page.
 - `self_select_run()`: Executor function fo SELF SELECT page.
+
+### pics (front end) 
+This folder contains images for the **introduction** page (`index.py`), organized into six subfolders based on STEEP +B topics: **social, technological, economic, environmental, political, and business & investment**. Each subfolder holds three PNG images, displayed based on the user-selected year and month.

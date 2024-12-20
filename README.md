@@ -35,7 +35,7 @@ This file serves as the application's entry point and is primarily responsible f
 - Introduction
 - STEEP +B Trend Report Gallery
 
-**NOTE**: If you want to update the gallery with the latest version (the latest month's trend report), you need to manually edit the start time, end time, and year-month in the Streamlit secret settings. To verify whether the trend report has been generated and to confirm the exact start and end dates for the month you want to update, you can check the ARCHIVE page.
+
 
 ### pages (front end)
 Page files are python scripts that display UIs by streamlit, including:
@@ -65,8 +65,6 @@ This page allows user to query the generated output files by project name. The f
 - Monthly summary data in EXCEL format
 - Daily summary data in JSON format (utf-8 encoded)
 
-#### `index.py`:
-This page is the entrance of our application. It manages user login and the navigation across the three pages as mentioned above.
 
 ### managers (back end)
 This folder includes five python files for specific utilities. In each file, a class that has identical name with file name is established, with several tool functions defined by static method. 

@@ -32,7 +32,7 @@ with right_col:
 
 with right_box:
     st.subheader("Download links")
-    st.info("在公司的資料庫中，同一檔名的檔案，新的會覆蓋舊的檔案。因此此處所查詢到的資料皆為最新版本。")
+    # st.info("在公司的資料庫中，同一檔名的檔案，新的會覆蓋舊的檔案。因此此處所查詢到的資料皆為最新版本。")
     
 # 設定按鈕樣式
 st.markdown("""<style>

@@ -69,55 +69,55 @@ def main():
         cols = [col for group in (st.columns(3), st.columns(3))for col in group]
         for col, topic in zip(cols, ["social", "technological", "economic", "environmental", "political", "business_and_investment"]):
             with col:
-                with st.container(border = False):
-                    link_html_obj = DataManager.get_output_download_link(start,
-                                                                         end, 
-                                                                        topic, 
-                                                                        'pptx', 
-                                                                        'steep')
-                    pptx_base64 = re.search('href = "(.+)" download', link_html_obj).group(1)
-                    image_base64 = DataManager.image_to_b64(f"./pics/{topic}.png")
-                    file_name = f"{ym}-{topic}"
+                link_html_obj = DataManager.get_output_download_link(start,
+                                                                        end, 
+                                                                    topic, 
+                                                                    'pptx', 
+                                                                    'steep')
+                pptx_base64 = re.search('href = "(.+)" download', link_html_obj).group(1)
+                image_base64 = DataManager.image_to_b64(f"./pics/{topic}.png")
+                file_name = f"{ym}-{topic}"
 
-                    download_link = f"""
-                    <style>
-                    .hover-container {{
-                        position: relative;
-                        display: inline-block;
-                    }}
-                    .hover-container .hover-message {{
-                        visibility: hidden;
-                        background-color: rgba(0, 0, 0, 0.65);
-                        color: #fff;
-                        text-align: center;
-                        border-radius: 5px;
-                        padding: 5px 10px;
-                        position: absolute;
-                        bottom: 10%; /* 提示文字出現在圖片上方 */
-                        left: 50%;
-                        transform: translateX(-50%);
-                        opacity: 0;
-                        transition: opacity 0.8s;
-                        font-size: 12px;
-                    }}
-                    .hover-container:hover .hover-message {{
-                        visibility: visible;
-                        opacity: 1;
-                    }}
-                    .image:hover {{
-                        opacity: 0.8;
-                        filter: saturate(200%);
-                        transition: opacity 0.8s, filter 0.8s;
-                    }}
-                    </style>
-                    <div class="hover-container">
-                        <a href="{pptx_base64}" download="{file_name}">
-                            <img class="image" src="data:image/jpeg;base64,{image_base64}" alt="Download" style="width:500px;">
-                        </a>
-                        <div class="hover-message">Click to download {st.secrets["INDEX_MONTH"]} {topic} trend report</div>
-                    </div>
-                    """
-                    st.markdown(download_link, unsafe_allow_html = True)
+                download_link = f"""
+                <style>
+                .hover-container {{
+                    position: relative;
+                    display: inline-block;
+                }}
+                .hover-container .hover-message {{
+                    display: block;
+                    visibility: hidden;
+                    background-color: rgba(0, 0, 0, 0.65);
+                    color: #fff;
+                    text-align: center;
+                    border-radius: 5px;
+                    padding: 5px 10px;
+                    position: absolute;
+                    bottom: 10%; /* 提示文字出現在圖片上方 */
+                    left: 50%;
+                    transform: translateX(-50%);
+                    opacity: 0;
+                    transition: opacity 0.8s;
+                    font-size: 12px;
+                }}
+                .hover-container:hover .hover-message {{
+                    visibility: visible;
+                    opacity: 1;
+                }}
+                .image:hover {{
+                    opacity: 0.8;
+                    filter: saturate(150%);
+                    transition: opacity 0.6s, filter 0.6s;
+                }}
+                </style>
+                <div class="hover-container">
+                    <a class=img-container href="{pptx_base64}" download="{file_name}">
+                        <img class="image" src="data:image/jpeg;base64,{image_base64}" alt="Download" style="width:500px;">
+                    </a>
+                    <div class="hover-message">Click to download</div>
+                </div>
+                """
+                st.markdown(download_link, unsafe_allow_html = True)
     
 
     load_steep_download_pics(st.secrets["INDEX_START_DATE"], st.secrets["INDEX_END_DATE"], st.secrets["INDEX_MONTH"])

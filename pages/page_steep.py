@@ -52,7 +52,7 @@ st.session_state['steep_end'] = None
 # *** left column: user input; right column: progress and results
 left_col, right_col = st.columns((1/2, 1/2))
 with left_col:
-    st.info("We recommend read the instruction before implement")
+    st.info("使用前請至 DEMO Videos 頁面觀看說明影片")
 
 with right_col:
     st.error("**執行後至完成前，請不要對頁面進行操作，以免直接重來。**", icon="⚠️")

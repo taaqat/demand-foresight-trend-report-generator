@@ -2,6 +2,7 @@ import streamlit as st
 import yaml
 import streamlit as st
 import re
+import random
 from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
 from streamlit_authenticator import Hasher
@@ -14,11 +15,23 @@ if "page_config_set" not in st.session_state:
 
 
 # *********** Config ***********
-
-
 if "config" not in st.session_state:
     with open("users.yaml") as file:
         st.session_state.config = yaml.load(file, Loader=SafeLoader)
+
+st.session_state["ym_mapping"] = {
+    '2024 January': ["2024-01-01", "2024-01-31"],
+    '2024 February': ["2024-02-01", "2024-02-29"],
+    '2024 March': ["2024-03-01", "2024-03-31"],
+    '2024 April': ["2024-04-01", "2024-04-30"],
+    '2024 May': ["2024-05-01", "2024-05-31"],
+    '2024 June': ["2024-06-01", "2024-06-30"],
+    '2024 July': ["2024-07-01", "2024-07-31"],
+    '2024 August': ["2024-08-01", "2024-08-31"],
+    '2024 September': ["2024-09-01", "2024-10-01"],
+    '2024 October': ["2024-10-01", "2024-10-31"],
+    '2024 November': ["2024-11-01", "2024-11-27"]
+ }
 
 
 
@@ -65,62 +78,66 @@ def main():
 
     st.caption(f"Click the pictures to download the **{st.secrets["INDEX_MONTH"]}** trend report")
     @st.cache_data
-    def load_steep_download_pics(start, end, ym):
+    def load_steep_download_pics(ym, rand_int):
         cols = [col for group in (st.columns(3), st.columns(3))for col in group]
         for col, topic in zip(cols, ["social", "technological", "economic", "environmental", "political", "business_and_investment"]):
             with col:
-                link_html_obj = DataManager.get_output_download_link(start,
-                                                                        end, 
-                                                                    topic, 
-                                                                    'pptx', 
-                                                                    'steep')
-                pptx_base64 = re.search('href = "(.+)" download', link_html_obj).group(1)
-                image_base64 = DataManager.image_to_b64(f"./pics/{topic}.png")
-                file_name = f"{ym}-{topic}"
+                try:
+                    link_html_obj = DataManager.get_output_download_link(st.session_state["ym_mapping"][ym][0],
+                                                                        st.session_state["ym_mapping"][ym][1], 
+                                                                        topic, 
+                                                                        'pptx', 
+                                                                        'steep')
+                    pptx_base64 = re.search('href = "(.+)" download', link_html_obj).group(1)
+                    image_base64 = DataManager.image_to_b64(f"./pics/{topic}/{rand_int}.png")
+                    file_name = f"{ym}-{topic}"
 
-                download_link = f"""
-                <style>
-                .hover-container {{
-                    position: relative;
-                    display: inline-block;
-                }}
-                .hover-container .hover-message {{
-                    display: block;
-                    visibility: hidden;
-                    background-color: rgba(0, 0, 0, 0.65);
-                    color: #fff;
-                    text-align: center;
-                    border-radius: 5px;
-                    padding: 5px 10px;
-                    position: absolute;
-                    bottom: 10%; /* 提示文字出現在圖片上方 */
-                    left: 50%;
-                    transform: translateX(-50%);
-                    opacity: 0;
-                    transition: opacity 0.8s;
-                    font-size: 12px;
-                }}
-                .hover-container:hover .hover-message {{
-                    visibility: visible;
-                    opacity: 1;
-                }}
-                .image:hover {{
-                    opacity: 0.8;
-                    filter: saturate(150%);
-                    transition: opacity 0.6s, filter 0.6s;
-                }}
-                </style>
-                <div class="hover-container">
-                    <a class=img-container href="{pptx_base64}" download="{file_name}">
-                        <img class="image" src="data:image/jpeg;base64,{image_base64}" alt="Download" style="width:500px;">
-                    </a>
-                    <div class="hover-message">Click to download</div>
-                </div>
-                """
-                st.markdown(download_link, unsafe_allow_html = True)
+                    download_link = f"""
+                    <style>
+                    .hover-container {{
+                        position: relative;
+                        display: inline-block;
+                    }}
+                    .hover-container .hover-message {{
+                        display: block;
+                        visibility: hidden;
+                        background-color: rgba(0, 0, 0, 0.65);
+                        color: #fff;
+                        text-align: center;
+                        border-radius: 5px;
+                        padding: 5px 10px;
+                        position: absolute;
+                        bottom: 10%; /* 提示文字出現在圖片上方 */
+                        left: 50%;
+                        transform: translateX(-50%);
+                        opacity: 0;
+                        transition: opacity 0.8s;
+                        font-size: 12px;
+                    }}
+                    .hover-container:hover .hover-message {{
+                        visibility: visible;
+                        opacity: 1;
+                    }}
+                    .image:hover {{
+                        opacity: 0.8;
+                        filter: saturate(150%);
+                        transition: opacity 0.6s, filter 0.6s;
+                    }}
+                    </style>
+                    <div class="hover-container">
+                        <a class=img-container href="{pptx_base64}" download="{file_name}">
+                            <img class="image" src="data:image/jpeg;base64,{image_base64}" alt="Download" style="width:500px;">
+                        </a>
+                        <div class="hover-message">Click to download</div>
+                    </div>
+                    """
+                    st.markdown(download_link, unsafe_allow_html = True)
+                except:
+                    # st.write("No such file")
+                    pass
     
-
-    load_steep_download_pics(st.secrets["INDEX_START_DATE"], st.secrets["INDEX_END_DATE"], st.secrets["INDEX_MONTH"])
+    ym = st.selectbox("Choose a month", st.session_state['ym_mapping'].keys())
+    load_steep_download_pics(ym, random.randint(1, 3))
 
     
 

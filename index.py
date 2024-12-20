@@ -81,7 +81,6 @@ def main():
     
     # *** load download UI
 
-    st.caption(f"Click the pictures to download the **{st.secrets["INDEX_MONTH"]}** trend report")
     @st.cache_data
     def load_steep_download_pics(ym, seed):
         cols = [col for group in (st.columns(3), st.columns(3))for col in group]
@@ -142,7 +141,7 @@ def main():
                     # st.write("No such file")
                     pass
     
-    ym = st.selectbox("Choose a month", st.session_state['ym_mapping'].keys())
+    ym = st.selectbox("Choose a month to download the STEEP reports", st.session_state['ym_mapping'].keys())
     load_steep_download_pics(ym, random.randint(1, 3))
 
     

@@ -104,7 +104,7 @@ def main():
     # ----------------------------------------------------------------------------
     # *** STEEP Report GALLERY
     # * Function for loading STEEP +B report dynamically *
-                              # * cache the data to reduce data transmission burden
+    @st.cache_data                          # * cache the data to reduce data transmission burden
     def load_steep_download_pics(ym, pic_id):
         # * initialize the dictionary for the input year month
 
@@ -186,7 +186,6 @@ def main():
 
     # * User choose the year month *
     # ym = st.selectbox("Choose a month to download the STEEP reports", st.session_state['ym_mapping'].keys())
-    @st.cache_data()
     def render():
         tabs = st.tabs(st.session_state['ym_mapping'].keys())
 

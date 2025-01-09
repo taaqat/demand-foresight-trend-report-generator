@@ -186,12 +186,15 @@ def main():
 
     # * User choose the year month *
     # ym = st.selectbox("Choose a month to download the STEEP reports", st.session_state['ym_mapping'].keys())
-    tabs = st.tabs(st.session_state['ym_mapping'].keys())
+    @st.cache_data()
+    def render():
+        tabs = st.tabs(st.session_state['ym_mapping'].keys())
 
-    for tab, ym in zip(tabs, st.session_state['ym_mapping'].keys()):
-        with tab:
-            load_steep_download_pics(ym = ym, pic_id = st.session_state['ym_mapping'][ym][2])
+        for tab, ym in zip(tabs, st.session_state['ym_mapping'].keys()):
+            with tab:
+                load_steep_download_pics(ym = ym, pic_id = st.session_state['ym_mapping'][ym][2])
 
+    render()
     
                 
     

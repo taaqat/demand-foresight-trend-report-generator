@@ -93,7 +93,7 @@ def main():
             st.markdown("""
             <style>
                 .powered-by {text-align:right;
-                            font-size: 14px;
+                            font-size: 10px;
                             color: grey;}
             </style>
             <p class = powered-by> Powered by 資策會數位轉型研究院 <br/>跨域實證服務中心 創新孵化組</p>""", unsafe_allow_html = True)

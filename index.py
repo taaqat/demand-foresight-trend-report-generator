@@ -106,7 +106,6 @@ def main():
     @st.cache_data                          # * cache the data to reduce data transmission burden
     def load_steep_download_pics(ym, pic_id):
         # * initialize the dictionary for the input year month
-        st.session_state['steep_gallery'][ym] = {}
 
         # * define six blocks (STEEP +B respectively)
         cols = [col for group in (st.columns(3), st.columns(3))for col in group]
@@ -201,28 +200,32 @@ def main():
 
 # ------------------------------------------------------------------------------------------------------
 # *** Authentication & Call the main function ***
+            
+if st.secrets['permission']['authenticate'] == True:
 
-authenticator = stauth.Authenticate(
-    st.session_state.config['credentials'],
-    st.session_state.config['cookie']['name'],
-    st.session_state.config['cookie']['key'],
-    st.session_state.config['cookie']['expiry_days'],
-)
-try:
-    l, m, r = st.columns((1/4, 1/2, 1/4))
-    with m:
-        placeholder = st.container()
-    with placeholder:
-        authenticator.login('main')
-except Exception as e:
-    st.error(e)
+    authenticator = stauth.Authenticate(
+        st.session_state.config['credentials'],
+        st.session_state.config['cookie']['name'],
+        st.session_state.config['cookie']['key'],
+        st.session_state.config['cookie']['expiry_days'],
+    )
+    try:
+        l, m, r = st.columns((1/4, 1/2, 1/4))
+        with m:
+            placeholder = st.container()
+        with placeholder:
+            authenticator.login('main')
+    except Exception as e:
+        st.error(e)
 
-if st.session_state.authentication_status:
-    st.session_state.authenticator = authenticator
+    if st.session_state.authentication_status:
+        st.session_state.authenticator = authenticator
+        main()
+        with st.sidebar:
+            authenticator.logout()
+    elif st.session_state.authentication_status is False:
+        st.error('使用者名稱/密碼不正確')
+
+else:
     main()
-    with st.sidebar:
-        authenticator.logout()
-elif st.session_state.authentication_status is False:
-    st.error('使用者名稱/密碼不正確')
-
 

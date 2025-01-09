@@ -86,9 +86,9 @@ def main():
     with st.sidebar:
         icon_box, text_box = st.columns((0.2, 0.8))
         with icon_box:
-            st.markdown(f'''<a class="img-container" >
+            st.markdown(f'''
                             <img class="image" src="data:image/jpeg;base64,{DataManager.image_to_b64(f"./pics/iii_icon.png")}" alt="III Icon" style="width:500px;">
-                        </a>''', unsafe_allow_html = True)
+                        ''', unsafe_allow_html = True)
         with text_box:
             st.markdown("""
             <style>

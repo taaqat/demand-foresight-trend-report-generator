@@ -37,6 +37,7 @@ def monthly_summary(start_date: str, end_date: str,  user_name, user_email):
         month_raw = st.session_state['fetched_raw']
     except:
         month_raw = DataManager.fetch(start, end)
+        st.session_state['fetched_raw'] = month_raw
     
     month_out = {}
     
@@ -48,7 +49,8 @@ def monthly_summary(start_date: str, end_date: str,  user_name, user_email):
     # while loop to iterate over all days within the given period
     st_bar = st.progress(0, "Summarizing news within a given period...")            # progress bar on streamlit UI
     while now < end:
-        st_bar.progress(counter/max, f"Summarizing news for {now}") # !!!
+        in_message = DataManager.return_daily_raw_str(now, month_raw)
+        st_bar.progress(counter/max, f"Summarizing news for {now} (token size: {len(in_message)})") # !!!
 
         # todo 這邊之後要改回來
         # first try to fetch the daily summary data from database
@@ -58,9 +60,12 @@ def monthly_summary(start_date: str, end_date: str,  user_name, user_email):
 
         # if objective file does not exist, create one with daily_summarize() and return it back to database
         except:
-            in_message = DataManager.return_daily_raw_str(now, month_raw)
+            
+            # with st.expander('raw'):
+            #     st.write(in_message)
             response = daily_summarize(in_message)
             month_out.update(response)
+
 
             # Step 2: Convert JSON data to a string and then to bytes
             json_string = json.dumps(response)  # Convert JSON to a string

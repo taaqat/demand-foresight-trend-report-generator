@@ -16,8 +16,8 @@ from requests.adapters import HTTPAdapter
 import requests
 from io import BytesIO
 
-from managers.module_manager import ModuleManager
-ModuleManager.import_modules()
+# from module_manager import ModuleManager
+# ModuleManager.import_modules()
 
 
 # from contextlib import contextmanager, redirect_stdout
@@ -265,13 +265,15 @@ class DataManager:
         else:
             date = day
 
+
+
         for index, row in data.iterrows():
             # print(f"Row {index}: date={row['date']}, 重點摘要={row['重點摘要']}, 關鍵數據={row['關鍵數據']}")
-            if row["重點摘要"] != "" and row["published_at"].date() == date:
+            if row["重點摘要"] not in ["", " ", None] and row["published_at"].date() == date:
                 contents.append(row["重點摘要"] + "\n" + str(row["關鍵數據"]))
                 
-            if index % 10 == 0:
-                contents.append("\n" + str(date) + "\n")
+                if index % 10 == 0:
+                    contents.append("\n" + str(date) + "\n")
         content = "\n" + f"**{str(date)}**'s news" + "\n\n" +"\n\n".join(contents) + "\n\n" + "*"*100
 
         return content

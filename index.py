@@ -44,7 +44,8 @@ st.session_state["ym_mapping"] = {
 # *** function that would be called after login (entry point of the app) ***
 def main():
 
-    st.title("WELCOME")
+    st.title("STEEP +B Trend Report Gallery")
+    st.caption(":gray[歡迎來到資策會 Demand Foresight Tool 平台！此平台透過畫廊的形式，展示敝團隊透過**串接 AI 模型**與**簡報自動化生成技術**所製作之每月趨勢報告，提供使用者自由下載使用。]")
     
 
     # ---------------------------------------------------
@@ -69,31 +70,43 @@ def main():
 
     st.sidebar.header("資策會 Demand Foresight Tools")
     with st.sidebar:
-        st.page_link('index.py', label = 'Home Page', icon = ':material/add_circle:')
+        st.page_link('index.py', label = 'STEEP +B Gallery', icon = ':material/add_circle:')
 
-    st.sidebar.write("**趨勢報告產生器**")
-    with st.sidebar:
-        st.page_link('pages/page_demo.py', label = 'DEMO Videos', icon = ':material/add_circle:')
-        st.page_link('pages/page_steep.py', label = 'STEEP +B 月報', icon = ':material/add_circle:')
-        st.page_link('pages/page_self_select.py', label = '自選主題', icon = ':material/add_circle:')
-        st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
+    if st.secrets['permission']['trend_report_generator'] == True:
+        st.sidebar.write("**趨勢報告產生器**")
+        with st.sidebar:
+            st.page_link('pages/page_demo.py', label = 'DEMO Videos', icon = ':material/add_circle:')
+            st.page_link('pages/page_steep.py', label = 'STEEP +B 月報', icon = ':material/add_circle:')
+            st.page_link('pages/page_self_select.py', label = '自選主題', icon = ':material/add_circle:')
+            st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
 
-
-    st.sidebar.write("**對話式工具**")
-    st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", label = "RAG 與文件對話", icon = ':material/link:')
+    if st.secrets['permission']['chat_tool'] == True:
+        st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", label = "與文件對話", icon = ':material/link:')
     
-    st.sidebar.write("**視覺化界面**")
+    with st.sidebar:
+        icon_box, text_box = st.columns((0.2, 0.8))
+        with icon_box:
+            st.markdown(f'''<a class="img-container" >
+                            <img class="image" src="data:image/jpeg;base64,{DataManager.image_to_b64(f"./pics/iii_icon.png")}" alt="III Icon" style="width:500px;">
+                        </a>''', unsafe_allow_html = True)
+        with text_box:
+            st.markdown("""
+            <style>
+                .powered-by {text-align:right;
+                            font-size: 14px;
+                            color: grey;}
+            </style>
+            <p class = powered-by> Powered by 資策會數位轉型研究院 <br/>跨域實證服務中心 創新孵化組</p>""", unsafe_allow_html = True)
+    # st.sidebar.write("**視覺化界面**")
     # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
     
     # ----------------------------------------------------------------------------
     # *** STEEP Report GALLERY
-
-    # * User choose the year month *
-    ym = st.selectbox("Choose a month to download the STEEP reports", st.session_state['ym_mapping'].keys())
-
     # * Function for loading STEEP +B report dynamically *
     @st.cache_data                          # * cache the data to reduce data transmission burden
     def load_steep_download_pics(ym, pic_id):
+        # * initialize the dictionary for the input year month
+        st.session_state['steep_gallery'][ym] = {}
 
         # * define six blocks (STEEP +B respectively)
         cols = [col for group in (st.columns(3), st.columns(3))for col in group]
@@ -159,16 +172,30 @@ def main():
                         <div class="hover-message">Click to download</div>
                     </div>
                     """
-
+                    
                     # * display it with st.markdown()
                     st.markdown(download_link, unsafe_allow_html = True)
+
                 except Exception as e:
                     # st.write(e)
                     pass
     
     # * ym = ym: the year-month requested by users
     # * pic_id = st.session_state['ym_mapping'][ym][2]: 為了要讓每個月的照片不同，動態讀取 session_state 中的 pic path（本來用 randint 但這方法會讓 st.cache_data 失效）
-    load_steep_download_pics(ym = ym, pic_id = st.session_state['ym_mapping'][ym][2])
+    
+
+    # * User choose the year month *
+    # ym = st.selectbox("Choose a month to download the STEEP reports", st.session_state['ym_mapping'].keys())
+    tabs = st.tabs(st.session_state['ym_mapping'].keys())
+
+    for tab, ym in zip(tabs, st.session_state['ym_mapping'].keys()):
+        with tab:
+            load_steep_download_pics(ym = ym, pic_id = st.session_state['ym_mapping'][ym][2])
+
+    
+                
+    
+    
 
     
 

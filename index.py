@@ -82,7 +82,7 @@ def main():
             st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
 
     if st.secrets['permission']['chat_tool'] == True:
-        st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", label = "與文件對話", icon = ':material/link:')
+        st.sidebar.page_link("https://demand-foresight-citation-energy.streamlit.app/", label = "與文件對話", icon = ':material/link:')
     
     with st.sidebar:
         icon_box, text_box = st.columns((0.2, 0.8))

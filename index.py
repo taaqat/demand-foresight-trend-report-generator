@@ -96,7 +96,7 @@ def main():
                             font-size: 10px;
                             color: grey;}
             </style>
-            <p class = powered-by> Powered by 資策會數位轉型研究院 <br/>跨域實證服務中心 創新孵化組</p>""", unsafe_allow_html = True)
+            <p class = powered-by> Powered by 資策會數轉院 <br/>跨域實證服務中心 創新孵化組</p>""", unsafe_allow_html = True)
     # st.sidebar.write("**視覺化界面**")
     # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
     

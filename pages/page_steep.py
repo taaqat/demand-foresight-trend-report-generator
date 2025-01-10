@@ -11,6 +11,22 @@ from scripts.executor import Executor
 import datetime as dt
 
 # *** SIDE BAR CONFIGURATION
+# * III Icon 和開發團隊
+with st.sidebar:
+        icon_box, text_box = st.columns((0.2, 0.8))
+        with icon_box:
+            st.markdown(f'''
+                            <img class="image" src="data:image/jpeg;base64,{DataManager.image_to_b64(f"./pics/iii_icon.png")}" alt="III Icon" style="width:500px;">
+                        ''', unsafe_allow_html = True)
+        with text_box:
+            st.markdown("""
+            <style>
+                .powered-by {text-align:right;
+                            font-size: 14px;
+                            color: grey;}
+            </style>
+            <p class = powered-by> Powered by 資策會數轉院 <br/>跨域實證服務中心 創新孵化組</p>""", unsafe_allow_html = True)
+
 st.sidebar.header("資策會 Demand Foresight Tools")
 with st.sidebar:
     st.page_link('index.py', label = 'Home Page', icon = ':material/add_circle:')
@@ -42,6 +58,8 @@ with st.sidebar:
         if st.button("顯示所有暫存"):
             with st.expander("session states"):
                 st.write(st.session_state.keys())
+
+
 
 # *** CSS style setting
 st.markdown("""<style>

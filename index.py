@@ -97,6 +97,12 @@ def main():
             st.page_link('pages/page_self_select.py', label = '自選主題', icon = ':material/add_circle:')
             st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
 
+    if st.secrets['permission']['theme_based_generator'] == True:
+        st.sidebar.write("**主題式趨勢報告**")
+        with st.sidebar:
+            st.sidebar.page_link("https://demand-foresight-theme-based-report-generator-7d32y4wrfnhpobtb.streamlit.app/", label = "主題式報告產生器", icon = ':material/link:')
+
+
     if st.secrets['permission']['chat_tool'] == True:
         st.sidebar.page_link("https://demand-foresight-citation-energy.streamlit.app/", label = "與文件對話", icon = ':material/link:')
     

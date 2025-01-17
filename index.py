@@ -108,10 +108,14 @@ def main():
         st.sidebar.write("**跨文件檢索工具**")
         with st.sidebar:
             st.sidebar.page_link("https://demand-foresight-citation-energy.streamlit.app/", label = "與文件對話", icon = ':material/link:')
+    
+    # if st.secrets['permission']['visualization'] == True:
+    #      st.sidebar.write("**視覺化界面**")
+    #     st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
+
     with st.sidebar:
         SessionManager.fetch_IP()
-    # st.sidebar.write("**視覺化界面**")
-    # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
+    
     
     # ----------------------------------------------------------------------------
     # *** STEEP Report GALLERY

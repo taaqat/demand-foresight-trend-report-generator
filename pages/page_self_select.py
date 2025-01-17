@@ -10,6 +10,8 @@ from managers.session_manager import SessionManager
 from scripts.executor import Executor
 import datetime as dt
 import pandas as pd
+import requests
+
 
 # *** SIDE BAR CONFIGURATION
 # * III Icon 和開發團隊
@@ -46,6 +48,8 @@ st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", l
 st.sidebar.write("**視覺化界面**")
 # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
 
+with st.sidebar:
+    SessionManager.fetch_IP()
 
 
 

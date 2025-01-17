@@ -1,8 +1,10 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 from streamlit_authenticator import Hasher
+import requests
 import yaml
 from managers.data_manager import DataManager
+from managers.session_manager import SessionManager
 from yaml.loader import SafeLoader
 
 st.title("DEMO")
@@ -43,7 +45,8 @@ st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", l
 st.sidebar.write("**視覺化界面**")
 # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
 
-
+with st.sidebar:
+    SessionManager.fetch_IP()
 
 # *** CSS style setting
 st.markdown("""<style>

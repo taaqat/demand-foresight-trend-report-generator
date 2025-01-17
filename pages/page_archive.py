@@ -1,8 +1,10 @@
 import streamlit as st 
+import requests
 from managers.data_manager import DataManager
 from managers.export_manager import ExportManager
 from managers.session_manager import SessionManager
 st.title("ARCHIVE")
+
 
 # *** SIDE BAR CONFIGURATION
 # * III Icon 和開發團隊
@@ -39,7 +41,8 @@ st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", l
 st.sidebar.write("**視覺化界面**")
 # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
 
-
+with st.sidebar:
+    SessionManager.fetch_IP()
 
 
 left_col, right_col = st.columns((1/2, 1/2))

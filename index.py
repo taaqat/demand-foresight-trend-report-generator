@@ -2,6 +2,7 @@ import streamlit as st
 import yaml
 import streamlit as st
 import re
+import requests
 import time
 import random
 from yaml.loader import SafeLoader
@@ -107,7 +108,8 @@ def main():
         st.sidebar.write("**跨文件檢索工具**")
         with st.sidebar:
             st.sidebar.page_link("https://demand-foresight-citation-energy.streamlit.app/", label = "與文件對話", icon = ':material/link:')
-    
+    with st.sidebar:
+        SessionManager.fetch_IP()
     # st.sidebar.write("**視覺化界面**")
     # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
     
@@ -205,7 +207,8 @@ def main():
 
     render()
     
-                
+
+    
     
     
 

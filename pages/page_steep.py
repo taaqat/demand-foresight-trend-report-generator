@@ -43,6 +43,9 @@ st.sidebar.write("**對話式工具**")
 st.sidebar.page_link("https://livinglab-demand-foresight-chat.streamlit.app/", label = "RAG 與文件對話", icon = ':material/link:')
 
 st.sidebar.write("**視覺化界面**")
+
+with st.sidebar:
+    SessionManager.fetch_IP()
 # st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
 
 

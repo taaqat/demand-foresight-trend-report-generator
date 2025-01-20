@@ -40,7 +40,7 @@ This file serves as the application's entry point and is primarily responsible f
 ### pages (front end)
 Page files are python scripts that display UIs by streamlit, including:
 
-#### page_demo.py:
+#### `page_demo.py`: 
 This file demonstrates how to use the tool by youtube tutorial videos.
 
 #### `page_steep.py`: 

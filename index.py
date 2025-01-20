@@ -69,8 +69,7 @@ def main():
     # ---------------------------------------------------
     # *** navigation bar by st.page_link()
     st.session_state['logged_in'] = True
-    
-    # ****************************************** SIDE BAR CONFIGURATION ******************************************
+
     # * III Icon 和開發團隊
     with st.sidebar:
             icon_box, text_box = st.columns((0.2, 0.8))
@@ -117,7 +116,6 @@ def main():
     with st.sidebar:
         SessionManager.fetch_IP()
     
-    # **********************************************************************************************************
     
     # ----------------------------------------------------------------------------
     # *** STEEP Report GALLERY

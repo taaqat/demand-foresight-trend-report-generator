@@ -48,6 +48,7 @@ def main():
 
     st.title("STEEP +B Trend Report Gallery")
     st.caption(":gray[歡迎來到資策會 Demand Foresight Tool 平台！此平台透過畫廊的形式，展示敝團隊透過**串接 AI 模型**與**簡報自動化生成技術**所製作之每月趨勢報告，提供使用者自由下載使用。]")
+    st.write("Test")
     
 
     # ---------------------------------------------------

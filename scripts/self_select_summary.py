@@ -18,7 +18,8 @@ from io import BytesIO
 
 def in_group_summarize(in_message, title, batch):
 
-    chain = LlmManager.create_prompt_chain(sys_prompt = PromptManager.SELF_SELECT.step1_prompt(title, batch))
+    chain = LlmManager.create_prompt_chain(sys_prompt = PromptManager.SELF_SELECT.step1_prompt(title, batch),
+                                           model = st.session_state['model'])
 
     return LlmManager.llm_api_call(chain, in_message)
 
@@ -63,7 +64,7 @@ def summarize_all(raw_data, user_name, user_email, title, start_date, end_date, 
         summary_out.to_excel(writer, index = False, sheet_name = 'Sheet1')
     excel_buffer.seek(0)  # Move to the beginning of the buffer
     b64_excel = base64.b64encode(excel_buffer.read()).decode('utf-8')
-    DataManager.post_files(f"Summary_{title.replace(" ", "_")}_{start_date}-{end_date}.xlsx",
+    DataManager.post_files(f"Summary_{title.replace(' ', '_')}_{start_date}-{end_date}.xlsx",
                            b64_excel,
                            str(dt.datetime.today() + dt.timedelta(90)),
                            user_name,

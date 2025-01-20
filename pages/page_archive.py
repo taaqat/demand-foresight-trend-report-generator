@@ -5,8 +5,7 @@ from managers.export_manager import ExportManager
 from managers.session_manager import SessionManager
 st.title("ARCHIVE")
 
-
-# *** SIDE BAR CONFIGURATION
+# ****************************************** SIDE BAR CONFIGURATION ******************************************
 # * III Icon 和開發團隊
 with st.sidebar:
         icon_box, text_box = st.columns((0.2, 0.8))
@@ -26,7 +25,7 @@ with st.sidebar:
 st.sidebar.header("資策會 Demand Foresight Tools")
 with st.sidebar:
     st.page_link('index.py', label = 'STEEP +B Gallery', icon = ':material/add_circle:')
-    
+
 if st.secrets['permission']['trend_report_generator'] == True:
     st.sidebar.write("**趨勢報告產生器**")
     with st.sidebar:
@@ -53,7 +52,7 @@ if st.secrets['permission']['chat_tool'] == True:
 with st.sidebar:
     SessionManager.fetch_IP()
 
-
+# **************************************************************************************************************
 
 
 left_col, right_col = st.columns((1/2, 1/2))

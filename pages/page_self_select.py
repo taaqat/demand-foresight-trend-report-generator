@@ -12,8 +12,7 @@ import datetime as dt
 import pandas as pd
 import requests
 
-
-# *** SIDE BAR CONFIGURATION
+# ****************************************** SIDE BAR CONFIGURATION ******************************************
 # * III Icon 和開發團隊
 with st.sidebar:
         icon_box, text_box = st.columns((0.2, 0.8))
@@ -73,6 +72,7 @@ with st.sidebar:
         if st.button("顯示所有暫存"):
             with st.expander("session states"):
                 st.write(st.session_state.keys())
+# ***********************************************************************************************************
 
 # ********* config **********
 st.title("自選主題")

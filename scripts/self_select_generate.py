@@ -44,7 +44,7 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
             
         three_vers = {}
         for ver in range(1, 4):
-            chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step2_prompt(title, ver))
+            chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step2_prompt(title, ver, additional))
             three_vers.update(LlmManager.llm_api_call(chain, in_message))
             
             st_bar.progress(1/5 * (ver/3), f"({round(1/5 * (ver/3) * 100)}%) Generating {title} trend report (ver {ver + 1})")
@@ -62,7 +62,7 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
         for ver, value in three_vers.items():
             in_message = in_message + '\n' + ver + '\n\n' + json.dumps(value) + '\n\n'
 
-        chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step3_prompt)
+        chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step3_prompt(additional))
         trends_basic = LlmManager.llm_api_call(chain, in_message)
 
         st.session_state['self_select_trends_basic'] = trends_basic
@@ -87,7 +87,7 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
             in_message = f'''
             總共有這些事件。請分類：\n\n{events_message}\n\n----\n\n*****主要趨勢{count}（{name}）*****：\n\n{trend_message}
             '''
-            chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step4_prompt)
+            chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step4_prompt(additional))
             trends_with_events.append(LlmManager.llm_api_call(chain, in_message))
             st_bar.progress(2/5 + 1/5 * (count/len(trends_basic)), text = f"({round((2/5 + 1/5 * (count/len(trends_basic))) * 100)}%) Classifying events to each trend..." )
             count += 1
@@ -124,7 +124,7 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
             '''#缺口：{trend["<e>缺口"]}\n\n
             in_message += message
 
-        chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step6_prompt)
+        chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step6_prompt(additional))
         final_summary = LlmManager.llm_api_call(chain, in_message)
         st.write('''    🤝 Final summarization completed! ''')
         st_bar.progress(1, text = f"(100%) Complete!")

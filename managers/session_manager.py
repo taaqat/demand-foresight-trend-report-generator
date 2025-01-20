@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
+import requests
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -162,3 +163,10 @@ class SessionManager:
             
         for key in ls:
                 del st.session_state[key]
+    # *** function that return IP address for the deployed url
+    @staticmethod
+    def fetch_IP():
+        response = requests.get("https://api.ipify.org?format=json")
+        public_ip = response.json()["ip"]
+
+        st.caption(f"Deployed IP Address: **:blue[{public_ip}]**")

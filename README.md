@@ -12,10 +12,11 @@
 |  ├── llm_manager.py
 |  ├── prompt_manager.py
 |  └── session_manager.py
-├── page_archive.py
-├── page_self_select.py
-├── page_steep.py
-├── page_demo.py
+├── pages
+|  ├── page_demo.py
+|  ├── page_archive.py
+|  ├── page_self_select.py
+|  └── page_steep.py
 ├── requirements.txt
 ├── scripts
 |  ├── executor.py
@@ -23,10 +24,20 @@
 |  ├── self_select_summary.py
 |  ├── steep_generate.py
 |  └── steep_summary.py
+├── pics
 ├── users.yaml
 ```
 
-### page files (front end)
+### index.py (entry point of the app)
+This file serves as the application's entry point and is primarily responsible for the following three functions:
+
+- User Authentication
+- Introduction
+- STEEP +B Trend Report Gallery
+
+
+
+### pages (front end)
 Page files are python scripts that display UIs by streamlit, including:
 
 #### `page_demo.py`: 
@@ -54,10 +65,8 @@ This page allows user to query the generated output files by project name. The f
 - Monthly summary data in EXCEL format
 - Daily summary data in JSON format (utf-8 encoded)
 
-#### `index.py`:
-This page is the entrance of our application. It manages user login and the navigation across the three pages as mentioned above.
 
-### managers (back end) (folder)
+### managers (back end)
 This folder includes five python files for specific utilities. In each file, a class that has identical name with file name is established, with several tool functions defined by static method. 
 
 #### `data_manager.py` -> `DataManager`
@@ -129,7 +138,7 @@ This file manages functions associated with **st.session_state** management and 
 - `session_state_clear()`: Clear the session states based on the page parameter passed in.
 
 
-### scripts (back end) (folder)
+### scripts (back end) 
 This folders include five python scripts that control the workflow of trend report generation process.
 
 #### `steep_summary.py`
@@ -149,3 +158,6 @@ This file links functions from the four python script files as mentioned above, 
 
 - `steep_run()`: Executor function fo STEEP page.
 - `self_select_run()`: Executor function fo SELF SELECT page.
+
+### pics (front end) 
+This folder contains images for the **introduction** page (`index.py`), organized into six subfolders based on STEEP +B topics: **social, technological, economic, environmental, political, and business & investment**. Each subfolder holds three PNG images, displayed based on the user-selected year and month.

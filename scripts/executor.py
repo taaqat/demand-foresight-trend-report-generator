@@ -26,7 +26,8 @@ class Executor:
                   end_date, 
                   topics: list, 
                   excel_output = True, 
-                  ppt_output = True):
+                  ppt_output = True,
+                  daily_regen = False):
 
         # *** generate summary data if not existing
         try:
@@ -36,7 +37,7 @@ class Executor:
             try:
                 summary_data = DataManager.b64_to_dataframe(DataManager.get_files(f"Summary_{start_date}-{end_date}.xlsx", 'xlsx'))
             except:
-                summary_data = monthly_summary(start_date, end_date, user_name, user_email)
+                summary_data = monthly_summary(start_date, end_date, user_name, user_email, daily_regen)
 
         # *** generate trend report
         sys_info = lambda x: f"Generating {x} trend report... "
@@ -59,7 +60,7 @@ class Executor:
                 st_bar.progress(counter, sys_info(topic))
 
                 begin = time.time()
-                result = gen_trend_report(topic, start_date, end_date, user_name, user_email, summary_data)
+                result = gen_trend_report(topic, start_date, end_date, user_name, user_email, summary_data, daily_regen)
                 finish = time.time()
 
                 counter = i/len(topics)
@@ -132,7 +133,7 @@ class Executor:
             st.write(f'💫 {title} trend report completed! {round(finish - begin, 3)} seconds spent.')
 
             res_pptx_bs = ExportManager.SELF_SELECT.create_pptx(color, title, result)
-            filename = f"{title.replace(" ", "_")}_trends_{start_date}-{end_date}.pptx"
+            filename = f"{title.replace(' ', '_')}_trends_{start_date}-{end_date}.pptx"
             DataManager.post_files(filename, res_pptx_bs, str(dt.datetime.today() + dt.timedelta(365)), user_name, user_email)
             
             SessionManager.self_select_database('update', title, keywords, start_date, end_date, user_name, user_email, dt.date.today())

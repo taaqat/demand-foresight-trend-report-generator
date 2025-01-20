@@ -9,7 +9,7 @@ from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
 from streamlit_authenticator import Hasher
 from managers.session_manager import SessionManager
-from managers.data_manager import DataManager
+from managers.data_manager import DataManager\
 
 
 # *********** Config ***********

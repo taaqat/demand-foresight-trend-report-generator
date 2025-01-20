@@ -10,7 +10,7 @@ from yaml.loader import SafeLoader
 st.title("DEMO")
 
 
-# *** SIDE BAR CONFIGURATION
+# ****************************************** SIDE BAR CONFIGURATION ******************************************
 # * III Icon 和開發團隊
 with st.sidebar:
         icon_box, text_box = st.columns((0.2, 0.8))
@@ -80,6 +80,7 @@ div[data-baseweb="input"]:hover {
 }
 </style>
 """, unsafe_allow_html=True)
+# ***********************************************************************************************
 
 
 

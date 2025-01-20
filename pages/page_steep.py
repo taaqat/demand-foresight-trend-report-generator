@@ -10,7 +10,7 @@ from managers.session_manager import SessionManager
 from scripts.executor import Executor
 import datetime as dt
 
-# *** SIDE BAR CONFIGURATION
+# ****************************************** SIDE BAR CONFIGURATION ******************************************
 # * III Icon 和開發團隊
 with st.sidebar:
         icon_box, text_box = st.columns((0.2, 0.8))
@@ -69,6 +69,7 @@ with st.sidebar:
             with st.expander("session states"):
                 st.write(st.session_state.keys())
 
+# *******************************************************************************************************************
 
 
 # *** CSS style setting

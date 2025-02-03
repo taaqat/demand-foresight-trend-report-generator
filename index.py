@@ -114,10 +114,6 @@ if st.secrets['permission']['chat_tool'] == True:
 with st.sidebar:
     SessionManager.fetch_IP()
 
-if st.session_state['model_type'] == "":
-    st.info("**請先選擇欲使用的語言模型**")
-    if st.button("點擊開啟選單"):
-        LlmManager.model_selection()
 
 # **************************************************************************
 # *** function that would be called after login (entry point of the app) ***

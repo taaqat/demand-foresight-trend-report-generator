@@ -9,7 +9,8 @@ from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
 from streamlit_authenticator import Hasher
 from managers.session_manager import SessionManager
-from managers.data_manager import DataManager\
+from managers.data_manager import DataManager
+from managers.llm_manager import LlmManager
 
 
 # *********** Config ***********
@@ -22,6 +23,10 @@ if "page_config_set" not in st.session_state:
 if "config" not in st.session_state:
     with open("users.yaml") as file:
         st.session_state.config = yaml.load(file, Loader=SafeLoader)
+
+# * model
+if "model_type" not in st.session_state:
+    st.session_state['model_type'] = ""
 
 # * configure the start-date, end-date, and theme picture path for year month in 2024
 #  {'2024 MONTH': [START_DATE, END_DATE, PIC_PATH]}
@@ -41,80 +46,86 @@ st.session_state["ym_mapping"] = {
  }
 
 
+# ***************************************************
+# *** Sidebar Configuration
+# ---------------------------------------------------
+# *** button style setting
+st.markdown("""<style>
+div.stButton > button {
+    width: 100%;  
+    height: 50px;
+    margin-left: 0;
+    margin-right: auto;
+}
+div.stButton > button:hover {
+    transform: scale(1.02);
+    transition: transform 0.05s;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ---------------------------------------------------
+# *** navigation bar by st.page_link()
+st.session_state['logged_in'] = True
+
+# * III Icon 和開發團隊
+with st.sidebar:
+        icon_box, text_box = st.columns((0.2, 0.8))
+        with icon_box:
+            st.markdown(f'''
+                            <img class="image" src="data:image/jpeg;base64,{DataManager.image_to_b64(f"./pics/iii_icon.png")}" alt="III Icon" style="width:500px;">
+                        ''', unsafe_allow_html = True)
+        with text_box:
+            st.markdown("""
+            <style>
+                .powered-by {text-align:right;
+                            font-size: 14px;
+                            color: grey;}
+            </style>
+            <p class = powered-by> Powered by 資策會數轉院 <br/>跨域實證服務中心 創新孵化組</p>""", unsafe_allow_html = True)
+
+st.sidebar.header("資策會 Demand Foresight Tools")
+with st.sidebar:
+    st.page_link('index.py', label = 'STEEP +B Gallery', icon = ':material/add_circle:')
+
+if st.secrets['permission']['trend_report_generator'] == True:
+    st.sidebar.write("**趨勢報告產生器**")
+    with st.sidebar:
+        st.page_link('pages/page_demo.py', label = 'DEMO Videos', icon = ':material/add_circle:')
+        st.page_link('pages/page_steep.py', label = 'STEEP +B 月報', icon = ':material/add_circle:')
+        st.page_link('pages/page_self_select.py', label = '自選主題', icon = ':material/add_circle:')
+        st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
+
+if st.secrets['permission']['theme_based_generator'] == True:
+    st.sidebar.write("**主題式趨勢報告**")
+    with st.sidebar:
+        st.sidebar.page_link("https://demand-foresight-theme-based-report-generator-7d32y4wrfnhpobtb.streamlit.app/", label = "主題式報告產生器", icon = ':material/link:')
 
 
+if st.secrets['permission']['chat_tool'] == True:
+    st.sidebar.write("**跨文件檢索工具**")
+    with st.sidebar:
+        st.sidebar.page_link("https://demand-foresight-citation-energy.streamlit.app/", label = "與文件對話", icon = ':material/link:')
+
+# if st.secrets['permission']['visualization'] == True:
+#      st.sidebar.write("**視覺化界面**")
+#     st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
+
+with st.sidebar:
+    SessionManager.fetch_IP()
+
+if st.session_state['model_type'] == "":
+    st.info("**請先選擇欲使用的語言模型**")
+    if st.button("點擊開啟選單"):
+        LlmManager.model_selection()
+
+# **************************************************************************
 # *** function that would be called after login (entry point of the app) ***
 def main():
 
     st.title("STEEP +B Trend Report Gallery")
     st.caption(":gray[歡迎來到資策會 Demand Foresight Tool 平台！此平台透過畫廊的形式，展示敝團隊透過**串接 AI 模型**與**簡報自動化生成技術**所製作之每月趨勢報告，提供使用者自由下載使用。]")
     
-
-    # ---------------------------------------------------
-    # *** button style setting
-    st.markdown("""<style>
-    div.stButton > button {
-        width: 100%;  
-        height: 50px;
-        margin-left: 0;
-        margin-right: auto;
-    }
-    div.stButton > button:hover {
-        transform: scale(1.02);
-        transition: transform 0.05s;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # ---------------------------------------------------
-    # *** navigation bar by st.page_link()
-    st.session_state['logged_in'] = True
-
-    # * III Icon 和開發團隊
-    with st.sidebar:
-            icon_box, text_box = st.columns((0.2, 0.8))
-            with icon_box:
-                st.markdown(f'''
-                                <img class="image" src="data:image/jpeg;base64,{DataManager.image_to_b64(f"./pics/iii_icon.png")}" alt="III Icon" style="width:500px;">
-                            ''', unsafe_allow_html = True)
-            with text_box:
-                st.markdown("""
-                <style>
-                    .powered-by {text-align:right;
-                                font-size: 14px;
-                                color: grey;}
-                </style>
-                <p class = powered-by> Powered by 資策會數轉院 <br/>跨域實證服務中心 創新孵化組</p>""", unsafe_allow_html = True)
-
-    st.sidebar.header("資策會 Demand Foresight Tools")
-    with st.sidebar:
-        st.page_link('index.py', label = 'STEEP +B Gallery', icon = ':material/add_circle:')
-
-    if st.secrets['permission']['trend_report_generator'] == True:
-        st.sidebar.write("**趨勢報告產生器**")
-        with st.sidebar:
-            st.page_link('pages/page_demo.py', label = 'DEMO Videos', icon = ':material/add_circle:')
-            st.page_link('pages/page_steep.py', label = 'STEEP +B 月報', icon = ':material/add_circle:')
-            st.page_link('pages/page_self_select.py', label = '自選主題', icon = ':material/add_circle:')
-            st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
-
-    if st.secrets['permission']['theme_based_generator'] == True:
-        st.sidebar.write("**主題式趨勢報告**")
-        with st.sidebar:
-            st.sidebar.page_link("https://demand-foresight-theme-based-report-generator-7d32y4wrfnhpobtb.streamlit.app/", label = "主題式報告產生器", icon = ':material/link:')
-
-
-    if st.secrets['permission']['chat_tool'] == True:
-        st.sidebar.write("**跨文件檢索工具**")
-        with st.sidebar:
-            st.sidebar.page_link("https://demand-foresight-citation-energy.streamlit.app/", label = "與文件對話", icon = ':material/link:')
-    
-    # if st.secrets['permission']['visualization'] == True:
-    #      st.sidebar.write("**視覺化界面**")
-    #     st.sidebar.page_link("[小賴做的視覺化界面]", label = "", icon = ':material/add_circle:')
-
-    with st.sidebar:
-        SessionManager.fetch_IP()
     
     
     # ----------------------------------------------------------------------------
@@ -248,4 +259,5 @@ if st.secrets['permission']['authenticate'] == True:
 
 else:
     main()
+    
 

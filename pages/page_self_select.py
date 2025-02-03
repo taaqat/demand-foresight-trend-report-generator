@@ -88,11 +88,22 @@ if 'self_select_raw_data' not in st.session_state:
 if 'CLAUDE_KEY' not in st.session_state:
     st.session_state['CLAUDE_KEY'] = " "
 
+if 'OPENAI_KEY' not in st.session_state:
+    st.session_state['OPENAI_KEY'] = ""
+
 if 'KEY_verified' not in st.session_state:
     st.session_state['KEY_verified'] = False
 
-if 'model' not in st.session_state:
-    st.session_state['model'] = LlmManager.init_model()
+if "model_type" not in st.session_state:
+    st.session_state['model_type'] = ""
+
+# *** 模型選擇
+if st.session_state['model_type'] == "":
+    st.info("**請先選擇欲使用的語言模型**")
+    if st.button("點擊開啟選單"):
+        LlmManager.model_selection()
+
+
 
 # *** CSS style setting
 st.markdown("""<style>
@@ -121,6 +132,7 @@ div[data-baseweb="input"]:hover {
     
     
 def main():
+
     # ********* Basic info input *********
     with st.container(key = 'basic_info'):
         st.subheader("基本資料輸入")
@@ -393,24 +405,52 @@ def main():
 
 # ** user_token switch: if the user is required to input their own api token
 if st.secrets['permission']['user_token'] == True:
+    # ** Ensure that the model type is selected
+    if st.session_state['model_type'] == "":
+        st.stop()
+
     # ** Verify API token
     if st.session_state['KEY_verified'] == False:
         try:
-            if st.button("點擊設定 Claud API key"):
-                LlmManager.customer_claude_token()
+            st.info("**請設定 API key**")
+            if st.button("點擊設定 API key"):
+                LlmManager.customer_token(st.session_state['model_type'])
+            
         except:
             pass
     else:
-        main()
-        with st.sidebar:
-            if st.button("重置 API Key"):
-                for session in [
-                    "KEY_verified",
-                    "CLAUDE_KEY"
-                ]:
-                    del st.session_state[session]
-                st.rerun()
+        if st.session_state['model']:
+            main()
+            with st.sidebar:
+                if st.button("重置模型設定"):
+                    for session in [
+                        "KEY_verified",
+                        "CLAUDE_KEY",
+                        "OPENAI_KEY",
+                        "model",
+                        "model_type"
+                    ]:
+                        del st.session_state[session]
+                    st.rerun()
+        else:
+            st.stop()
 
 else:
     st.session_state['CLAUDE_KEY'] = st.secrets['CLAUDE_KEY']
-    main()
+    st.session_state['OPENAI_KEY'] = st.secrets['OPENAI_KEY']
+    st.session_state['model'] = LlmManager.init_model()
+    if st.session_state['model']:
+        main()
+        with st.sidebar:
+            if st.button("重置模型設定"):
+                for session in [
+                    "KEY_verified",
+                    "CLAUDE_KEY",
+                    "OPENAI_KEY",
+                    "model",
+                    "model_type"
+                ]:
+                    del st.session_state[session]
+                st.rerun()
+    else:
+        st.stop()

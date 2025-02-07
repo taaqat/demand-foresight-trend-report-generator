@@ -113,13 +113,6 @@ This file manages everything associated with LLM API call. We use Claude as our 
 
 - `create_prompt_chain()`: Return a **LangChain runnable** object with system prompt (to be used in `LlmManager.llm_api_call()`). Parameter `sys_prompt` (system prompt) should be passed in.
 
-#### `llm_manager.py` -> `LlmManager`
-
-This file manages everything associated with LLM API call. We use Claude as our model.
-
-- `llm_api_call()`: Call Claude API and return JSON formatted response. Parameter `chain` should be passed in as **LangChain runnable**  object that contains system prompt (which can be obtained by `LlmManager.create_prompt_chain()` function), and parameter `in_message` (user prompt in string format) should be passed in as well.
-
-- `create_prompt_chain()`: Return a **LangChain runnable** object with system prompt (to be used in `LlmManager.llm_api_call()`). Parameter `sys_prompt` (system prompt) should be passed in.
 
 #### `prompt_manager.py` -> `PromptManager`
 

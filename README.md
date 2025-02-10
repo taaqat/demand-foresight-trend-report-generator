@@ -31,9 +31,9 @@
 ### index.py (entry point of the app)
 This file serves as the application's entry point and is primarily responsible for the following three functions:
 
-- User Authentication
+- Authentication
 - Introduction
-- STEEP +B Trend Report Gallery
+- STEEP +B Yearly Trend Report Gallery
 
 
 
@@ -45,6 +45,19 @@ This file demonstrates how to use the tool by youtube tutorial videos.
 
 #### `page_steep.py`: 
 This file displays the UI for STEEP trend report generation. User inputs include **nickname, email, desired period, topics, and output formats**. With such information, user can obtain trend reports in desired output format within 1 hour.
+
+The whole generation process is:
+
+1. Summarize all news events within the specified period
+2. Generate three version crude trend reports
+3. Aggregate these three versions
+4. Classify representative events / news back to each trend
+5. Let user check the output so far, and allow user to edit the intermediate output (which becomes the input of the subsequent inference)
+6. Infer each trends with well-structured template
+7. Summarize and conclude
+8. Export as the format required by the user (pptx, excel)
+9. Post files back to III database, and record the generation history in Google Sheet database.
+
 
 #### `page_self_select.py`:
 This file displays the UI for SELF SELECT trend report generation. In addition to the basic user inputs, user should also name the generation session with a consice project name. 
@@ -109,9 +122,18 @@ This file defines functions that associate with **data export**. Functions that 
 
 This file manages everything associated with LLM API call. We use Claude as our model.
 
+- `model_select()`: Expand a streamlit dialog form to ask user to select the model type to be used.
+
+- `init_model()`: Initialize LLM client according to user-selected model type (**claude-3.5-sonnet / gpt-4o**).
+
+- `api_key_verify()`: Verify the API key based on model type selected by the user. 
+
+- `customize_token()`: Expand a streamlit dialog form to ask for user's own LLM API key.
+
 - `llm_api_call()`: Call Claude API and return JSON formatted response. Parameter `chain` should be passed in as **LangChain runnable**  object that contains system prompt (which can be obtained by `LlmManager.create_prompt_chain()` function), and parameter `in_message` (user prompt in string format) should be passed in as well.
 
 - `create_prompt_chain()`: Return a **LangChain runnable** object with system prompt (to be used in `LlmManager.llm_api_call()`). Parameter `sys_prompt` (system prompt) should be passed in.
+
 
 
 #### `prompt_manager.py` -> `PromptManager`
@@ -130,6 +152,11 @@ This file manages functions associated with **st.session_state** management and 
 
 - `session_state_clear()`: Clear the session states based on the page parameter passed in.
 
+- `fetch_IP()`: Return the IP address of deployment (for firewall setting for III database).
+
+- `show_sessions()`: Show current streamlit sessions to help debug.
+- 
+
 
 ### scripts (back end) 
 This folders include five python scripts that control the workflow of trend report generation process.
@@ -138,7 +165,9 @@ This folders include five python scripts that control the workflow of trend repo
 - `monthly_summary()`: Summarize all news by **day** within specified period, and return in pd.DataFrame object with date as index, each STEEP theme as columns, and news summary as value. This function does not require raw data as parameter because it is nested by `DataManager.fetch()` function.
 
 #### `steep_generate.py`
-- `gen_trend_report()`: Generate trend report and return in JSON format based on specified topic and time period. 
+- `gen_trend_report_1()`: Generate trend report until news classification step. This function does not return any value. The result is stored in streamlit session.
+
+ - `gen_trend_report_2()`: Continue to generate trend report, including the inference & conclusion part. This function return a JSON dictionary.
 
 #### `self_select_summary.py`
 - `monthly_summary()`: Summarize filtered news by **group** within specified period, and return in pd.DataFrame object with date as index and news summary as value. Due to the session issue, this function requires raw data as parameter. (We let users confirm the result of raw data query, then proceed to the summary prosedure.)
@@ -146,11 +175,9 @@ This folders include five python scripts that control the workflow of trend repo
 #### `self_select_generate.py`
 - `gen_trend_report()`: Generate trend report and return in JSON format based on the specified summary data. 
 
-#### `executor.py`
-This file links functions from the four python script files as mentioned above, serving as the interface that connects UI and back-end design. Specifically, `Executor` class has methods that receive user input, generate trend reports, export as pptx slides and excel, post the output files back to III database, update the generation history to google sheet database, send notification emails, and finally clear all related session state variables in progress. 
+#### `self_selct_executor.py`
+This file links functions from `self_select_summary.py` and `self_select_generate.py`, serving as the interface that connects UI and back-end design (only for Self Select page). Specifically, `Executor` class has methods that receive user input, generate trend reports, export as pptx slides and excel, post the output files back to III database, update the generation history to google sheet database, send notification emails, and finally clear all related session state variables in progress. 
 
-- `steep_run()`: Executor function fo STEEP page.
-- `self_select_run()`: Executor function fo SELF SELECT page.
 
 ### pics (front end) 
 This folder contains images for the **introduction** page (`index.py`), organized into six subfolders based on STEEP +B topics: **social, technological, economic, environmental, political, and business & investment**. Each subfolder holds three PNG images, displayed based on the user-selected year and month.

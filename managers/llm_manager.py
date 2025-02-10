@@ -1,6 +1,8 @@
 from dotenv import dotenv_values                                   # read api key in .env file
 from langchain_anthropic import ChatAnthropic
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
+from langchain.schema import HumanMessage
 import streamlit as st
 import json
 import time
@@ -17,13 +19,62 @@ from .data_manager import DataManager
 # *** Read in API key at Streamlit (by streamlit.secrets) ***
 
 class LlmManager:
-    CLAUDE_KEY = st.secrets['CLAUDE_KEY']
-    model = ChatAnthropic(model = 'claude-3-5-sonnet-20240620',
-                            api_key = CLAUDE_KEY,
-                            max_tokens = 8000,
-                            temperature = 0.0,
-                            verbose = True
-                            )
+
+    if 'KEY_verified' not in st.session_state:
+        st.session_state['KEY_verified'] = False
+
+    # * initialize model
+    @staticmethod
+    def init_model():
+        CLAUDE_KEY = st.session_state['CLAUDE_KEY']
+        OPENAI_KEY = st.session_state['OPENAI_KEY']
+        
+        if st.session_state['model_type'] == 'claude-3-5-sonnet-20241022':
+            model = ChatAnthropic(model = 'claude-3-5-sonnet-20241022',
+                                    api_key = CLAUDE_KEY,
+                                    max_tokens = 8000,
+                                    temperature = 0.0,
+                                    verbose = True
+                                    )
+            return model
+        elif st.session_state['model_type'] == 'gpt-4o':
+            model = ChatOpenAI(model = 'gpt-4o',
+                               api_key = OPENAI_KEY,
+                               max_tokens = 16000,
+                               temperature = 0.0,
+                               verbose = True)
+            return model
+        else:
+            return None
+    
+    # * test if the api key is valid
+    @staticmethod
+    def api_key_verify(model):
+        response = model([HumanMessage(content = "Hello, how are you?")])
+        st.session_state['KEY_verified'] = True
+        return response
+
+    @staticmethod
+    @st.dialog("請輸入您的 API Key")
+    def customer_token(model_selected):
+
+        model_alias = {"claude-3-5-sonnet-20241022": "Claude",
+                       "gpt-4o": "OpenAI"}[model_selected]
+        model_key = {"claude-3-5-sonnet-20241022": "CLAUDE_KEY",
+                       "gpt-4o": "OPENAI_KEY"}[model_selected]
+
+        tk = st.text_input(f"請輸入您的 {model_alias} API Key")
+        if st.button("確認"):
+            st.session_state[model_key] = tk
+            with st.spinner("Verifying API key..."):
+                try:
+                    st.session_state['model'] = LlmManager.init_model()
+                    LlmManager.api_key_verify(st.session_state['model'])
+                    st.rerun()
+
+                except Exception as e:
+                    st.warning("Invalid Token")
+            
 
     # Implement Anthropic API call 
     # *** input: chain(prompt | model), in_message(str) ***
@@ -76,7 +127,7 @@ class LlmManager:
         return summary_json
         
     @staticmethod
-    def create_prompt_chain(sys_prompt):
+    def create_prompt_chain(sys_prompt, model):
 
         # *** Create the Prompt ***
         prompt_obj = ChatPromptTemplate.from_messages(
@@ -88,11 +139,19 @@ class LlmManager:
         )
 
         # *** Create LLM Chain ***
-        chain = prompt_obj | LlmManager.model
+        chain = prompt_obj | model
 
         return chain
+    
+    @staticmethod
+    @st.dialog("請選擇欲使用的語言模型")
+    def model_selection():
 
-
+        model_selected = st.selectbox("請選擇欲使用的語言模型", ["claude-3-5-sonnet-20241022", "gpt-4o"])
+        if st.button("確認"):
+            st.session_state['model_type'] = model_selected
+            st.rerun()
+    
 
 
 

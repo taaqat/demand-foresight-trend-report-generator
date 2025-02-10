@@ -18,7 +18,7 @@ from io import BytesIO
 
 
 
-def gen_trend_report(topic: str, start_date: str, end_date: str, user_name, user_email, data = None) -> json:
+def gen_trend_report(topic: str, start_date: str, end_date: str, user_name, user_email, data = None, daily_regen = False) -> json:
 
     # *** Try to import necessary data ***
     # if failed, generate by "monthly_summary()" function 
@@ -26,7 +26,7 @@ def gen_trend_report(topic: str, start_date: str, end_date: str, user_name, user
         try:
             data = DataManager.b64_to_dataframe(DataManager.get_files(f"Summary_{start_date}-{end_date}.xlsx", 'xlsx'))  
         except:
-            data = monthly_summary(start_date, end_date, user_name, user_email)
+            data = monthly_summary(start_date, end_date, user_name, user_email, daily_regen)
     # -------------------------------------------------------------------------------------
     st_bar = st.progress(0, text = f"({0}%) Generating {topic} trend report (three versions)...")
     # *** Generate three versions of trend reports ***
@@ -44,7 +44,8 @@ def gen_trend_report(topic: str, start_date: str, end_date: str, user_name, user
         
         for ver in range(1, 4):
 
-            chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step2_prompt(topic, ver))
+            chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step2_prompt(topic, ver),
+                                                   st.session_state['model'])
             three_vers.update(LlmManager.llm_api_call(chain, in_message))
             
             st_bar.progress(1/5 * (ver/3), f"({round(1/5 * (ver/3) * 100)}%) Generating {topic} trend report (ver {ver + 1})")
@@ -62,7 +63,8 @@ def gen_trend_report(topic: str, start_date: str, end_date: str, user_name, user
         for ver, value in three_vers.items():
             in_message = in_message + '\n' + ver + '\n\n' + json.dumps(value) + '\n\n'
 
-        chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step3_prompt(topic))
+        chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step3_prompt(topic),
+                                               st.session_state['model'])
         trends_basic = LlmManager.llm_api_call(chain, in_message)
 
         st.session_state['steep_trends_basic'] = trends_basic
@@ -86,7 +88,8 @@ def gen_trend_report(topic: str, start_date: str, end_date: str, user_name, user
             in_message = f'''
             總共有這些事件。請分類：\n\n{events_message}\n\n----\n\n*****主要趨勢{count}（{name}）*****：\n\n{trend_message}
             '''
-            chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step4_prompt)
+            chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step4_prompt,
+                                                   st.session_state['model'])
             trends_with_events.append(LlmManager.llm_api_call(chain, in_message))
             st_bar.progress(2/5 + 1/5 * (count/len(trends_basic)), text = f"({round((2/5 + 1/5 * (count/len(trends_basic))) * 100)}%) Classifying events to each trend..." )
             count += 1
@@ -103,7 +106,8 @@ def gen_trend_report(topic: str, start_date: str, end_date: str, user_name, user
         count = 1
         for trend in trends_with_events:
             in_message = json.dumps(trend)
-            chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step5_prompt)
+            chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step5_prompt,
+                                                   st.session_state['model'])
             trend_inference.update(LlmManager.llm_api_call(chain, in_message))
             st_bar.progress(3/5 + 1/5 * (count/len(trends_with_events)), text = f"({round((3/5 + 1/5 * (count/len(trends_with_events))) * 100)}%) Inferring {topic} trend report..." )
             count += 1
@@ -122,7 +126,8 @@ def gen_trend_report(topic: str, start_date: str, end_date: str, user_name, user
             '''
             in_message += message
         
-        chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step6_prompt)
+        chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step6_prompt,
+                                               st.session_state['model'])
         final_summary = LlmManager.llm_api_call(chain, in_message)
         st.write('''    🤝 Final summarization completed! ''')
         st_bar.progress(1, text = f"(100%) Complete!")

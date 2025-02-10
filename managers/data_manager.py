@@ -370,12 +370,12 @@ class DataManager:
             },
             "self_select": {
                 "pptx": {
-                    "filename": f"{topic.replace(" ", "_")}_trends_{start_date}-{end_date}.pptx",
+                    "filename": f"{topic.replace(' ', '_')}_trends_{start_date}-{end_date}.pptx",
                     "type": "vnd.openxmlformats-officedocument.presentationml.presentation",
                     "text": f"Download the {topic} trend report from {start_date} to {end_date} (Pptx Slides)"
                 },
                 "xlsx": {
-                    "filename": f"{topic.replace(" ", "_")}_{start_date}-{end_date}_trend_report.xlsx",
+                    "filename": f"{topic.replace(' ', '_')}_{start_date}-{end_date}_trend_report.xlsx",
                     "type": "vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     "text": f"Download trend reports from {start_date} to {end_date} (Excel)"
                 },

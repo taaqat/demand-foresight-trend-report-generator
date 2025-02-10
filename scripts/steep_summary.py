@@ -17,11 +17,12 @@ from io import BytesIO
 
 def daily_summarize(in_message):
 
-    chain = LlmManager.create_prompt_chain(sys_prompt = PromptManager.STEEP.step1_prompt)
+    chain = LlmManager.create_prompt_chain(sys_prompt = PromptManager.STEEP.step1_prompt,
+                                           model = st.session_state['model'])
 
     return LlmManager.llm_api_call(chain, in_message)
 
-def monthly_summary(start_date: str, end_date: str,  user_name, user_email):
+def monthly_summary(start_date: str, end_date: str,  user_name, user_email, daily_regen = False):
 
     # start = dt.datetime.strptime(start_date, "%Y-%m-%d").date()
     # end = dt.datetime.strptime(end_date, "%Y-%m-%d").date()
@@ -54,15 +55,34 @@ def monthly_summary(start_date: str, end_date: str,  user_name, user_email):
 
         # todo 這邊之後要改回來
         # first try to fetch the daily summary data from database
-        try:
-            response = DataManager.get_files(f"Daily_Summary_{now}.json", 'json') 
-            month_out.update(json.loads(base64.b64decode(response)))
+        if daily_regen == False:
+            try:
+                response = DataManager.get_files(f"Daily_Summary_{now}.json", 'json') 
+                month_out.update(json.loads(base64.b64decode(response)))
 
-        # if objective file does not exist, create one with daily_summarize() and return it back to database
-        except:
-            
-            # with st.expander('raw'):
-            #     st.write(in_message)
+            # if objective file does not exist, create one with daily_summarize() and return it back to database
+            except:
+                
+                # with st.expander('raw'):
+                #     st.write(in_message)
+                response = daily_summarize(in_message)
+                month_out.update(response)
+
+
+                # Step 2: Convert JSON data to a string and then to bytes
+                json_string = json.dumps(response)  # Convert JSON to a string
+                json_bytes = json_string.encode('utf-8')  # Convert the string to bytes
+
+                # Step 3: Encode the byte string to Base64
+                encoded_json = base64.b64encode(json_bytes)
+
+                # Step 4: Optionally, convert Base64 bytes to a string for easy storage
+                encoded_json_str = encoded_json.decode('utf-8')
+
+
+                DataManager.post_files(file_name = f"Daily_Summary_{now}.json", file_content = encoded_json_str, 
+                            expiration = str(dt.datetime.today() + dt.timedelta(90)), user_name = user_name, user_email = user_email)
+        else:
             response = daily_summarize(in_message)
             month_out.update(response)
 

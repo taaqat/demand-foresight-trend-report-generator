@@ -9,7 +9,17 @@ from managers.llm_manager import LlmManager
 from managers.prompt_manager import PromptManager
 from managers.session_manager import SessionManager
 
+from scripts.steep_generate import gen_trend_report_1, gen_trend_report_2
+
 import datetime as dt
+import json
+import time
+
+import streamlit as st
+from code_editor import code_editor
+
+
+
 
 
 
@@ -66,11 +76,14 @@ with st.sidebar:
             for var in st.session_state.keys():
                 if var not in ['authentication_status', 'authenticator', 'logout', 'init', 'config']:
                     del st.session_state[var]
+
+            SessionManager.session_state_clear('steep')
+            SessionManager.session_state_clear('self-select')
+
             st.rerun()
 
         if st.button("顯示所有暫存"):
-            with st.expander("session states"):
-                st.write(st.session_state.keys())
+            SessionManager.show_sessions()
 
 
 
@@ -103,8 +116,16 @@ div[data-baseweb="input"]:hover {
 
 # ***************************************** Config****************************************
 st.title("STEEP +B")
-st.session_state['steep_start'] = None
-st.session_state['steep_end'] = None
+if 'steep_start' not in st.session_state:
+    st.session_state['steep_start'] = None
+if 'steep_end' not in st.session_state:
+    st.session_state['steep_end'] = None
+if 'steep_topic' not in st.session_state:
+    st.session_state['steep_topic'] = None
+if 'user_name' not in st.session_state:
+    st.session_state['user_name'] = None
+if 'user_email' not in st.session_state:
+    st.session_state['user_email'] = None
 if 'CLAUDE_KEY' not in st.session_state:
     st.session_state['CLAUDE_KEY'] = ""
 if 'OPENAI_KEY' not in st.session_state:
@@ -113,18 +134,34 @@ if 'KEY_verified' not in st.session_state:
     st.session_state['KEY_verified'] = False
 if "model_type" not in st.session_state:
     st.session_state['model_type'] = ""
+if 'steep_running' not in st.session_state:
+    st.session_state['steep_running'] = False
 
-# *** 模型選擇
+
+
+# *** 模型選擇 
 if st.session_state['model_type'] == "":
     st.info("**請先選擇欲使用的語言模型**")
     if st.button("點擊開啟選單"):
         LlmManager.model_selection()
 
 
-# *****************************************************************************************
-# ****************************************** GUI ******************************************
+
+
+
 def main():
-    
+    # *** Model Reset Button
+    with st.sidebar:
+        if st.button("重置模型設定"):
+            for session in [
+                "KEY_verified",
+                "CLAUDE_KEY",
+                "OPENAI_KEY",
+                "model",
+                "model_type"
+            ]:
+                del st.session_state[session]
+            st.rerun()
 
     # *** left column: user input; right column: progress and results
     left_col, right_col = st.columns((1/2, 1/2))
@@ -133,13 +170,14 @@ def main():
 
     with right_col:
         st.error("**執行後至完成前，請不要對頁面進行操作，以免直接重來。**", icon="⚠️")
-        console_box = st.container(border = True)
-        output_box = st.container(border = True)
+        console_box_1 = st.empty()
+        console_box_2 = st.empty()
+        output_box = st.empty()
 
-    with console_box:
+    with console_box_1.container():
         st.subheader("進度報告")
 
-    with output_box:
+    with output_box.container():
         st.subheader("產出結果下載連結")
         
         
@@ -188,25 +226,25 @@ def main():
             st.subheader("選擇主題")
             topic_to_deal = []
             if ppt or excel:
-                topic_to_deal = st.multiselect("You can choose multiple topics", ["social", "technological", "environmental", "economic", "political", "business_and_investment"])
+                topic_to_deal = st.selectbox("Choose one topic", ["social", "technological", "environmental", "economic", "political", "business_and_investment"])
             else:
-                topic_to_deal = st.multiselect("You can choose multiple topics", ["social", "technological", "environmental", "economic", "political", "business_and_investment"], disabled = True)
+                topic_to_deal = st.selectbox("Choose one topic", ["social", "technological", "environmental", "economic", "political", "business_and_investment"], disabled = True)
             daily_regen = st.toggle("是否重新產生每日摘要")
 
     # *** Check if the inputs are valid ***
-    # XOR1 - 7 為必須滿足的條件。XOR8 為建議滿足的條件。
+    # COND1 - 7 為必須滿足的條件。COND8 為建議滿足的條件。
     existing_projects = SessionManager.steep_database(method = 'fetch')
-    XOR1 = user_name != ""
-    XOR2 = user_email != ""
-    XOR3 = start_date <= dt.date.today()
-    XOR4 = end_date <= dt.date.today()
-    XOR5 = start_date < end_date
-    XOR6 = not ([summary_output, ppt, excel] == [False, False, False])
-    XOR7 = not (ppt or excel) & (topic_to_deal == [])
-    XOR8 = sum([proj_name in existing_projects['primary_key'].tolist() for proj_name in [f'{start_date}_{end_date}_{topic}' for topic in topic_to_deal]]) == 0
+    COND1 = user_name != ""
+    COND2 = user_email != ""
+    COND3 = start_date <= dt.date.today()
+    COND4 = end_date <= dt.date.today()
+    COND5 = start_date < end_date
+    COND6 = not ([summary_output, ppt, excel] == [False, False, False])
+    COND7 = not (ppt or excel) & (topic_to_deal == [])
+    COND8 = sum([proj_name in existing_projects['primary_key'].tolist() for proj_name in [f'{start_date}_{end_date}_{topic}' for topic in topic_to_deal]]) == 0
 
     # 如果該專案名稱與日期已經有製作過的紀錄 -> 提醒使用者
-    if not XOR8:
+    if not COND8:
         with left_col:
             st.warning("該時間段之 STEEP 趨勢報告已經存在於資料庫中（可以於 Archive 頁面查詢）。若要重新製作，會覆蓋掉舊的資料。若仍要執行請按 submit。", icon = '⚠️')
 
@@ -237,77 +275,177 @@ def main():
     if submission:
         
         # *** first, check all input schema is required ***
-        if not XOR1:
+        if not COND1:
             with left_col:
                 st.warning('Please input your nickname!')
-        if not XOR2:
+        if not COND2:
             with left_col:
                 st.warning('Please input your email address!')
-        if not XOR3:
+        if not COND3:
             with left_col:
                 st.warning('Starting Date should not be later than today!!')
-        if not XOR4:
+        if not COND4:
             with left_col:
                 st.warning('Ending Date should not be later than today!!')
-        if not XOR5:
+        if not COND5:
             with left_col:
                 st.warning('Starting Date should be prior to Ending Date!!')
-        if not XOR6:
+        if not COND6:
             with left_col:
                 st.warning('Please select at least one output format!')
-        if not XOR7:
+        if not COND7:
             with left_col:
                 st.warning('Please select at least one topic')
 
         
         # *** If the input date format is valid -> run
-        if XOR1 & XOR2 & XOR3 & XOR4 & XOR5 & XOR6 & XOR7:
+        if COND1 & COND2 & COND3 & COND4 & COND5 & COND6 & COND7:
 
             if (start_date == st.session_state['steep_start']) & (end_date == st.session_state['steep_end']):
                 st.cache_data.clear()
 
             st.session_state['steep_start'] = start_date
             st.session_state['steep_end'] = end_date
+            st.session_state['steep_topic'] = topic_to_deal
+            st.session_state['user_name'] = user_name
+            st.session_state['user_email'] = user_email
             if 'steep_summary' in st.session_state:
                 del st.session_state['steep_summary']
             if 'fetched_raw' in st.session_state:
                 del st.session_state['fetched_raw']
+
+            st.session_state['steep_running'] = 'step1'
+
+    # *** Step1: News Summary, Generate three version trend reports, Aggregation, Event Classification
+    if st.session_state['steep_running'] == 'step1':
+        console_box_1.empty()
+        console_box_2.empty()
+        with console_box_1.container():
+
+            st.subheader("進度報告")
+            # * Undo button
+            if st.button("Undo", key = 'back_to_step0'):
+                st.session_state['steep_running'] = False
+                for session in ["steep_trend_basic", "steep_three_vers", "steep_trends_with_events", "steep_trends_with_events_modified"]:
+                    try:
+                        del st.session_state[session]
+                    except:
+                        pass
+                st.rerun()
+
+            gen_trend_report_1(st.session_state['steep_topic'],
+                       st.session_state['steep_start'],
+                       st.session_state['steep_end'],
+                       st.session_state['user_name'],
+                       st.session_state['user_email'])
+
+            # ** 生成基本趨勢報告框架和分類事件之後，開啟 code editor 以供使用者調整內容。後續推論將以使用者修改過後的內容為基礎。
+            bs = [{
+                "name": "→點擊儲存變更",
+                "feather": "Save",
+                "alwaysOn": True,
+                "commands": ["submit"],
+                "style": {"top": "0.46rem", "right": "0.4rem"},
+                "hasText": True
+                }]         # * -> code editor 右上角的 Save 按鈕。點擊後，使用者變更後的資料將被存放置 session_state。
+
+            response_dict = code_editor(json.dumps({"trends_with_events": st.session_state['steep_trends_with_events']}, indent = 4, ensure_ascii = False), lang = 'json',
+                                        buttons = bs,
+                                        height=[10, 20],
+                                        options = {"wrap": True})
+
+            if st.button("送出，開始推論:red[**（送出前記得點擊右上角按鈕儲存變更）**]"):
+
+                try:
+                    st.session_state['steep_trends_with_events_modified'] = json.loads(response_dict['text'])['trends_with_events']
+                    st.session_state['steep_running'] = 'step2'
+                    st.rerun()
+
+                except json.decoder.JSONDecodeError:
+                    st.warning("JSON 結構無效。請**點擊儲存變更**，並確保內容為有效 JSON 格式")
+                    st.stop()
+
+
+    # *** Step2: Inference, and final summary -> json -> pptx/excel
+    elif st.session_state['steep_running'] == 'step2':
+        console_box_1.empty()
+        console_box_2.empty()
+        with console_box_2.container():
+            st.subheader("進度報告")
+
+            # * Undo button
+            if st.button("Undo", key = 'back_to_step1'):
+                st.session_state['steep_running'] = 'step1'
+                for session in ["steep_trend_inference", "steep_final_summary"]:
+                    try:
+                        del st.session_state[session]
+                    except:
+                        pass
+                st.rerun()
+
+            # * Execute
+            result = gen_trend_report_2(st.session_state['steep_topic'],
+                       st.session_state['steep_start'],
+                       st.session_state['steep_end'],
+                       st.session_state['user_name'],
+                       st.session_state['user_email'])
+            
+            
+            # ** Create Ppt slides && Post back to DB && record in Google Sheet
+            res_pptx_bs = ExportManager.STEEP.create_pptx(st.session_state['steep_topic'], result)
+            filename = f"{st.session_state['steep_topic']}_trends_{st.session_state['steep_start']}-{st.session_state['steep_end']}.pptx"
+            DataManager.post_files(filename, 
+                                    res_pptx_bs, 
+                                    str(dt.datetime.today() + dt.timedelta(365)), 
+                                    st.session_state['user_name'], 
+                                    st.session_state['user_email'])
+            
+            SessionManager.steep_database('update', 
+                        st.session_state['steep_start'], 
+                        st.session_state['steep_end'], st.session_state['steep_topic'], st.session_state['user_name'], st.session_state['user_email'], dt.date.today())
             
 
-            # ******************************** Console Box *************************************
-            # *** Render all progresses and results on the RHS ***
-            with console_box:
+            # ** Create excel && Post back to DB && record in Google Sheet
+            b64_excel = ExportManager.STEEP.create_excel(
+                            st.session_state['steep_start'], 
+                            st.session_state['steep_end'], ['social', 'technological', 'economic', 'environmental', 'political', 'business_and_investment'])   
+            filename = f'{st.session_state['steep_start']}-{st.session_state['steep_end']}_STEEP.xlsx'
+            DataManager.post_files(filename,
+                                    b64_excel,
+                                    str(dt.datetime.today() + dt.timedelta(365)), 
+                                    st.session_state['user_name'], 
+                                    st.session_state['user_email'])
+            SessionManager.steep_database('update', 
+                            st.session_state['steep_start'], 
+                            st.session_state['steep_end'], "EXCEL", st.session_state['user_name'], st.session_state['user_email'], dt.date.today())
+        
+        with output_box.container():
+            st.subheader("產出結果下載連結")
+
+            if ppt:
+
+                st.success("Ppt slides created! You can download now💥")
+                st.markdown(DataManager.get_output_download_link(
+                    st.session_state['steep_start'], 
+                    st.session_state['steep_end'], 
+                    st.session_state['steep_topic'], 'pptx', 'steep'), unsafe_allow_html = True)
+
+            if excel:
                 
-                try:
-                    with st.spinner("Processing..."):
-                        # *** main function for inference and generating trend report ***
-                        Executor.steep_run(
-                            user_name, user_email, start_date, end_date, topic_to_deal, excel, ppt,
-                            daily_regen
-                        )
-                except:
-                    SessionManager.send_notification_email(user_name, user_email, type = 'failed')
-                    raise NotImplementedError("Something went wrong... Please trace back to debug.")
-                    
-            # ******************************** Output Box *************************************
-            # *** check the output format, read from cache folders, and generate download link ***
-            with output_box:
-                if ppt:
+                st.success("Excel file created! You can download now💥")
+                st.markdown(DataManager.get_output_download_link(st.session_state['steep_start'], 
+                                st.session_state['steep_end'], '', 'xlsx', 'steep'), unsafe_allow_html = True)
 
-                    st.success("Ppt slides created! You can download now💥")
-                    for topic in topic_to_deal:
-                        st.markdown(DataManager.get_output_download_link(start_date, end_date, topic, 'pptx', 'steep'), unsafe_allow_html = True)
+            if summary_output:
+                st.success("Here is the daily summary for the period you requested💥")
+                st.markdown(DataManager.get_summary_download_link(st.session_state['steep_start'], 
+                                st.session_state['steep_end']), unsafe_allow_html = True)
 
-                if excel:
-                    
-                    st.success("Excel file created! You can download now💥")
-                    st.markdown(DataManager.get_output_download_link(start_date, end_date, '', 'xlsx', 'steep'), unsafe_allow_html = True)
 
-                if summary_output:
-                    st.success("Here is the daily summary for the period you requested💥")
-                    st.markdown(DataManager.get_summary_download_link(start_date, end_date), unsafe_allow_html = True)
 
-# ** user_token switch: if the user is required to input their own api token
+
+
+# ** user_token switch: if the user is required to input their own token
 if st.secrets['permission']['user_token'] == True:
     # ** Ensure that the model type is selected
     if st.session_state['model_type'] == "":
@@ -324,17 +462,7 @@ if st.secrets['permission']['user_token'] == True:
     else:
         if st.session_state['model']:
             main()
-            with st.sidebar:
-                if st.button("重置模型設定"):
-                    for session in [
-                        "KEY_verified",
-                        "CLAUDE_KEY",
-                        "OPENAI_KEY",
-                        "model",
-                        "model_type"
-                    ]:
-                        del st.session_state[session]
-                    st.rerun()
+            
         else:
             st.stop()
 
@@ -344,17 +472,7 @@ else:
     st.session_state['model'] = LlmManager.init_model()
     if st.session_state['model']:
         main()
-        with st.sidebar:
-            if st.button("重置模型設定"):
-                for session in [
-                    "KEY_verified",
-                    "CLAUDE_KEY",
-                    "OPENAI_KEY",
-                    "model",
-                    "model_type"
-                ]:
-                    del st.session_state[session]
-                st.rerun()
+        
     else:
         st.stop()
     

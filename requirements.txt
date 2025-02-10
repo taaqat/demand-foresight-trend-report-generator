@@ -11,4 +11,5 @@ numpy
 python-pptx  # Correct package name for pptx
 st-gsheets-connection
 streamlit-authenticator
+streamlit-code-editor
 PyYAML

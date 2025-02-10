@@ -15,6 +15,7 @@ class SessionManager:
 
     # *** This function communicates with STEEP Google Sheet Database ***
     @staticmethod
+    @st.cache_data
     def steep_database(method: str, 
                        start_date = None, 
                        end_date = None, 
@@ -155,14 +156,17 @@ class SessionManager:
 
         if page == 'steep':
             ls = ['steep_three_vers', 'steep_trend_inference', 'steep_final_summary', 
-                  'steep_trends_basic', 'steep_trends_with_events']
+                  'steep_trends_basic', 'steep_trends_with_events', 'steep_trends_with_events_modified']
             
         elif page == 'self-select':
             ls = ['self_select_three_vers', 'self_select_inference', 'self_select_final_summary', 
                   'self_select_trends_basic', 'self_select_trends_with_events']
             
         for key in ls:
+            try:
                 del st.session_state[key]
+            except: 
+                pass
     # *** function that return IP address for the deployed url
     @staticmethod
     def fetch_IP():
@@ -170,3 +174,24 @@ class SessionManager:
         public_ip = response.json()["ip"]
 
         st.caption(f"Deployed IP Address: **:blue[{public_ip}]**")
+
+    @staticmethod
+    @st.dialog("Session States", width = 'large')
+    def show_sessions():
+        session_df = pd.DataFrame(columns = ['session', 'content'])
+        for key, value in st.session_state.items():
+            if key not in  ['CLAUDE_KEY', 'OPENAI_KEY', 'ym_mapping', 'gs_steep']:
+                session_df.loc[len(session_df), ['session', 'content']] = [key, value]
+        st.data_editor(session_df.sort_values('session').reset_index().drop('index', axis = 1),
+                       width = 1000,
+                       column_config = {
+                           'session': st.column_config.TextColumn(
+                               "Session Name",
+                               disabled = True
+
+                           ),
+                           'content': st.column_config.Column(
+                               "Session Value",
+                               disabled = True
+                           )
+                       })

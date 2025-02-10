@@ -2,7 +2,7 @@ import streamlit as st
 import importlib
 
 # *** Import utilities
-from scripts.executor import Executor
+from scripts.self_select_executor import Executor
 from managers.data_manager import DataManager
 from managers.export_manager import ExportManager
 from managers.llm_manager import LlmManager
@@ -174,11 +174,10 @@ def main():
         console_box_2 = st.empty()
         output_box = st.empty()
 
-    with console_box_1.container():
+    with console_box_1.container(border = True):
         st.subheader("進度報告")
 
-    with output_box.container():
-        st.subheader("產出結果下載連結")
+    
         
         
 
@@ -320,7 +319,7 @@ def main():
     if st.session_state['steep_running'] == 'step1':
         console_box_1.empty()
         console_box_2.empty()
-        with console_box_1.container():
+        with console_box_1.container(border = True):
 
             st.subheader("進度報告")
             # * Undo button
@@ -333,13 +332,21 @@ def main():
                         pass
                 st.rerun()
 
-            gen_trend_report_1(st.session_state['steep_topic'],
-                       st.session_state['steep_start'],
-                       st.session_state['steep_end'],
-                       st.session_state['user_name'],
-                       st.session_state['user_email'])
+            try:
+                gen_trend_report_1(st.session_state['steep_topic'],
+                        st.session_state['steep_start'],
+                        st.session_state['steep_end'],
+                        st.session_state['user_name'],
+                        st.session_state['user_email'])
+                SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'step_1_completed')
+            except Exception as error:
+                st.error('some error happened..')
+                st.warning(error)
+                SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
+
 
             # ** 生成基本趨勢報告框架和分類事件之後，開啟 code editor 以供使用者調整內容。後續推論將以使用者修改過後的內容為基礎。
+            st.info("趨勢報告的基礎架構已生成，如下。請確認是否有要修改的地方。\n\n若有修改，記得點擊右側儲存按鈕後再送出。")
             bs = [{
                 "name": "→點擊儲存變更",
                 "feather": "Save",
@@ -370,7 +377,7 @@ def main():
     elif st.session_state['steep_running'] == 'step2':
         console_box_1.empty()
         console_box_2.empty()
-        with console_box_2.container():
+        with console_box_2.container(border = True):
             st.subheader("進度報告")
 
             # * Undo button
@@ -384,63 +391,85 @@ def main():
                 st.rerun()
 
             # * Execute
-            result = gen_trend_report_2(st.session_state['steep_topic'],
-                       st.session_state['steep_start'],
-                       st.session_state['steep_end'],
-                       st.session_state['user_name'],
-                       st.session_state['user_email'])
+            try:
+                result = gen_trend_report_2(st.session_state['steep_topic'],
+                        st.session_state['steep_start'],
+                        st.session_state['steep_end'],
+                        st.session_state['user_name'],
+                        st.session_state['user_email'])
+            except Exception as error:
+                st.error('some error happened..')
+                st.warning(error)
+                SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
             
             
             # ** Create Ppt slides && Post back to DB && record in Google Sheet
-            res_pptx_bs = ExportManager.STEEP.create_pptx(st.session_state['steep_topic'], result)
-            filename = f"{st.session_state['steep_topic']}_trends_{st.session_state['steep_start']}-{st.session_state['steep_end']}.pptx"
-            DataManager.post_files(filename, 
-                                    res_pptx_bs, 
-                                    str(dt.datetime.today() + dt.timedelta(365)), 
-                                    st.session_state['user_name'], 
-                                    st.session_state['user_email'])
-            
-            SessionManager.steep_database('update', 
-                        st.session_state['steep_start'], 
-                        st.session_state['steep_end'], st.session_state['steep_topic'], st.session_state['user_name'], st.session_state['user_email'], dt.date.today())
-            
+            try:
+                res_pptx_bs = ExportManager.STEEP.create_pptx(st.session_state['steep_topic'], result)
+                filename = f"{st.session_state['steep_topic']}_trends_{st.session_state['steep_start']}-{st.session_state['steep_end']}.pptx"
+                DataManager.post_files(filename, 
+                                        res_pptx_bs, 
+                                        str(dt.datetime.today() + dt.timedelta(365)), 
+                                        st.session_state['user_name'], 
+                                        st.session_state['user_email'])
+                
+                SessionManager.steep_database('update', 
+                            st.session_state['steep_start'], 
+                            st.session_state['steep_end'], st.session_state['steep_topic'], st.session_state['user_name'], st.session_state['user_email'], dt.date.today())
+            except Exception as error:
+                st.error('some error happened..')
+                st.warning(error)
+                SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
 
             # ** Create excel && Post back to DB && record in Google Sheet
-            b64_excel = ExportManager.STEEP.create_excel(
-                            st.session_state['steep_start'], 
-                            st.session_state['steep_end'], ['social', 'technological', 'economic', 'environmental', 'political', 'business_and_investment'])   
-            filename = f'{st.session_state['steep_start']}-{st.session_state['steep_end']}_STEEP.xlsx'
-            DataManager.post_files(filename,
-                                    b64_excel,
-                                    str(dt.datetime.today() + dt.timedelta(365)), 
-                                    st.session_state['user_name'], 
-                                    st.session_state['user_email'])
-            SessionManager.steep_database('update', 
-                            st.session_state['steep_start'], 
-                            st.session_state['steep_end'], "EXCEL", st.session_state['user_name'], st.session_state['user_email'], dt.date.today())
-        
+            try:
+                b64_excel = ExportManager.STEEP.create_excel(
+                                st.session_state['steep_start'], 
+                                st.session_state['steep_end'], ['social', 'technological', 'economic', 'environmental', 'political', 'business_and_investment'])   
+                filename = f'{st.session_state['steep_start']}-{st.session_state['steep_end']}_STEEP.xlsx'
+                DataManager.post_files(filename,
+                                        b64_excel,
+                                        str(dt.datetime.today() + dt.timedelta(365)), 
+                                        st.session_state['user_name'], 
+                                        st.session_state['user_email'])
+                SessionManager.steep_database('update', 
+                                st.session_state['steep_start'], 
+                                st.session_state['steep_end'], "EXCEL", st.session_state['user_name'], st.session_state['user_email'], dt.date.today())
+            except Exception as error:
+                st.error('some error happened..')
+                st.warning(error)
+                SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
+
         with output_box.container():
             st.subheader("產出結果下載連結")
+            try:
+                if ppt:
 
-            if ppt:
+                    st.success("Ppt slides created! You can download now💥")
+                    st.markdown(DataManager.get_output_download_link(
+                        st.session_state['steep_start'], 
+                        st.session_state['steep_end'], 
+                        st.session_state['steep_topic'], 'pptx', 'steep'), unsafe_allow_html = True)
 
-                st.success("Ppt slides created! You can download now💥")
-                st.markdown(DataManager.get_output_download_link(
-                    st.session_state['steep_start'], 
-                    st.session_state['steep_end'], 
-                    st.session_state['steep_topic'], 'pptx', 'steep'), unsafe_allow_html = True)
+                if excel:
+                    
+                    st.success("Excel file created! You can download now💥")
+                    st.markdown(DataManager.get_output_download_link(st.session_state['steep_start'], 
+                                    st.session_state['steep_end'], '', 'xlsx', 'steep'), unsafe_allow_html = True)
 
-            if excel:
+                if summary_output:
+                    st.success("Here is the daily summary for the period you requested💥")
+                    st.markdown(DataManager.get_summary_download_link(st.session_state['steep_start'], 
+                                    st.session_state['steep_end']), unsafe_allow_html = True)
+                    
+                SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'completed')
                 
-                st.success("Excel file created! You can download now💥")
-                st.markdown(DataManager.get_output_download_link(st.session_state['steep_start'], 
-                                st.session_state['steep_end'], '', 'xlsx', 'steep'), unsafe_allow_html = True)
+            except Exception as error:
+                st.error('some error happened..')
+                st.warning(error)
+                SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
 
-            if summary_output:
-                st.success("Here is the daily summary for the period you requested💥")
-                st.markdown(DataManager.get_summary_download_link(st.session_state['steep_start'], 
-                                st.session_state['steep_end']), unsafe_allow_html = True)
-
+        SessionManager.session_state_clear('steep')
 
 
 

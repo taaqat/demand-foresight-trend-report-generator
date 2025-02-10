@@ -53,6 +53,7 @@ class SessionManager:
     
     # *** This function communicates with Self Select Google Sheet Database ***
     @staticmethod
+    @st.cache_data
     def self_select_database(method: str, 
                              project_name = None, 
                              keywords = None, 
@@ -101,14 +102,17 @@ class SessionManager:
 
     # *** This function sends Notification Email to User's Address ***
     @staticmethod
-    def send_notification_email(receiver_nickname, receiver_email, type):
+    def send_notification_email(receiver_nickname, receiver_email, type, error_msg = None):
 
-        assert type in ['completed', 'failed'], "parameter 'type' should be one of ['completed', 'failed']"
+        assert type in ['completed', 'failed', 'step_1_completed'], "parameter 'type' should be one of ['completed', 'failed', 'step_1_completed']"
 
         sender_email = "taaqat93@gmail.com"
-        type_mapping = {"completed": """Your trend reports have been generated! Remember to download it from the page before the links disappear!
+        type_mapping = {"completed": """你的趨勢報告已完成，請回到 streamlit app 界面下載。或，可以至 ARCHIVE 頁面查詢。
                                 <br /><br />Sincerely,<br /><strong>III Trend Report Generator</strong>""",
-                        "failed": """Something went wrong while running... Please go back to the page of Trend Report Generator and run it again!
+                        "failed": f"""Something went wrong while running... Please go back to the page of Trend Report Generator and run it again!
+                                <br /><br />Error Message: {error_msg}
+                                <br /><br />Sincerely,<br /><strong>III Trend Report Generator</strong>""",
+                        "step_1_completed": """你的趨勢報告已經做到一半囉，請回到 streamlit app 界面確認目前生成的趨勢以及相關事件是否符合您的需求，並且點擊確認按鈕以繼續進行後續推論。若要修改趨勢報告內容或相關事件，記得要點擊儲存按鈕後再送出！
                                 <br /><br />Sincerely,<br /><strong>III Trend Report Generator</strong>"""}
 
         # * email_content *
@@ -131,7 +135,7 @@ class SessionManager:
         msg = MIMEMultipart()
         msg['From'] = "III demand-foresight trend report generator"
         msg['To'] = receiver_email
-        msg['Subject'] = f"[III] Trend Reports {type.capitalize()}!"
+        msg['Subject'] = f"[III] Trend Reports Notification!"
         msg.attach(MIMEText(mail_content, 'html'))
 
         # SMTP Config

@@ -7,7 +7,7 @@ from managers.llm_manager import LlmManager
 from managers.prompt_manager import PromptManager
 from managers.session_manager import SessionManager
 
-from scripts.executor import Executor
+from scripts.self_select_executor import Executor
 import datetime as dt
 import pandas as pd
 import requests
@@ -136,6 +136,17 @@ div[data-baseweb="input"]:hover {
     
     
 def main():
+    with st.sidebar:
+        if st.button("重置模型設定"):
+            for session in [
+                "KEY_verified",
+                "CLAUDE_KEY",
+                "OPENAI_KEY",
+                "model",
+                "model_type"
+            ]:
+                del st.session_state[session]
+            st.rerun()
 
     # ********* Basic info input *********
     with st.container(key = 'basic_info'):
@@ -425,17 +436,7 @@ if st.secrets['permission']['user_token'] == True:
     else:
         if st.session_state['model']:
             main()
-            with st.sidebar:
-                if st.button("重置模型設定"):
-                    for session in [
-                        "KEY_verified",
-                        "CLAUDE_KEY",
-                        "OPENAI_KEY",
-                        "model",
-                        "model_type"
-                    ]:
-                        del st.session_state[session]
-                    st.rerun()
+            
         else:
             st.stop()
 
@@ -445,16 +446,5 @@ else:
     st.session_state['model'] = LlmManager.init_model()
     if st.session_state['model']:
         main()
-        with st.sidebar:
-            if st.button("重置模型設定"):
-                for session in [
-                    "KEY_verified",
-                    "CLAUDE_KEY",
-                    "OPENAI_KEY",
-                    "model",
-                    "model_type"
-                ]:
-                    del st.session_state[session]
-                st.rerun()
     else:
         st.stop()

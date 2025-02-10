@@ -429,7 +429,7 @@ if st.secrets['permission']['user_token'] == True:
         try:
             st.info("**請設定 API key**")
             if st.button("點擊設定 API key"):
-                LlmManager.customer_token(st.session_state['model_type'])
+                LlmManager.customize_token(st.session_state['model_type'])
             
         except:
             pass

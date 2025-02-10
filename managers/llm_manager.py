@@ -20,9 +20,19 @@ from .data_manager import DataManager
 # *** Read in API key at Streamlit (by streamlit.secrets) ***
 
 class LlmManager:
-
     if 'KEY_verified' not in st.session_state:
         st.session_state['KEY_verified'] = False
+
+
+    @staticmethod
+    @st.dialog("請選擇欲使用的語言模型")
+    def model_selection():
+
+        model_selected = st.selectbox("請選擇欲使用的語言模型", ["claude-3-5-sonnet-20241022", "gpt-4o"])
+        if st.button("確認"):
+            st.session_state['model_type'] = model_selected
+            st.rerun()
+    
 
     # * initialize model
     @staticmethod
@@ -57,7 +67,7 @@ class LlmManager:
 
     @staticmethod
     @st.dialog("請輸入您的 API Key")
-    def customer_token(model_selected):
+    def customize_token(model_selected):
 
         model_alias = {"claude-3-5-sonnet-20241022": "Claude",
                        "gpt-4o": "OpenAI"}[model_selected]
@@ -74,7 +84,7 @@ class LlmManager:
                     st.rerun()
 
                 except Exception as e:
-                    st.warning("Invalid Token")
+                    st.warning("Invalid API key")
             
 
     # Implement Anthropic API call 
@@ -144,14 +154,7 @@ class LlmManager:
 
         return chain
     
-    @staticmethod
-    @st.dialog("請選擇欲使用的語言模型")
-    def model_selection():
 
-        model_selected = st.selectbox("請選擇欲使用的語言模型", ["claude-3-5-sonnet-20241022", "gpt-4o"])
-        if st.button("確認"):
-            st.session_state['model_type'] = model_selected
-            st.rerun()
     
 
 

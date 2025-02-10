@@ -441,6 +441,7 @@ def main():
                 st.markdown(DataManager.get_summary_download_link(st.session_state['steep_start'], 
                                 st.session_state['steep_end']), unsafe_allow_html = True)
 
+        SessionManager.session_state_clear('steep')
 
 
 

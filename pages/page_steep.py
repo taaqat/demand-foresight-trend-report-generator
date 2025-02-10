@@ -2,7 +2,7 @@ import streamlit as st
 import importlib
 
 # *** Import utilities
-from scripts.executor import Executor
+from scripts.self_select_executor import Executor
 from managers.data_manager import DataManager
 from managers.export_manager import ExportManager
 from managers.llm_manager import LlmManager
@@ -174,11 +174,10 @@ def main():
         console_box_2 = st.empty()
         output_box = st.empty()
 
-    with console_box_1.container():
+    with console_box_1.container(border = True):
         st.subheader("進度報告")
 
-    with output_box.container():
-        st.subheader("產出結果下載連結")
+    
         
         
 
@@ -320,7 +319,7 @@ def main():
     if st.session_state['steep_running'] == 'step1':
         console_box_1.empty()
         console_box_2.empty()
-        with console_box_1.container():
+        with console_box_1.container(border = True):
 
             st.subheader("進度報告")
             # * Undo button
@@ -378,7 +377,7 @@ def main():
     elif st.session_state['steep_running'] == 'step2':
         console_box_1.empty()
         console_box_2.empty()
-        with console_box_2.container():
+        with console_box_2.container(border = True):
             st.subheader("進度報告")
 
             # * Undo button

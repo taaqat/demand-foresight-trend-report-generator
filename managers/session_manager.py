@@ -177,7 +177,7 @@ class SessionManager:
         response = requests.get("https://api.ipify.org?format=json")
         public_ip = response.json()["ip"]
 
-        st.caption(f"Deployed IP Address: **:blue[{public_ip}]**")
+        st.caption(f"Deployed IP: **:blue[{public_ip}]**  |  Branch [**:orange[main]**](https://github.com/taaqat/demand-foresight-trend-report-generator)")
 
     @staticmethod
     @st.dialog("Session States", width = 'large')

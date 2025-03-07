@@ -456,13 +456,13 @@ def main():
                 st.warning(error)
                 SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
 
-            # TODO ** 產出 Flexible 簡報 HTML & CSS
+            # ** Generate Flexible Web Slides with HTML & CSS (by AI)
             try:
                 with st.spinner("正在生成網頁版簡報..."):
                     chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
-                    html_slide_output = LlmManager.llm_api_call(chain, result)
+                    html_slide_output = LlmManager.llm_api_call(chain, json.dumps(result) + f"\n\n主題名稱：{st.session_state['steep_topic']}\n\n時間段：{st.session_state['steep_start']} to {st.session_state['steep_end']}")
                     filename = f"{st.session_state['steep_topic']}_trends_{st.session_state['steep_start']}-{st.session_state['steep_end']}_html.txt"
-                    # TODO ** POST BACK & 串 ARCHIVE PAGE
+                    # ** POST BACK to DB & 串 ARCHIVE PAGE
                     DataManager.post_files(
                         filename,
                         html_slide_output['output'],

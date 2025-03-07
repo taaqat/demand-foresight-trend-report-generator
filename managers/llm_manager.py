@@ -56,13 +56,7 @@ class LlmManager:
                                temperature = 0.0,
                                verbose = True)
             return model
-        elif st.session_state['model_type'] == 'claude-3-7-sonnet':
-            model = ChatAnthropic(model = 'claude-3-7-sonnet-20250219',
-                               api_key = CLAUDE_3_7,
-                               max_tokens = 16000,
-                               temperature = 0.0,
-                               verbose = True)
-            return model
+        
         else:
             return None
     
@@ -77,7 +71,7 @@ class LlmManager:
     @st.dialog("請輸入您的 API Key")
     def customize_token(model_selected):
 
-        model_alias = {"claude-3-7-sonnet-20250219": "Claude",
+        model_alias = {"claude-3-7-sonnet-20250219": "Claude_3.7",
                        "gpt-4o": "OpenAI"}[model_selected]
         model_key = {"claude-3-7-sonnet-20250219": "CLAUDE_KEY",
                        "gpt-4o": "OPENAI_KEY"}[model_selected]

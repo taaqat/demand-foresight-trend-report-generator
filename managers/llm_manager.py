@@ -39,7 +39,7 @@ class LlmManager:
     def init_model():
         CLAUDE_KEY = st.session_state['CLAUDE_KEY']
         OPENAI_KEY = st.session_state['OPENAI_KEY']
-        CLAUDE_3_7 = st.session_state['CLAUDE_3_7']
+       
         
         if st.session_state['model_type'] == 'claude-3-7-sonnet-20250219':
             model = ChatAnthropic(model = 'claude-3-7-sonnet-20250219',

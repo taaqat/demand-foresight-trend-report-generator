@@ -130,8 +130,6 @@ if 'CLAUDE_KEY' not in st.session_state:
     st.session_state['CLAUDE_KEY'] = ""
 if 'OPENAI_KEY' not in st.session_state:
     st.session_state['OPENAI_KEY'] = ""
-if 'CLAUDE_3_7' not in st.session_state:
-    st.session_state['CLAUDE_3_7'] = st.secrets['CLAUDE_3_7']
 if 'KEY_verified' not in st.session_state:
     st.session_state['KEY_verified'] = False
 if "model_type" not in st.session_state:

@@ -28,7 +28,7 @@ class LlmManager:
     @st.dialog("請選擇欲使用的語言模型")
     def model_selection():
 
-        model_selected = st.selectbox("請選擇欲使用的語言模型", ["claude-3-5-sonnet-20241022", "gpt-4o"])
+        model_selected = st.selectbox("請選擇欲使用的語言模型", ["claude-3-7-sonnet-20250219", "gpt-4o"])
         if st.button("確認"):
             st.session_state['model_type'] = model_selected
             st.rerun()
@@ -39,9 +39,10 @@ class LlmManager:
     def init_model():
         CLAUDE_KEY = st.session_state['CLAUDE_KEY']
         OPENAI_KEY = st.session_state['OPENAI_KEY']
+       
         
-        if st.session_state['model_type'] == 'claude-3-5-sonnet-20241022':
-            model = ChatAnthropic(model = 'claude-3-5-sonnet-20241022',
+        if st.session_state['model_type'] == 'claude-3-7-sonnet-20250219':
+            model = ChatAnthropic(model = 'claude-3-7-sonnet-20250219',
                                     api_key = CLAUDE_KEY,
                                     max_tokens = 8000,
                                     temperature = 0.0,
@@ -55,6 +56,7 @@ class LlmManager:
                                temperature = 0.0,
                                verbose = True)
             return model
+        
         else:
             return None
     
@@ -69,9 +71,9 @@ class LlmManager:
     @st.dialog("請輸入您的 API Key")
     def customize_token(model_selected):
 
-        model_alias = {"claude-3-5-sonnet-20241022": "Claude",
+        model_alias = {"claude-3-7-sonnet-20250219": "Claude_3.7",
                        "gpt-4o": "OpenAI"}[model_selected]
-        model_key = {"claude-3-5-sonnet-20241022": "CLAUDE_KEY",
+        model_key = {"claude-3-7-sonnet-20250219": "CLAUDE_KEY",
                        "gpt-4o": "OPENAI_KEY"}[model_selected]
 
         tk = st.text_input(f"請輸入您的 {model_alias} API Key")
@@ -104,7 +106,6 @@ class LlmManager:
                 memory += response.content
                 response = chain.invoke({"input": in_message, "memory": memory})
             memory += str(response.content)
-            # st.write(memory)
             return memory
         
         summary_json = DataManager.find_json_object(run_with_memory(chain, in_message))

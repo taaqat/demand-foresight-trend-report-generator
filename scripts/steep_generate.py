@@ -192,8 +192,9 @@ def gen_trend_report_1(topic: str, start_date: str, end_date: str, user_name, us
         for ver, value in three_vers.items():
             in_message = in_message + '\n' + ver + '\n\n' + json.dumps(value) + '\n\n'
 
-        chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step3_prompt(topic),
+        chain = LlmManager.create_prompt_chain(st.session_state['steep_prompt_3'],
                                                st.session_state['model'])
+        
         trends_basic = LlmManager.llm_api_call(chain, in_message)
 
         st.session_state['steep_trends_basic'] = trends_basic
@@ -219,7 +220,7 @@ def gen_trend_report_1(topic: str, start_date: str, end_date: str, user_name, us
             in_message = f'''
             總共有這些事件。請分類：\n\n{events_message}\n\n----\n\n*****主要趨勢{count}（{name}）*****：\n\n{trend_message}
             '''
-            chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step4_prompt,
+            chain = LlmManager.create_prompt_chain(st.session_state['steep_prompt_4'],
                                                    st.session_state['model'])
             trends_with_events.append(LlmManager.llm_api_call(chain, in_message))
             st_bar.progress(2/5 + 1/5 * (count/len(trends_basic)), text = f"({round((2/5 + 1/5 * (count/len(trends_basic))) * 100)}%) Classifying events to each trend..." )
@@ -243,7 +244,7 @@ def gen_trend_report_2(topic: str, start_date: str, end_date: str, user_name, us
         count = 1
         for trend in trends_with_events:
             in_message = json.dumps(trend)
-            chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step5_prompt,
+            chain = LlmManager.create_prompt_chain(st.session_state['steep_prompt_5'],
                                                    st.session_state['model'])
             trend_inference.update(LlmManager.llm_api_call(chain, in_message))
             st_bar.progress(3/5 + 1/5 * (count/len(trends_with_events)), text = f"({round((3/5 + 1/5 * (count/len(trends_with_events))) * 100)}%) Inferring {topic} trend report..." )
@@ -265,7 +266,7 @@ def gen_trend_report_2(topic: str, start_date: str, end_date: str, user_name, us
             '''
             in_message += message
         
-        chain = LlmManager.create_prompt_chain(PromptManager.STEEP.step6_prompt,
+        chain = LlmManager.create_prompt_chain(st.session_state['steep_prompt_6'],
                                                st.session_state['model'])
         final_summary = LlmManager.llm_api_call(chain, in_message)
         st.write('''    🤝 Final summarization completed! ''')

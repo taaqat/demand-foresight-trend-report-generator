@@ -136,6 +136,16 @@ if "model_type" not in st.session_state:
     st.session_state['model_type'] = ""
 if 'steep_running' not in st.session_state:
     st.session_state['steep_running'] = False
+if 'steep_prompt_3' not in st.session_state:
+    st.session_state['steep_prompt_3'] = PromptManager.STEEP.step3_prompt
+if 'steep_prompt_4' not in st.session_state:
+    st.session_state['steep_prompt_4'] = PromptManager.STEEP.step4_prompt
+if 'steep_prompt_5' not in st.session_state:
+    st.session_state['steep_prompt_5'] = PromptManager.STEEP.step5_prompt
+if 'steep_prompt_6' not in st.session_state:
+    st.session_state['steep_prompt_6'] = PromptManager.STEEP.step6_prompt
+
+    
 
 
 
@@ -219,6 +229,8 @@ def main():
             summary_output = output_format_mapping["總結過後的新聞摘要（EXCEL；無趨勢報告）"]        
             ppt = output_format_mapping["選取主題之趨勢報告（PPT；單一主題）"]      
             excel = output_format_mapping["選取主題之趨勢報告（EXCEL；所有主題）"] 
+            
+            daily_regen = st.toggle("是否重新產生每日摘要")
 
         # *** Topics input ***
         with subcol6:
@@ -228,7 +240,11 @@ def main():
                 topic_to_deal = st.selectbox("Choose one topic", ["social", "technological", "environmental", "economic", "political", "business_and_investment"])
             else:
                 topic_to_deal = st.selectbox("Choose one topic", ["social", "technological", "environmental", "economic", "political", "business_and_investment"], disabled = True)
-            daily_regen = st.toggle("是否重新產生每日摘要")
+
+            
+
+            if st.button("點擊編輯 System prompt"):
+                PromptManager.STEEP.prompt_editor()
 
     # *** Check if the inputs are valid ***
     # COND1 - 7 為必須滿足的條件。COND8 為建議滿足的條件。
@@ -401,7 +417,7 @@ def main():
                 st.error('some error happened..')
                 st.warning(error)
                 SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
-            
+                st.stop()
             
             # ** Create Ppt slides && Post back to DB && record in Google Sheet
             try:
@@ -440,6 +456,24 @@ def main():
                 st.warning(error)
                 SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
 
+            # TODO ** 產出 Flexible 簡報 HTML & CSS
+            try:
+                with st.spinner("正在生成網頁版簡報..."):
+                    chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
+                    html_slide_output = LlmManager.llm_api_call(chain, result)
+                    filename = f"{st.session_state['steep_topic']}_trends_{st.session_state['steep_start']}-{st.session_state['steep_end']}_html.txt"
+                    # TODO ** POST BACK & 串 ARCHIVE PAGE
+                    DataManager.post_files(
+                        filename,
+                        html_slide_output['output'],
+                        str(dt.datetime.today() + dt.timedelta(365)), 
+                        st.session_state['user_name'], 
+                        st.session_state['user_email']
+                    )
+                st.success("HTML簡報生成完畢！已回傳至 III Database")
+            except:
+                st.error("Failed to generate HTML & CSS based slides")
+
         with output_box.container():
             st.subheader("產出結果下載連結")
             try:
@@ -461,7 +495,8 @@ def main():
                     st.success("Here is the daily summary for the period you requested💥")
                     st.markdown(DataManager.get_summary_download_link(st.session_state['steep_start'], 
                                     st.session_state['steep_end']), unsafe_allow_html = True)
-                    
+
+                st.markdown(html_slide_output['output'], unsafe_allow_html = True)    
                 SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'completed')
                 
             except Exception as error:

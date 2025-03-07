@@ -229,7 +229,7 @@ class DataManager:
         filename, 
         ext):
 
-        assert ext in ['pptx', 'xlsx', 'json'], "Parameter 'ext' must be one of the following: ['pptx', 'xlsx', 'json']"
+        assert ext in ['pptx', 'xlsx', 'json', 'txt'], "Parameter 'ext' must be one of the following: ['pptx', 'xlsx', 'json', 'txt']"
         
         url = 'http://61.64.60.30/news-crawler/api/file/?'
         
@@ -243,11 +243,17 @@ class DataManager:
 
         response = requests.get(url, params = end_point_params, headers = headers)
         
-        try:
-            response_b64 = response.json()['file_content']
-            return response_b64
-        except:
-            raise ValueError("No such file in the database!")
+        if ext in ['pptx', 'xlsx', 'json']:
+            try:
+                response_b64 = response.json()['file_content']
+                return response_b64
+            except:
+                raise ValueError("No such file in the database!")
+        else:
+            try:
+                return response.json()['file_content']
+            except Exception as e:
+                raise ValueError("No such file in the database!")
         
     # *****************************************
     # *** Functions for data transformation ***

@@ -39,6 +39,7 @@ class LlmManager:
     def init_model():
         CLAUDE_KEY = st.session_state['CLAUDE_KEY']
         OPENAI_KEY = st.session_state['OPENAI_KEY']
+        CLAUDE_3_7 = st.session_state['CLAUDE_3_7']
         
         if st.session_state['model_type'] == 'claude-3-5-sonnet-20241022':
             model = ChatAnthropic(model = 'claude-3-5-sonnet-20241022',
@@ -51,6 +52,13 @@ class LlmManager:
         elif st.session_state['model_type'] == 'gpt-4o':
             model = ChatOpenAI(model = 'gpt-4o',
                                api_key = OPENAI_KEY,
+                               max_tokens = 16000,
+                               temperature = 0.0,
+                               verbose = True)
+            return model
+        elif st.session_state['model_type'] == 'claude-3-7-sonnet':
+            model = ChatAnthropic(model = 'claude-3-7-sonnet-20250219',
+                               api_key = CLAUDE_3_7,
                                max_tokens = 16000,
                                temperature = 0.0,
                                verbose = True)

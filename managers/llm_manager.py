@@ -106,7 +106,6 @@ class LlmManager:
                 memory += response.content
                 response = chain.invoke({"input": in_message, "memory": memory})
             memory += str(response.content)
-            # st.write(memory)
             return memory
         
         summary_json = DataManager.find_json_object(run_with_memory(chain, in_message))

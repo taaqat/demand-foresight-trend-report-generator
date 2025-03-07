@@ -461,6 +461,16 @@ def main():
                 with st.spinner("正在生成網頁版簡報..."):
                     chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
                     html_slide_output = LlmManager.llm_api_call(chain, result)
+                    filename = f"{st.session_state['steep_topic']}_trends_{st.session_state['steep_start']}-{st.session_state['steep_end']}_html.txt"
+                    # TODO ** POST BACK & 串 ARCHIVE PAGE
+                    DataManager.post_files(
+                        filename,
+                        html_slide_output['output'],
+                        str(dt.datetime.today() + dt.timedelta(365)), 
+                        st.session_state['user_name'], 
+                        st.session_state['user_email']
+                    )
+                st.success("HTML簡報生成完畢！已回傳至 III Database")
             except:
                 st.error("Failed to generate HTML & CSS based slides")
 

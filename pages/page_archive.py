@@ -21,6 +21,16 @@ div.stButton > button:hover {
     transform: scale(1.02);
     transition: transform 0.05s;
 }
+div.stDownloadButton > button {
+    width: 100%;  /* 設置按鈕寬度為頁面寬度的 50% */
+    height: 67px;
+    margin-left: 0;
+    margin-right: auto;
+}
+div.stDownloadButton > button:hover {
+    transform: scale(1.02);
+    transition: transform 0.05s;
+}
 div[data-testid="stTextAreaRootElement"]:hover {
     border-color: #baad8d
 }
@@ -80,6 +90,35 @@ with st.sidebar:
 # **************************************************************************************************************
 
 TAB_HTML, TAB_DOWNLOAD = st.tabs(['HTML 網頁版趨勢報告', '典藏檔案下載'])
+
+with TAB_HTML:
+    left_col, right_col, but_col = st.columns((0.45, 0.45, 0.1))
+    month_df = SessionManager.steep_database('fetch').iloc[::-1]
+
+    with left_col:
+        topic_selection = st.selectbox("選擇主題", ['social', 'economic', 'environmental', 'technological', 'political', 'business_and_investment'])
+    with right_col:
+        period_selection = st.selectbox("選擇時間區段", (month_df['start_date'] + '-' + month_df['end_date']).unique())
+    
+
+    filename = topic_selection + '_trends_' + period_selection + '_html.txt'
+    
+    try:
+        html_body = DataManager.get_files(filename, 'txt')
+        with but_col:
+            download_btn = st.download_button(
+                label = "點擊下載",
+                data = html_body,
+                file_name = topic_selection + '_trends_' + period_selection + '.html',
+                type="primary",
+                icon=":material/download:",
+                mime="html"
+            )
+        st.html(html_body)
+        
+        
+    except Exception as e:
+        st.error("所選主題與時間段並無 HTML 簡報檔案！")
 
 with TAB_DOWNLOAD:
     left_col, right_col = st.columns((1/2, 1/2))
@@ -233,18 +272,3 @@ with TAB_DOWNLOAD:
                     except:
                         pass
 
-with TAB_HTML:
-    left_col, right_col = st.columns(2)
-    month_df = SessionManager.steep_database('fetch').iloc[::-1]
-
-    with left_col:
-        topic_selection = st.selectbox("選擇主題", ['social', 'economic', 'environmental', 'technological', 'political', 'business_and_investment'])
-    with right_col:
-        period_selection = st.selectbox("選擇時間區段", (month_df['start_date'] + '-' + month_df['end_date']).unique())
-    
-    filename = topic_selection + '_trends_' + period_selection + '_html.txt'
-    
-    try:
-        st.html(DataManager.get_files(filename, 'txt'))
-    except Exception as e:
-        st.error("所選主題與時間段並無 HTML 簡報檔案！")

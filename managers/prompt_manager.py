@@ -762,7 +762,7 @@ Economic 維度非常複雜，因為經濟是時時刻刻都在改變的。因�
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>趨勢報告簡報</title>
+    <title>{{主題名稱}}趨勢報告 - {{日期}}</title>
     <style>
         body {{            font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -822,4 +822,7 @@ Economic 維度非常複雜，因為經濟是時時刻刻都在改變的。因�
 3. 每個 CSS, HTML 區塊之間，請不要有任何換行符號，不然輸出會失敗。
 4. 請善用 <li> 標籤來列點，或是善用 <div> 標籤來製作 hashtag 小方格。
 5. 請發揮創意排版，不需要完全參照我給的例子。
+6. 引數 {{主題名稱}} 和 {{時間區段}} 將於 user input 中給定，HTML title 請遵守我設定的格式。
+7. 因為我使用 streamlit 開發， CSS 樣式設定會改動到頁面上所有對應標籤名稱的元素。為了避免此事發生，如果你有需要進行樣式設定，請使用 class 做分類，不要用 tag 名稱！
+8. 請調整成 full width！我的 HTML 簡報左右兩邊不想要留白。
 '''

@@ -234,10 +234,17 @@ with TAB_DOWNLOAD:
                         pass
 
 with TAB_HTML:
+    left_col, right_col = st.columns(2)
     month_df = SessionManager.steep_database('fetch').iloc[::-1]
-    selected_key = st.selectbox('Choose', month_df['topic'] + '_trends_' + month_df['start_date'] + '-' + month_df['end_date'])
+
+    with left_col:
+        topic_selection = st.selectbox("選擇主題", ['social', 'economic', 'environmental', 'technological', 'political', 'business_and_investment'])
+    with right_col:
+        period_selection = st.selectbox("選擇時間區段", (month_df['start_date'] + '-' + month_df['end_date']).unique())
+    
+    filename = topic_selection + '_trends_' + period_selection + '_html.txt'
     
     try:
-        st.html(DataManager.get_files(selected_key + "_html.txt", 'txt'))
+        st.html(DataManager.get_files(filename, 'txt'))
     except Exception as e:
         st.error("所選主題與時間段並無 HTML 簡報檔案！")

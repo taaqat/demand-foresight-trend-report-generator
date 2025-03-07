@@ -796,7 +796,6 @@ Economic 維度非常複雜，因為經濟是時時刻刻都在改變的。因�
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="keyword">#數位轉型</div>
     <div class="quote-line">
@@ -809,7 +808,6 @@ Economic 維度非常複雜，因為經濟是時時刻刻都在改變的。因�
         <li>雲端技術加速企業轉型</li>
     </ul>
 </div>
-
 </body>
 </html>
 
@@ -825,4 +823,5 @@ Economic 維度非常複雜，因為經濟是時時刻刻都在改變的。因�
 6. 引數 {{主題名稱}} 和 {{時間區段}} 將於 user input 中給定，HTML title 請遵守我設定的格式。
 7. 因為我使用 streamlit 開發， CSS 樣式設定會改動到頁面上所有對應標籤名稱的元素。為了避免此事發生，如果你有需要進行樣式設定，請使用 class 做分類，不要用 tag 名稱！
 8. 請調整成 full width！我的 HTML 簡報左右兩邊不想要留白。
+9. 不要添加任何的註解區塊！！
 '''

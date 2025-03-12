@@ -416,6 +416,7 @@ def main():
                         st.session_state['steep_end'],
                         st.session_state['user_name'],
                         st.session_state['user_email'])
+                st.session_state['steep_json_result'] = result
             except Exception as error:
                 st.error('some error happened..')
                 st.warning(error)
@@ -459,23 +460,7 @@ def main():
                 st.warning(error)
                 SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
 
-            # ** Generate Flexible Web Slides with HTML & CSS (by AI)
-            try:
-                with st.spinner("正在生成網頁版簡報..."):
-                    chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
-                    html_slide_output = LlmManager.llm_api_call(chain, json.dumps(result) + f"\n\n主題名稱：{st.session_state['steep_topic']}\n\n時間段：{st.session_state['steep_start']} to {st.session_state['steep_end']}")
-                    filename = f"{st.session_state['steep_topic']}_trends_{st.session_state['steep_start']}-{st.session_state['steep_end']}_html.txt"
-                    # ** POST BACK to DB & 串 ARCHIVE PAGE
-                    DataManager.post_files(
-                        filename,
-                        html_slide_output['output'],
-                        str(dt.datetime.today() + dt.timedelta(365)), 
-                        st.session_state['user_name'], 
-                        st.session_state['user_email']
-                    )
-                st.success("HTML簡報生成完畢！已回傳至 III Database")
-            except:
-                st.error("Failed to generate HTML & CSS based slides")
+            
 
         with output_box.container():
             st.subheader("產出結果下載連結")
@@ -498,16 +483,61 @@ def main():
                     st.success("Here is the daily summary for the period you requested💥")
                     st.markdown(DataManager.get_summary_download_link(st.session_state['steep_start'], 
                                     st.session_state['steep_end']), unsafe_allow_html = True)
-
-                st.markdown(html_slide_output['output'], unsafe_allow_html = True)    
+       
                 SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'completed')
-                
+
             except Exception as error:
                 st.error('some error happened..')
                 st.warning(error)
                 SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
 
-        SessionManager.session_state_clear('steep')
+            st.warning("已依照您需要的格式產出趨勢報告！請問是否要繼續製作更精美的網頁版簡報（HTML）？")
+            proceed, finish = st.columns(2)
+            with proceed:
+                if st.button("好，繼續生成"):
+
+                    st.session_state['steep_running'] = 'step3'
+                    st.rerun()
+
+                    
+            with finish:
+                if st.button("結束"):
+                    SessionManager.session_state_clear('steep')
+                    st.session_state['steep_running'] = False
+                    st.rerun()
+
+    elif st.session_state['steep_running'] == 'step3': 
+        # ** Generate Flexible Web Slides with HTML & CSS (by AI)
+        console_box_2.empty()
+        with console_box_2.container(border = True):
+            # * Undo button
+            if st.button("Undo", key = 'back_to_step2'):
+                st.session_state['steep_running'] = 'step2'
+                st.rerun()
+
+            try:
+                with st.spinner("正在生成網頁版簡報..."):
+                    chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
+                    html_slide_output = LlmManager.llm_api_call(chain, json.dumps(st.session_state['steep_json_result']) + f"\n\n主題名稱：{st.session_state['steep_topic']}\n\n時間段：{st.session_state['steep_start']} to {st.session_state['steep_end']}")
+                    filename = f"{st.session_state['steep_topic']}_trends_{st.session_state['steep_start']}-{st.session_state['steep_end']}_html.txt"
+                    # ** POST BACK to DB & 串 ARCHIVE PAGE
+                    DataManager.post_files(
+                        filename,
+                        html_slide_output['output'],
+                        str(dt.datetime.today() + dt.timedelta(365)), 
+                        st.session_state['user_name'], 
+                        st.session_state['user_email']
+                    )
+            except:
+                st.error("Failed to generate HTML & CSS based slides")
+
+        with output_box.container():
+            st.success("HTML簡報生成完畢！已回傳至 III Database！")
+            with st.expander("Expand to preview"):
+                st.markdown(html_slide_output['output'], unsafe_allow_html = True)    
+
+            SessionManager.session_state_clear('steep')
+            st.session_state['steep_running'] = False
 
 
 

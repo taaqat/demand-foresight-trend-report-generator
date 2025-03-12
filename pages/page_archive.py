@@ -22,7 +22,7 @@ div.stButton > button:hover {
     transition: transform 0.05s;
 }
 div.stDownloadButton > button {
-    width: 100%;  /* 設置按鈕寬度為頁面寬度的 50% */
+    width: 80%;  /* 設置按鈕寬度為頁面寬度的 50% */
     height: 67px;
     margin-left: 0;
     margin-right: auto;
@@ -89,7 +89,7 @@ with st.sidebar:
 
 # **************************************************************************************************************
 
-TAB_HTML, TAB_DOWNLOAD = st.tabs(['HTML 網頁版趨勢報告', '典藏檔案下載'])
+TAB_HTML, TAB_DOWNLOAD = st.tabs(['STEEP Slides', 'All Available Archives'])
 
 with TAB_HTML:
     left_col, right_col, but_col = st.columns((0.45, 0.45, 0.1))
@@ -107,7 +107,7 @@ with TAB_HTML:
         html_body = DataManager.get_files(filename, 'txt')
         with but_col:
             download_btn = st.download_button(
-                label = "點擊下載",
+                label = "",
                 data = html_body,
                 file_name = topic_selection + '_trends_' + period_selection + '.html',
                 type="primary",

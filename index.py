@@ -16,7 +16,7 @@ from managers.llm_manager import LlmManager
 # *********** Config ***********
 # * page layout
 if "page_config_set" not in st.session_state:
-    st.set_page_config(page_title='Demand Foresight Tools', page_icon=":tada:", layout="wide")
+    st.set_page_config(page_title='Demand Foresight Tools', page_icon=":material/home:", layout="wide")
     st.session_state["page_config_set"] = True
 
 # * user authentication data

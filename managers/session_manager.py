@@ -178,7 +178,7 @@ class SessionManager:
         public_ip = response.json()["ip"]
 
 
-        st.caption(f"Deployed IP: **:blue[{public_ip}]**  |  Branch [**:orange[main]**](https://github.com/taaqat/demand-foresight-trend-report-generator)")
+        st.caption(f"Deployed IP: **:blue[{public_ip}]** ")
 
 
     @staticmethod

@@ -7,6 +7,11 @@ from managers.data_manager import DataManager
 from managers.session_manager import SessionManager
 from yaml.loader import SafeLoader
 
+# * page layout
+if "page_config_set" not in st.session_state:
+    st.set_page_config(page_title='Demand Foresight Tools', page_icon=":material/home:", layout="wide")
+    st.session_state["page_config_set"] = True
+
 st.title("DEMO")
 
 

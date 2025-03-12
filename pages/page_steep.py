@@ -19,7 +19,10 @@ import streamlit as st
 from code_editor import code_editor
 
 
-
+# * page layout
+if "page_config_set" not in st.session_state:
+    st.set_page_config(page_title='Demand Foresight Tools', page_icon=":material/home:", layout="wide")
+    st.session_state["page_config_set"] = True
 
 
 

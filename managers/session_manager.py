@@ -182,7 +182,6 @@ class SessionManager:
 
 
     @staticmethod
-    @st.dialog("Session States", width = 'large')
     def show_sessions():
         session_df = pd.DataFrame(columns = ['session', 'content'])
         for key, value in st.session_state.items():

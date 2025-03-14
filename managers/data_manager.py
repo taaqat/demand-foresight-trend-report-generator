@@ -349,6 +349,18 @@ class DataManager:
             return data
         except:
             raise UnicodeDecodeError("Encountered Errors while tranforming base64 to dataframe. Please ensure the original data format to be 'xlsx'.")
+        
+    # --- Transform Base64 formatted pptx to proper Power point BytesIO format
+    @staticmethod
+    def b64_to_pptx_IO(b64_str):
+        try:
+            data = base64.b64decode(b64_str)
+            data = BytesIO(data)
+
+            return data
+        except:
+            raise UnicodeDecodeError("Encountered Errors while tranforming base64 to dataframe. Please ensure the original data format to be 'pptx'.")
+            
 
     # --- Get output download link (to render on UI with st.markdown())
     @staticmethod

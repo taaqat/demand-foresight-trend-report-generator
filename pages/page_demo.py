@@ -34,14 +34,14 @@ with st.sidebar:
 
 st.sidebar.header("資策會 Demand Foresight Tools")
 with st.sidebar:
-    st.page_link('index.py', label = 'STEEP +B Gallery', icon = ':material/add_circle:')
+    st.page_link('index.py', label = 'STEEP 月報', icon = ':material/add_circle:')
 
 if st.secrets['permission']['trend_report_generator'] == True:
     st.sidebar.write("**趨勢報告產生器**")
     with st.sidebar:
         st.page_link('pages/page_demo.py', label = 'DEMO Videos', icon = ':material/add_circle:')
-        st.page_link('pages/page_steep.py', label = 'STEEP +B 月報', icon = ':material/add_circle:')
-        st.page_link('pages/page_self_select.py', label = '自選主題', icon = ':material/add_circle:')
+        st.page_link('pages/page_steep.py', label = 'STEEP 月報產生器', icon = ':material/add_circle:')
+        st.page_link('pages/page_self_select.py', label = '特定主題報告產生器', icon = ':material/add_circle:')
         st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
 
 if st.secrets['permission']['theme_based_generator'] == True:

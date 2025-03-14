@@ -45,14 +45,14 @@ with st.sidebar:
 
 st.sidebar.header("資策會 Demand Foresight Tools")
 with st.sidebar:
-    st.page_link('index.py', label = 'STEEP +B Gallery', icon = ':material/add_circle:')
+    st.page_link('index.py', label = 'STEEP 月報', icon = ':material/add_circle:')
 
 if st.secrets['permission']['trend_report_generator'] == True:
     st.sidebar.write("**趨勢報告產生器**")
     with st.sidebar:
         st.page_link('pages/page_demo.py', label = 'DEMO Videos', icon = ':material/add_circle:')
-        st.page_link('pages/page_steep.py', label = 'STEEP +B 月報', icon = ':material/add_circle:')
-        st.page_link('pages/page_self_select.py', label = '自選主題', icon = ':material/add_circle:')
+        st.page_link('pages/page_steep.py', label = 'STEEP 月報產生器', icon = ':material/add_circle:')
+        st.page_link('pages/page_self_select.py', label = '特定主題報告產生器', icon = ':material/add_circle:')
         st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
 
 if st.secrets['permission']['theme_based_generator'] == True:
@@ -74,19 +74,35 @@ with st.sidebar:
     SessionManager.fetch_IP()
 
 with st.sidebar:
-        if st.button("清除所有暫存"):
-            st.cache_data.clear()
-            for var in st.session_state.keys():
-                if var not in ['authentication_status', 'authenticator', 'logout', 'init', 'config']:
-                    del st.session_state[var]
+        
+        @st.dialog("進階設定")
+        def developer_option():
+            if st.button("清除所有暫存"):
+                st.cache_data.clear()
+                for var in st.session_state.keys():
+                    if var not in ['authentication_status', 'authenticator', 'logout', 'init', 'config']:
+                        del st.session_state[var]
 
-            SessionManager.session_state_clear('steep')
-            SessionManager.session_state_clear('self-select')
+                SessionManager.session_state_clear('steep')
+                SessionManager.session_state_clear('self-select')
 
-            st.rerun()
+            if st.button("顯示所有暫存"):
+                SessionManager.show_sessions()
 
-        if st.button("顯示所有暫存"):
-            SessionManager.show_sessions()
+            # *** Model Reset Button
+            if st.button("重置模型設定"):
+                for session in [
+                    "KEY_verified",
+                    "CLAUDE_KEY",
+                    "OPENAI_KEY",
+                    "model",
+                    "model_type"
+                ]:
+                    del st.session_state[session]
+                st.rerun()
+
+        if st.button("進階設定"):
+            developer_option()
 
 
 
@@ -163,18 +179,7 @@ if st.session_state['model_type'] == "":
 
 
 def main():
-    # *** Model Reset Button
-    with st.sidebar:
-        if st.button("重置模型設定"):
-            for session in [
-                "KEY_verified",
-                "CLAUDE_KEY",
-                "OPENAI_KEY",
-                "model",
-                "model_type"
-            ]:
-                del st.session_state[session]
-            st.rerun()
+    
 
     # *** left column: user input; right column: progress and results
     left_col, right_col = st.columns((1/2, 1/2))

@@ -31,19 +31,24 @@ if "model_type" not in st.session_state:
 # * configure the start-date, end-date, and theme picture path for year month in 2024
 #  {'2024 MONTH': [START_DATE, END_DATE, PIC_PATH]}
 st.session_state["ym_mapping"] = {
-    '2024 January': ["2024-01-01", "2024-01-31", 1],
-    '2024 February': ["2024-02-01", "2024-02-29", 2],
-    '2024 March': ["2024-03-01", "2024-03-31", 3],
-    '2024 April': ["2024-04-01", "2024-04-30", 1],
-    '2024 May': ["2024-05-01", "2024-05-31", 2],
-    '2024 June': ["2024-06-01", "2024-06-30", 3],
-    '2024 July': ["2024-07-01", "2024-07-31", 1],
-    '2024 August': ["2024-08-01", "2024-08-31", 2],
-    '2024 September': ["2024-09-01", "2024-10-01", 3],
-    '2024 October': ["2024-10-01", "2024-10-31", 1],
-    '2024 November': ["2024-11-01", "2024-11-27", 2],
-    '2024 December': ["2024-12-01", "2024-12-31", 3]
- }
+    '2024': {
+        'January': ["2024-01-01", "2024-01-31", 1],
+        'February': ["2024-02-01", "2024-02-29", 2],
+        'March': ["2024-03-01", "2024-03-31", 3],
+        'April': ["2024-04-01", "2024-04-30", 1],
+        'May': ["2024-05-01", "2024-05-31", 2],
+        'June': ["2024-06-01", "2024-06-30", 3],
+        'July': ["2024-07-01", "2024-07-31", 1],
+        'August': ["2024-08-01", "2024-08-31", 2],
+        'September': ["2024-09-01", "2024-10-01", 3],
+        'October': ["2024-10-01", "2024-10-31", 1],
+        'November': ["2024-11-01", "2024-11-27", 2],
+        'December': ["2024-12-01", "2024-12-31", 3],
+    },
+    '2025': {
+        "January": ["2025-01-01", "2025-01-31"],
+        "February": ["2025-02-01", "2025-02-28"]
+ }}
 
 
 # ***************************************************
@@ -60,6 +65,11 @@ div.stButton > button {
 div.stButton > button:hover {
     transform: scale(1.02);
     transition: transform 0.05s;
+}
+div.stDownloadButton > button {
+    width: 100%;  
+    margin-left: 0;
+    margin-right: auto;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -86,14 +96,14 @@ with st.sidebar:
 
 st.sidebar.header("資策會 Demand Foresight Tools")
 with st.sidebar:
-    st.page_link('index.py', label = 'STEEP +B Gallery', icon = ':material/add_circle:')
+    st.page_link('index.py', label = 'STEEP 月報', icon = ':material/add_circle:')
 
 if st.secrets['permission']['trend_report_generator'] == True:
     st.sidebar.write("**趨勢報告產生器**")
     with st.sidebar:
         st.page_link('pages/page_demo.py', label = 'DEMO Videos', icon = ':material/add_circle:')
-        st.page_link('pages/page_steep.py', label = 'STEEP +B 月報', icon = ':material/add_circle:')
-        st.page_link('pages/page_self_select.py', label = '自選主題', icon = ':material/add_circle:')
+        st.page_link('pages/page_steep.py', label = 'STEEP 月報產生器', icon = ':material/add_circle:')
+        st.page_link('pages/page_self_select.py', label = '特定主題報告產生器', icon = ':material/add_circle:')
         st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
 
 if st.secrets['permission']['theme_based_generator'] == True:
@@ -119,17 +129,20 @@ with st.sidebar:
 # *** function that would be called after login (entry point of the app) ***
 def main():
 
-    st.title("STEEP +B Trend Report Gallery")
-    st.caption(":gray[歡迎來到資策會 Demand Foresight Tool 平台！此平台透過畫廊的形式，展示敝團隊透過**串接 AI 模型**與**簡報自動化生成技術**所製作之每月趨勢報告，提供使用者自由下載使用。]")
+    st.title("STEEP +B 月報")
+    st.caption(":gray[2024 年的 STEEP 月報僅提供 pptx 版本的載點。2025 年起的 STEEP 月報，以網頁式簡報呈現，同時也提供 pptx 版本簡報的載點。]")
     
     
     
     # ----------------------------------------------------------------------------
-    # *** STEEP Report GALLERY
-    # * Function for loading STEEP +B report dynamically *
+    # *** STEEP Report 
+    # * Function for loading STEEP +B monthly report in 2024 *
     @st.cache_data                          # * cache the data to reduce data transmission burden
-    def load_steep_download_pics(ym, pic_id):
-        # * initialize the dictionary for the input year month
+    def load_steep_2024(month, pic_id):
+        """
+        # * month = month: the year-month requested by users
+        # * pic_id = st.session_state['ym_mapping']['2024'][month][2]: 為了要讓每個月的照片不同，動態讀取 session_state 中的 pic path（本來用 randint 但這方法會讓 st.cache_data 失效）
+        """
 
         # * define six blocks (STEEP +B respectively)
         cols = [col for group in (st.columns(3), st.columns(3))for col in group]
@@ -139,8 +152,8 @@ def main():
             with col:
                 try:
                     # * fetch pptx based on start_date, end_date for corresponding month
-                    link_html_obj = DataManager.get_output_download_link(st.session_state["ym_mapping"][ym][0],
-                                                                        st.session_state["ym_mapping"][ym][1], 
+                    link_html_obj = DataManager.get_output_download_link(st.session_state["ym_mapping"]['2024'][month][0],
+                                                                        st.session_state["ym_mapping"]['2024'][month][1], 
                                                                         topic, 
                                                                         'pptx', 
                                                                         'steep')
@@ -152,7 +165,7 @@ def main():
                     image_base64 = DataManager.image_to_b64(f"./pics/{topic}/{pic_id}.png")
 
                     # * specify the filename (user will see this filename when they download)
-                    file_name = f"{ym}-{topic}"
+                    file_name = f"2024-{month}-{topic}"
 
                     # * create download link by HTML structure & CSS setting
                     download_link = f"""
@@ -203,18 +216,61 @@ def main():
                     # st.write(e)
                     pass
     
-    # * ym = ym: the year-month requested by users
-    # * pic_id = st.session_state['ym_mapping'][ym][2]: 為了要讓每個月的照片不同，動態讀取 session_state 中的 pic path（本來用 randint 但這方法會讓 st.cache_data 失效）
     
+    
+    # * Function for loading STEEP +B monthly report in 2024 *
+    def load_steep_2025(topic_selection, month, cl, cr):
+        
+        period = "-".join(st.session_state['ym_mapping']['2025'][month])
+        try:
+            filename_html = topic_selection + '_trends_' + period + '_html.txt'
+            filename_pptx = topic_selection + '_trends_' + period + '.pptx'
+
+            html_body = DataManager.get_files(filename_html, 'txt')
+            pptx_body = DataManager.b64_to_pptx_IO(DataManager.get_files(filename_pptx, 'pptx'))
+
+            with cl:
+                download_btn_l = st.download_button(
+                    label = "下載 HTML 檔案",
+                    data = html_body,
+                    file_name = topic_selection + '_trends_' + period + '.html',
+                    type="primary",
+                    icon=":material/download:",
+                    mime="html"
+                )
+            with cr:
+                download_btn_r = st.download_button(
+                    label = "下載 Pptx 檔案",
+                    data = pptx_body,
+                    file_name = topic_selection + "_trends_" + period + '.pptx',
+                    icon = ":material/download:",
+                    mime = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                )
+
+            st.html(html_body)
+        except:
+            st.warning("該主題之月報尚未生成！")
+        
 
     # * User choose the year month *
     # ym = st.selectbox("Choose a month to download the STEEP reports", st.session_state['ym_mapping'].keys())
     def render():
-        tabs = st.tabs(st.session_state['ym_mapping'].keys())
+        tabs = st.tabs(list(st.session_state['ym_mapping'].keys())[::-1])
 
-        for tab, ym in zip(tabs, st.session_state['ym_mapping'].keys()):
-            with tab:
-                load_steep_download_pics(ym = ym, pic_id = st.session_state['ym_mapping'][ym][2])
+        for tab, ym in zip(tabs, list(st.session_state['ym_mapping'].keys())[::-1]):
+            if ym.startswith("2024"):
+                with tab:
+                    month = st.selectbox("選擇月份", list(st.session_state['ym_mapping']['2024'].keys())[::-1], key = '2024_month')
+                    load_steep_2024(month, st.session_state['ym_mapping']['2024'][month][2])
+                    
+            elif ym.startswith("2025"):
+                with tab:
+                    cl2025, cr2025 = st.columns(2)
+                    with cl2025:
+                        topic_selection = st.selectbox("選擇主題", ['social', 'economic', 'environmental', 'technological', 'political', 'business_and_investment'], key = '2025_topic')
+                    with cr2025:
+                        month = st.selectbox("選擇月份", ['January', "February"], key = '2025_month')
+                    load_steep_2025(topic_selection, month, cl2025, cr2025)
 
     render()
     

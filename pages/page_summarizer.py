@@ -10,7 +10,11 @@ from managers.sheet_manager import SheetManager
 from managers.session_manager import SessionManager
 from scripts.summarizer import Summarizor
 
-
+# * page layout
+if "page_config_set" not in st.session_state:
+    st.set_page_config(page_title='Demand Foresight Tools', page_icon=":material/home:", layout="wide")
+    st.session_state["page_config_set"] = True
+    
 @st.dialog("輸入基本資料：")
 def user_info():
     user = st.text_input("你的暱稱")

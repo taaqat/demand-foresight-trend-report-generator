@@ -134,7 +134,7 @@ with st.sidebar:
 @st.dialog("上傳新聞資料")
 def FORM_news_data_upload():
     uploaded = st.file_uploader("上傳新聞資料", key = 'news')
-    raw = DataManager.load_news(uploaded)                 
+    raw = DataManager.summarizer_load_news(uploaded)                 
     with st.expander("預覽你上傳的資料"):
         st.dataframe(raw)
 

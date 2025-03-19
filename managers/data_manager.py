@@ -443,3 +443,17 @@ class DataManager:
                     
         else:
             return None
+        
+    @staticmethod
+    @st.cache_data
+    def summarizer_load_news(uploaded):
+
+        '''load news data from user upload with caching'''
+        if uploaded is not None:
+            try:
+                return pd.read_csv(uploaded)
+            except:
+                return pd.read_excel(uploaded)
+                    
+        else:
+            return None

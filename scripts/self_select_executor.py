@@ -28,26 +28,18 @@ class Executor:
                         end_date, 
                         raw_data, 
                         cols,                              # ** trend report 中想要的欄位（重要關係人、微弱信號 etc）（user input）
-                        additional,                        # ** 額外的 prompt（user input）
-                        summary_data = None, 
+                        additional,                        # ** 額外的 prompt（user input） 
                         excel_output = True, 
                         ppt_output = True, 
-                        color = "#F3B915"):
+                        color = "#F3B915",
+                        uploaded_data = pd.DataFrame()):
         
-        # *** generate summary data if not existing
-        try:
-            summary_data = st.session_state['self_select_summary']
-        except:
-            try:
-                summary_data = DataManager.b64_to_dataframe(DataManager.get_files(f"Summary_{title}_{start_date}-{end_date}.xlsx", 'xlsx'))
-            except:
-                summary_data = summarize_all(raw_data, user_name, user_email, title, start_date, end_date)        
-
+    
         if [excel_output, ppt_output] != [False, False]:
             # *** generate trend report
             begin = time.time()
             result = gen_trend_report_customized(
-                title, start_date, end_date, user_name, user_email, raw_data, cols, additional, summary_data
+                title, start_date, end_date, user_name, user_email, raw_data, cols, additional, uploaded_data
             )
             finish = time.time()
             

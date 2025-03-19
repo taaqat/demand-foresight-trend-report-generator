@@ -17,16 +17,30 @@ import base64
 from io import BytesIO
 
 
-def gen_trend_report_customized(title: str, start_date: str, end_date: str, user_name, user_email, raw_data, cols, additional, data = None, summary_update = None) -> json:
+def gen_trend_report_customized(title: str, start_date: str, end_date: str, user_name, user_email, raw_data, cols, additional, uploaded_data = pd.DataFrame()) -> json:
+    if not uploaded_data.empty:
+        assert '重點摘要' in uploaded_data.columns, "使用者上傳的資料中沒有'重點摘要'欄位"
+        assert '關鍵數據' in uploaded_data.columns, "使用者上傳的資料中沒有'關鍵數據'欄位"
+    """
+    Before:
+        raw_data 為III資料庫的中的新聞資料。此函數最開始會先偵測該批資料的摘要是否存在資料庫，若否，再用 summarize_all() 函數來製作。
+    After:
+        若要將此工具與使用者上傳的資料員進行整合，則必須要考慮使用者資料的上傳，因為摘要資料應該要包含所有的資料源，但本來的偵測方法會忽略使用者上傳的資料（ex: 製作兩次 3/1 - 3/8 的科技趨勢，但使用者上傳的資料有所不同。而該批摘要資料已經在第一次被製作並且回傳至資料庫，因此第二次製作時會直接跳過摘要階段，會產生問題）。
 
-
-    # *** Try to import necessary data ***
-    # if failed, generate by "monthly_summary()" function 
-    if data is None:
+        可以觀察到在 summarize_all() 函數中，引數 raw_data 只有「重點摘要」和「關鍵數據」兩欄會被使用，因此可以在輸入給 summarize_all() 函數前先將 raw_data 與使用者上傳的資料都只留下這兩欄，再進行垂直合併，最後一次輸入 summarize_all()。但當使用者上傳資料為 None，則使用原本方法。
+    """
+    # *** Summary Data Generation ***
+    # -- data 變數指的是已經摘要完成的新聞資料，是 summarize_all() 的回傳結果
+    if uploaded_data.empty:
         try:
             data = DataManager.b64_to_dataframe(DataManager.get_files(f"Summary_{title}_{start_date}-{end_date}.xlsx", 'xlsx'))  
         except:
             data = summarize_all(raw_data, user_name, user_email, title, start_date, end_date)
+
+    else:
+        merged_raw = pd.concat([raw_data[['重點摘要', '關鍵數據']], uploaded_data[['重點摘要', '關鍵數據']]])
+        data = summarize_all(merged_raw, user_name, user_email, title, start_date, end_date)
+
     # -------------------------------------------------------------------------------------
     st_bar = st.progress(0, text = f"Generating {title} trend report...")
     # *** Generate three versions of trend reports ***

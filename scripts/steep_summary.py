@@ -53,7 +53,6 @@ def monthly_summary(start_date: str, end_date: str,  user_name, user_email, dail
         in_message = DataManager.return_daily_raw_str(now, month_raw)
         st_bar.progress(counter/max, f"Summarizing news for {now} (token size: {len(in_message)})") # !!!
 
-        # todo 這邊之後要改回來
         # first try to fetch the daily summary data from database
         if daily_regen == False:
             try:

@@ -104,6 +104,7 @@ if st.secrets['permission']['trend_report_generator'] == True:
         st.page_link('pages/page_demo.py', label = 'DEMO Videos', icon = ':material/add_circle:')
         st.page_link('pages/page_steep.py', label = 'STEEP 月報產生器', icon = ':material/add_circle:')
         st.page_link('pages/page_self_select.py', label = '特定主題報告產生器', icon = ':material/add_circle:')
+        st.page_link('pages/page_summarizer.py', label = '新聞摘要產生器', icon = ':material/add_circle:')
         st.page_link('pages/page_archive.py', label = 'ARCHIVE', icon = ':material/add_circle:')
 
 if st.secrets['permission']['theme_based_generator'] == True:

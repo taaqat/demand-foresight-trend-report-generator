@@ -427,3 +427,19 @@ class DataManager:
     def image_to_b64(image_path):
         with open(image_path, "rb") as img_file:
             return base64.b64encode(img_file.read()).decode("utf-8")
+    
+
+    # --- Load user upload news in SELF_SELECT page
+    @staticmethod
+    @st.cache_data
+    def self_select_load_news(uploaded):
+
+        '''load news data from user upload with caching'''
+        if uploaded is not None:
+            try:
+                return pd.read_csv(uploaded)
+            except:
+                return pd.read_excel(uploaded)
+                    
+        else:
+            return None

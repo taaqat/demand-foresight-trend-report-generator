@@ -14,7 +14,7 @@ from scripts.summarizer import Summarizor
 if "page_config_set" not in st.session_state:
     st.set_page_config(page_title='Demand Foresight Tools', page_icon=":material/home:", layout="wide")
     st.session_state["page_config_set"] = True
-    
+
 @st.dialog("輸入基本資料：")
 def user_info():
     user = st.text_input("你的暱稱")
@@ -138,7 +138,7 @@ with st.sidebar:
 @st.dialog("上傳新聞資料")
 def FORM_news_data_upload():
     uploaded = st.file_uploader("上傳新聞資料", key = 'news')
-    raw = DataManager.summarizer_load_news(uploaded)                 
+    raw = DataManager.load_news(uploaded)                 
     with st.expander("預覽你上傳的資料"):
         st.dataframe(raw)
 

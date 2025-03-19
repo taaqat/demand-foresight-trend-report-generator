@@ -306,7 +306,7 @@ def main():
 \n**關鍵數據**: 該新聞文章提及的關鍵數據。若沒有相關的欄位，請選擇無，不要選擇不符合的欄位。 
 \n欄位名稱不合也沒關係，內容符合即可，此工具提供重新命名欄位功能。
 ''')
-        raw = DataManager.self_select_load_news(uploaded)                 
+        raw = DataManager.load_news(uploaded)                 
         with st.expander("預覽你上傳的資料"):
             st.dataframe(raw)
 

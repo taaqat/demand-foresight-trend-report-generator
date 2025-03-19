@@ -429,10 +429,10 @@ class DataManager:
             return base64.b64encode(img_file.read()).decode("utf-8")
     
 
-    # --- Load user upload news in SELF_SELECT page
+    # --- Load user uploaded data
     @staticmethod
     @st.cache_data
-    def self_select_load_news(uploaded):
+    def load_news(uploaded):
 
         '''load news data from user upload with caching'''
         if uploaded is not None:
@@ -443,17 +443,4 @@ class DataManager:
                     
         else:
             return None
-        
-    @staticmethod
-    @st.cache_data
-    def summarizer_load_news(uploaded):
-
-        '''load news data from user upload with caching'''
-        if uploaded is not None:
-            try:
-                return pd.read_csv(uploaded)
-            except:
-                return pd.read_excel(uploaded)
-                    
-        else:
-            return None
+     

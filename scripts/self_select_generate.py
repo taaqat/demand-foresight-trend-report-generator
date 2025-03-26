@@ -162,3 +162,12 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
 
     return result_json
 
+
+def get_key_data_per_report(title, trend_report_json, pdf_text, pdf_file_name):
+    """
+    前面步驟已生成的趨勢報告 + 使用者上傳的研究調查報告(pdf) -> 針對每個趨勢，從單一 pdf 中提取關鍵數據 / 案例
+    """
+    chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.get_key_data_from_pdf(title, trend_report_json),
+                                               st.session_state['model'])
+    pdf_output = {pdf_file_name: LlmManager.llm_api_call(chain, in_message = pdf_text)}
+    st.session_state['pdfs_output'].update(pdf_output)

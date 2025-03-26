@@ -8,6 +8,7 @@ import datetime as dt
 import base64
 import time
 import re
+from pypdf import PdfReader
 from time import sleep
 
 import urllib3
@@ -443,4 +444,17 @@ class DataManager:
                     
         else:
             return None
+        
+    # --- Load user uploaded pdf data
+    def load_pdfs(uploaded):
+
+        '''load pdf data from user upload with caching'''
+        reader = PdfReader(uploaded)
+        number_of_pages = len(reader.pages)
+        texts = []
+        for i in range(number_of_pages):
+            page = reader.pages[i]
+            texts.append(f"【page {i}】\n" + page.extract_text())
+
+        return texts
      

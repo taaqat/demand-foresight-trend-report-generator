@@ -177,11 +177,11 @@ def main():
 
     # *** left column: user input; right column: progress and results
     left_col, right_col = st.columns((1/2, 1/2))
-    with left_col:
-        st.info("使用前請至 DEMO Videos 頁面觀看說明影片")
+    # with left_col:
+    #     st.info("使用前請至 DEMO Videos 頁面觀看說明影片")
 
     with right_col:
-        st.error("**執行後至完成前，請不要對頁面進行操作，以免直接重來。**", icon="⚠️")
+        # st.error("**執行後至完成前，請不要對頁面進行操作，以免直接重來。**", icon="⚠️")
         console_box_1 = st.empty()
         console_box_2 = st.empty()
         output_box = st.empty()
@@ -195,13 +195,13 @@ def main():
 
     # *************************** Left Column - User Input ***************************
     with left_col:
-        st.subheader("基本資料輸入")
-        subcol1, subcol2 = st.columns((1/2, 1/2))
-        with subcol1:
-            user_name = st.text_input("你的暱稱")
-        # st.info("Please type in your email address so that we can send the results to you when completed")
-        with subcol2:
-            user_email = st.text_input("電子郵件地址")
+        # st.subheader("基本資料輸入")
+        # subcol1, subcol2 = st.columns((1/2, 1/2))
+        # with subcol1:
+        #     user_name = st.text_input("你的暱稱")
+        # # st.info("Please type in your email address so that we can send the results to you when completed")
+        # with subcol2:
+        #     user_email = st.text_input("電子郵件地址")
         # *** Date input ***
         st.subheader("選擇新聞來源之時間範圍")
         subcol3, subcol4 = st.columns((1/2, 1/2))
@@ -251,8 +251,8 @@ def main():
     # *** Check if the inputs are valid ***
     # COND1 - 7 為必須滿足的條件。COND8 為建議滿足的條件。
     existing_projects = SessionManager.steep_database(method = 'fetch')
-    COND1 = user_name != ""
-    COND2 = user_email != ""
+    # COND1 = user_name != ""
+    # COND2 = user_email != ""
     COND3 = start_date <= dt.date.today()
     COND4 = end_date <= dt.date.today()
     COND5 = start_date < end_date
@@ -292,12 +292,12 @@ def main():
     if submission:
         
         # *** first, check all input schema is required ***
-        if not COND1:
-            with left_col:
-                st.warning('Please input your nickname!')
-        if not COND2:
-            with left_col:
-                st.warning('Please input your email address!')
+        # if not COND1:
+        #     with left_col:
+        #         st.warning('Please input your nickname!')
+        # if not COND2:
+        #     with left_col:
+        #         st.warning('Please input your email address!')
         if not COND3:
             with left_col:
                 st.warning('Starting Date should not be later than today!!')
@@ -316,7 +316,7 @@ def main():
 
         
         # *** If the input date format is valid -> run
-        if COND1 & COND2 & COND3 & COND4 & COND5 & COND6 & COND7:
+        if COND3 & COND4 & COND5 & COND6 & COND7:  # COND1 & COND2 & 
 
             if (start_date == st.session_state['steep_start']) & (end_date == st.session_state['steep_end']):
                 st.cache_data.clear()
@@ -324,8 +324,8 @@ def main():
             st.session_state['steep_start'] = start_date
             st.session_state['steep_end'] = end_date
             st.session_state['steep_topic'] = topic_to_deal
-            st.session_state['user_name'] = user_name
-            st.session_state['user_email'] = user_email
+            st.session_state['user_name'] = "Wally"
+            st.session_state['user_email'] = "huang0jin@gmail.com"
             if 'steep_summary' in st.session_state:
                 del st.session_state['steep_summary']
             if 'fetched_raw' in st.session_state:

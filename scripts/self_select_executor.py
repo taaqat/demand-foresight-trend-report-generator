@@ -2,7 +2,7 @@
 # ** Executor: define main functions to be run after user submits the form
 
 from .self_select_summary import summarize_all
-from .self_select_generate import gen_trend_report_customized
+from .self_select_generate import gen_trend_report_customized, get_key_data_per_report
 from .steep_summary import monthly_summary
 from .steep_generate import gen_trend_report
 from managers.data_manager import DataManager
@@ -68,3 +68,19 @@ class Executor:
             pass
         
         SessionManager.send_notification_email(user_name, user_email, type = 'completed')
+
+    def get_all_pdfs_key_data(title):
+
+        progress_bar = st.progress(0, "正在從調查報告 / 研究報告中提取關鍵數據與案例...")
+        length = len(st.session_state['pdfs_raw'].keys())
+        count = 0
+
+        for pdf_file_name, pdf_text in st.session_state['pdfs_raw'].items():
+            progress_bar.progress(count/length, f"({count/length:.2f}%){pdf_file_name}")
+
+            pdf_text = "\n".join(pdf_text)
+            get_key_data_per_report(title, st.session_state['self_select_trends_basic'], pdf_text, pdf_file_name) 
+
+            count += 1
+            
+        progress_bar.progress(1, f"完成！")

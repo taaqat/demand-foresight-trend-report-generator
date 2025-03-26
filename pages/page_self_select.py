@@ -98,7 +98,7 @@ with st.sidebar:
 # ***********************************************************************************************************
 
 # ********* config **********
-st.title("自選主題")
+st.title("特定主題報告")
 if 'self_select_params' not in st.session_state:
     st.session_state['self_select_params'] = {}
 
@@ -119,6 +119,12 @@ if 'KEY_verified' not in st.session_state:
 
 if "model_type" not in st.session_state:
     st.session_state['model_type'] = ""
+
+if "pdfs_raw" not in st.session_state:
+    st.session_state['pdfs_raw'] = {}
+
+if "pdfs_output" not in st.session_state:
+    st.session_state['pdfs_output'] = {}
 
 if "self_select_user_upload" not in st.session_state:
     st.session_state['self_select_user_upload'] = pd.DataFrame()
@@ -161,14 +167,18 @@ def main():
 
     # ********* Basic info input *********
     with st.container(key = 'basic_info'):
-        st.subheader("基本資料輸入")
-        box1_left,box1_mid, box1_right = st.columns((1/3, 1/3, 1/3))
-        with box1_left:
-            project_name = st.text_input("Name this project with a concise name 👇")
-        with box1_mid:
-            user_name = st.text_input("你的暱稱")
-        with box1_right:
-            user_email = st.text_input("電子郵件地址")
+        # st.subheader("為此專案命名")
+        project_name = st.text_input("為此專案命名（名稱請勿包含空格） 👇", help = 'hello')
+        if ' ' in project_name:
+            st.warning("名稱中請勿包含空格")
+
+        # box1_left,box1_mid, box1_right = st.columns((1/3, 1/3, 1/3))
+        # with box1_left:
+        #     project_name = st.text_input("Name this project with a concise name 👇")
+        # with box1_mid:
+        #     user_name = st.text_input("你的暱稱")
+        # with box1_right:
+        #     user_email = st.text_input("電子郵件地址")
 
     # ********* Define UI components *********
     STEP_1_BOX = st.empty()
@@ -176,7 +186,7 @@ def main():
 
     with STEP_1_BOX.container():
         st.subheader("Step 1. 資料準備")
-        TAB_III_DATA_QUERY, TAB_USER_UPLOAD = st.tabs(['資策會數轉院輿情資料庫', '自行上傳資料'])
+        TAB_III_DATA_QUERY, TAB_USER_UPLOAD, TAB_PDF_REPORT = st.tabs(['資策會數轉院輿情資料庫', '自行上傳資料', '研究報告或調查報告'])
         
         with TAB_III_DATA_QUERY:
             s1_III_l, s1_III_r = st.columns((1/2, 1/2))
@@ -186,6 +196,9 @@ def main():
                 s1_III_result = st.empty()
         with TAB_USER_UPLOAD:
             s1_USER_l, s1_USER_r = st.columns((1/2, 1/2))
+        with TAB_PDF_REPORT:
+            s1_PDF_l, s1_PDF_r = st.columns((1/2, 1/2))
+        
         s1_FLOW_CONTROL = st.empty()
 
     with STEP_2_BOX.container():
@@ -200,15 +213,10 @@ def main():
 
     # ******** Step 1: Filter News *********
     def s1_filter_news():
-
-        
-        st.code("""根據您的專案需求，從資料庫中透過關鍵字搜尋出您需要的新聞。
-    您可以在這一步中先確認新聞數量與內容是否符合您的需求，再決定是否進行後續的趨勢推論。
-                """)
         
 
         # *** Date input ***
-        st.markdown("<h5>請選擇新聞來源之時間範圍</h5>", unsafe_allow_html = True)
+        st.markdown("<h5>新聞查詢</h5>", unsafe_allow_html = True)
         col1, col2 = st.columns((1/2, 1/2))
         with col1:
             try:
@@ -252,12 +260,12 @@ def main():
         query = st.button("Query", key = 'query')
         # * 1. Querying data from database with keywords input & update the fetched data to st.session_state
         if query:
-            if not user_name:
-                st.warning("請輸入您的暱稱")
-                st.stop()
-            if not user_email:
-                st.warning("請輸入您的 email")
-                st.stop()
+            # if not user_name:
+            #     st.warning("請輸入您的暱稱")
+            #     st.stop()
+            # if not user_email:
+            #     st.warning("請輸入您的 email")
+            #     st.stop()
             if not keywords_input:
                 st.warning("請輸入至少一個關鍵字")
                 st.stop()
@@ -361,6 +369,20 @@ def main():
     - 若您手邊只有新聞原文資料，請使用**新聞摘要產生器**工具來製作（參考左側選單）。
     - 若您的新聞筆數很大，請調整**批次數量**參數，讓語言模型分批處理。""")
             
+    
+    def s1_pdf_report_upload():
+        # * pdf 上傳的表單
+    
+        pdf_uploaded = st.file_uploader("上傳 PDF 格式研究報告（支援複數檔案）", type = "pdf", accept_multiple_files = True, key = 'pdfs')    
+
+        if st.button("確認", key = 'pdf_upload'):
+            if pdf_uploaded is not None:
+                for file in pdf_uploaded:
+                    if file.name not in st.session_state["pdfs_raw"].keys():
+                        pdf_in_messages = DataManager.load_pdfs(file)
+                        st.session_state["pdfs_raw"][file.name] = pdf_in_messages
+            st.rerun()
+
 
 
     # ******** Step 2: Customization and Generate *********
@@ -432,6 +454,8 @@ def main():
 
             else: 
                 # ******************************** Console Box *************************************
+                user_name, user_email = 'Wally', "huang0jin@gmail.com"
+
                 with s2_CONSOLE_box.container(border = True):
                     st.markdown("<h5>進度報告</h5>", unsafe_allow_html = True)
                     try:
@@ -480,7 +504,7 @@ def main():
             s1_filter_news()
 
         with s1_III_result.container(border = False):
-            st.markdown("<h5>查詢結果</h5>", unsafe_allow_html = True)
+            st.markdown("<h5>結果</h5>", unsafe_allow_html = True)
             st.dataframe(st.session_state['self_select_raw_data'], height = 383)
             if not st.session_state['self_select_raw_data'].empty:
                 if st.button("清除", key = 'iii_news_raw_clear'):
@@ -499,6 +523,17 @@ def main():
                     st.rerun()
             else:
                 st.dataframe(pd.DataFrame())
+
+        with s1_PDF_l:
+            st.markdown("<h5>上傳研究報告 / 調查報告資料</h5>", unsafe_allow_html = True)
+            s1_pdf_report_upload()
+        with s1_PDF_r:
+            st.markdown("<h5>預覽</h5>", unsafe_allow_html = True)
+            with st.container(height = 250, border = False):
+                for key, value in st.session_state["pdfs_raw"].items():
+                    st.caption(f"**:blue[{key}]**")
+                    st.json(value, expanded = False)
+
 
         with s1_FLOW_CONTROL.container():
             st.divider()

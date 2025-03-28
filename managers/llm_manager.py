@@ -19,6 +19,10 @@ from .data_manager import DataManager
 # OPENAI_KEY = config['OPENAI_KEY']
 # *** Read in API key at Streamlit (by streamlit.secrets) ***
 
+
+if "debug_mode" not in st.session_state:
+    st.session_state['debug_mode'] = False
+
 class LlmManager:
     if 'KEY_verified' not in st.session_state:
         st.session_state['KEY_verified'] = False
@@ -106,10 +110,15 @@ class LlmManager:
                 memory += response.content
                 response = chain.invoke({"input": in_message, "memory": memory})
             memory += str(response.content)
+
+            if st.session_state['debug_mode']:
+                st.write(memory)
+                
             return memory
         
         summary_json = DataManager.find_json_object(run_with_memory(chain, in_message))
-        # st.write(summary_json)
+        if st.session_state['debug_mode']:
+            st.write(summary_json)
 
         fail_count = 0
         while (summary_json in ["null", "DecodeError", None]):

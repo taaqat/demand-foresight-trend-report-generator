@@ -59,7 +59,7 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
         three_vers = {}
         for ver in range(1, 4):
             chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step2_prompt(title, ver, additional), st.session_state['model'])
-            three_vers.update(LlmManager.llm_api_call(chain, in_message))
+            three_vers.update(LlmManager.llm_api_call(chain, in_message.rstrip()))
             
             st_bar.progress(1/5 * (ver/3), f"({round(1/5 * (ver/3) * 100)}%) Generating {title} trend report (ver {ver + 1})")
         st.session_state['self_select_three_vers'] = three_vers
@@ -78,7 +78,7 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
 
         chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step3_prompt(additional), 
                                                st.session_state['model'])
-        trends_basic = LlmManager.llm_api_call(chain, in_message)
+        trends_basic = LlmManager.llm_api_call(chain, in_message.rstrip())
 
         st.session_state['self_select_trends_basic'] = trends_basic
 
@@ -104,7 +104,7 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
             '''
             chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step4_prompt(additional),
                                                    st.session_state['model'])
-            trends_with_events.append(LlmManager.llm_api_call(chain, in_message))
+            trends_with_events.append(LlmManager.llm_api_call(chain, in_message.rstrip()))
             st_bar.progress(2/5 + 1/5 * (count/len(trends_basic)), text = f"({round((2/5 + 1/5 * (count/len(trends_basic))) * 100)}%) Classifying events to each trend..." )
             count += 1
 
@@ -123,7 +123,7 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
             in_message = json.dumps(trend)
             chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step5_prompt(cols, additional),
                                                    st.session_state['model'])
-            trend_inference.update(LlmManager.llm_api_call(chain, in_message))
+            trend_inference.update(LlmManager.llm_api_call(chain, in_message.rstrip()))
             st_bar.progress(3/5 + 1/5 * (count/len(trends_with_events)), text = f"({round((3/5 + 1/5 * (count/len(trends_with_events))) * 100)}%) Inferring {title} trend report..." )
             count += 1
         st.session_state['self_select_trend_inference'] = trend_inference
@@ -143,7 +143,7 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
 
         chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.step6_prompt(additional),
                                                st.session_state['model'])
-        final_summary = LlmManager.llm_api_call(chain, in_message)
+        final_summary = LlmManager.llm_api_call(chain, in_message.rstrip())
         st.write('''    🤝 Final summarization completed! ''')
         st_bar.progress(1, text = f"(100%) Complete!")
         st_bar.empty()
@@ -169,5 +169,5 @@ def get_key_data_per_report(title, trend_report_json, pdf_text, pdf_file_name):
     """
     chain = LlmManager.create_prompt_chain(PromptManager.SELF_SELECT.get_key_data_from_pdf(title, trend_report_json),
                                                st.session_state['model'])
-    pdf_output = {pdf_file_name: LlmManager.llm_api_call(chain, in_message = pdf_text)}
+    pdf_output = {pdf_file_name: LlmManager.llm_api_call(chain, in_message = pdf_text.rstrip())}
     st.session_state['pdfs_output'].update(pdf_output)

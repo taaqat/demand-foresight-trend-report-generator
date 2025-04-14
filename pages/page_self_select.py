@@ -123,6 +123,13 @@ if "model_type" not in st.session_state:
 if "self_select_user_upload" not in st.session_state:
     st.session_state['self_select_user_upload'] = pd.DataFrame()
 
+# 修復：初始化缺少的會話狀態變數
+if 'debug_mode' not in st.session_state:
+    st.session_state['debug_mode'] = False
+
+if 'self_select_trends_with_events' not in st.session_state:
+    st.session_state['self_select_trends_with_events'] = []
+
 # *** 模型選擇
 if st.session_state['model_type'] == "":
     st.info("**請先選擇欲使用的語言模型**")
@@ -445,10 +452,21 @@ def main():
                                 user_upload_data
                             )
 
-                    except:
+                    except KeyError as e:
+                        st.error(f"找不到必要的會話狀態變數: {e}")
                         SessionManager.send_notification_email(user_name, user_email, type = 'failed')
-                        raise NotImplementedError("Something went wrong... Please trace back to debug.")
-                    
+                        st.warning(f"系統錯誤: 會話狀態變數未被初始化。請回到步驟一重新開始，或聯繫系統管理員。")
+                        
+                    except ValueError as e:
+                        st.error(f"資料格式錯誤: {e}")
+                        SessionManager.send_notification_email(user_name, user_email, type = 'failed')
+                        st.warning("資料庫中可能缺少所需的檔案，或檔案格式不正確。請確認您的資料來源，或聯繫系統管理員。")
+                        
+                    except Exception as e:
+                        SessionManager.send_notification_email(user_name, user_email, type = 'failed')
+                        st.error(f"執行過程中發生錯誤: {str(e)}")
+                        st.warning("處理過程中出現問題，請嘗試重新開始，或聯繫系統管理員獲取幫助。")
+                        raise
 
                 # ******************************** Output Box *************************************
                 # *** check the output format, read from cache folders, and generate download link ***

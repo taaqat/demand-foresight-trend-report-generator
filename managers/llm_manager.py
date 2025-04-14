@@ -100,6 +100,9 @@ class LlmManager:
         # This function ensures the return value from LLM is complete
         def run_with_memory(chain, in_message) -> str:
             memory = ""
+
+            if not in_message or in_message.strip() == "":
+                return "Error: Empty input message"
             
             response = chain.invoke({"input": in_message, "memory": memory})
             while response.usage_metadata["output_tokens"] >= 5000:

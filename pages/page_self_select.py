@@ -467,7 +467,7 @@ def main():
 
                     except Exception as e:
                         st.write(e)
-                        SessionManager.send_notification_email(user_name, user_email, type = 'failed')
+                        SessionManager.send_notification_email(user_name, user_email, type = 'failed', error_msg = e)
                         raise NotImplementedError("Something went wrong... Please trace back to debug.")
                     
 

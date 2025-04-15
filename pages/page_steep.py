@@ -157,7 +157,8 @@ if 'steep_prompt_5' not in st.session_state:
     st.session_state['steep_prompt_5'] = PromptManager.STEEP.step5_prompt
 if 'steep_prompt_6' not in st.session_state:
     st.session_state['steep_prompt_6'] = PromptManager.STEEP.step6_prompt
-
+if "debug_mode" not in st.session_state:
+    st.session_state["debug_mode"] = False
     
 
 

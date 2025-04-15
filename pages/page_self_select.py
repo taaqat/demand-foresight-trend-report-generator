@@ -140,6 +140,9 @@ if "pdfs_output" not in st.session_state:
 if "self_select_user_upload" not in st.session_state:
     st.session_state['self_select_user_upload'] = pd.DataFrame()
 
+if "debug_mode" not in st.session_state:
+    st.session_state["debug_mode"] = False
+
 # *** 模型選擇
 if st.session_state['model_type'] == "":
     st.info("**請先選擇欲使用的語言模型**")

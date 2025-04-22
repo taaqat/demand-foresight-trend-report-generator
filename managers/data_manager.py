@@ -254,6 +254,7 @@ class DataManager:
             try:
                 return response.json()['file_content']
             except Exception as e:
+                st.write(e)
                 raise ValueError("No such file in the database!")
         
     # *****************************************
@@ -357,6 +358,17 @@ class DataManager:
         try:
             data = base64.b64decode(b64_str)
             data = BytesIO(data)
+
+            return data
+        except:
+            raise UnicodeDecodeError("Encountered Errors while tranforming base64 to dataframe. Please ensure the original data format to be 'pptx'.")
+        
+    # --- Transform Base64 formatted json to Json format data
+    @staticmethod
+    def b64_to_json(b64_str):
+        try:
+            data = base64.b64decode(b64_str)
+            data = json.loads(data)
 
             return data
         except:

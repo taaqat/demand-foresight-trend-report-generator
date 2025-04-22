@@ -47,7 +47,9 @@ st.session_state["ym_mapping"] = {
     },
     '2025': {
         "January": ["2025-01-01", "2025-01-31"],
-        "February": ["2025-02-01", "2025-02-28"]
+        "February": ["2025-02-01", "2025-02-28"],
+        "March": ["2025-03-01", "2025-03-31"]
+
  }}
 
 
@@ -225,6 +227,7 @@ def main():
         period = "-".join(st.session_state['ym_mapping']['2025'][month])
         try:
             filename_html = topic_selection + '_trends_' + period + '_html.txt'
+            st.write(filename_html)
             filename_pptx = topic_selection + '_trends_' + period + '.pptx'
 
             html_body = DataManager.get_files(filename_html, 'txt')
@@ -249,7 +252,9 @@ def main():
                 )
 
             st.html(html_body)
-        except:
+        except Exception as e:
+            st.write(e)
+            st.write(filename_html)
             st.warning("該主題之月報尚未生成！")
         
 
@@ -270,10 +275,11 @@ def main():
                     with cl2025:
                         topic_selection = st.selectbox("選擇主題", ['social', 'economic', 'environmental', 'technological', 'political', 'business_and_investment'], key = '2025_topic')
                     with cr2025:
-                        month = st.selectbox("選擇月份", ['January', "February"], key = '2025_month')
+                        month = st.selectbox("選擇月份", st.session_state['ym_mapping']['2025'].keys(), key = '2025_month')
                     load_steep_2025(topic_selection, month, cl2025, cr2025)
 
     render()
+    st.write(DataManager.get_files("social_trends_2025-03-01-2025-03-31_html.txt", 'txt'))
     
 
     

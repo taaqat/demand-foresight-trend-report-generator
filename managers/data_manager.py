@@ -216,7 +216,7 @@ class DataManager:
         http.mount("http://", adapter) 
         try:
             response = http.post(url, json = payload, headers = headers)
-            # st.info(f"File {json.loads(response.content)['file_name']} has been updated to III's database")
+            st.info(f"File {json.loads(response.content)['file_name']} has been updated to III's database")
         except:
             response = http.post(url, json = payload, headers = headers)
             st.warning(response.content)

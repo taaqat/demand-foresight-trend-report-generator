@@ -586,6 +586,7 @@ def main():
                 json_body = DataManager.get_files(f"{topic}_trend_report_{start_date}-{end_date}.json", 'json')
                 json_body = DataManager.b64_to_json(json_body)
                 html_slide_output = LlmManager.llm_api_call(chain, (json.dumps(json_body) + f"\n\n主題名稱：{topic}\n\n時間段：{start_date} to {end_date}").strip())
+                st.html(html_slide_output['output'])
                 
                 # ** POST BACK to DB & 串 ARCHIVE PAGE
                 status = DataManager.post_files(

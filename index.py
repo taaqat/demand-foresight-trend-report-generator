@@ -11,6 +11,7 @@ from streamlit_authenticator import Hasher
 from managers.session_manager import SessionManager
 from managers.data_manager import DataManager
 from managers.llm_manager import LlmManager
+from managers.constants import *
 
 
 # *********** Config ***********
@@ -30,27 +31,7 @@ if "model_type" not in st.session_state:
 
 # * configure the start-date, end-date, and theme picture path for year month in 2024
 #  {'2024 MONTH': [START_DATE, END_DATE, PIC_PATH]}
-st.session_state["ym_mapping"] = {
-    '2024': {
-        'January': ["2024-01-01", "2024-01-31", 1],
-        'February': ["2024-02-01", "2024-02-29", 2],
-        'March': ["2024-03-01", "2024-03-31", 3],
-        'April': ["2024-04-01", "2024-04-30", 1],
-        'May': ["2024-05-01", "2024-05-31", 2],
-        'June': ["2024-06-01", "2024-06-30", 3],
-        'July': ["2024-07-01", "2024-07-31", 1],
-        'August': ["2024-08-01", "2024-08-31", 2],
-        'September': ["2024-09-01", "2024-10-01", 3],
-        'October': ["2024-10-01", "2024-10-31", 1],
-        'November': ["2024-11-01", "2024-11-27", 2],
-        'December': ["2024-12-01", "2024-12-31", 3],
-    },
-    '2025': {
-        "January": ["2025-01-01", "2025-01-31"],
-        "February": ["2025-02-01", "2025-02-28"],
-        "March": ["2025-03-01", "2025-03-31"]
-
- }}
+st.session_state["ym_mapping"] = ym_mapping
 
 
 # ***************************************************
@@ -227,7 +208,6 @@ def main():
         period = "-".join(st.session_state['ym_mapping']['2025'][month])
         try:
             filename_html = topic_selection + '_trends_' + period + '_html.txt'
-            st.write(filename_html)
             filename_pptx = topic_selection + '_trends_' + period + '.pptx'
 
             html_body = DataManager.get_files(filename_html, 'txt')
@@ -253,9 +233,9 @@ def main():
 
             st.html(html_body)
         except Exception as e:
-            st.write(e)
-            st.write(filename_html)
             st.warning("該主題之月報尚未生成！")
+            st.warning(e)
+
         
 
     # * User choose the year month *
@@ -279,7 +259,6 @@ def main():
                     load_steep_2025(topic_selection, month, cl2025, cr2025)
 
     render()
-    st.write(DataManager.get_files("social_trends_2025-03-01-2025-03-31_html.txt", 'txt'))
     
 
     

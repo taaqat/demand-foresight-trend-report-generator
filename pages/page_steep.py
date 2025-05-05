@@ -8,6 +8,7 @@ from managers.export_manager import ExportManager
 from managers.llm_manager import LlmManager
 from managers.prompt_manager import PromptManager
 from managers.session_manager import SessionManager
+from managers.constants import *
 
 from scripts.steep_generate import gen_trend_report_1, gen_trend_report_2
 
@@ -94,11 +95,21 @@ with st.sidebar:
             ]:
                 del st.session_state[session]
             st.rerun()
-
-        only_html_slide = st.toggle("html_slide_重做")
-        if only_html_slide:
+        only_html_slide_on  = False
+        only_html_slide_off = False
+        if st.session_state['steep_running'] != "html_slide_補做":
+            only_html_slide_on  = st.button("開啟網頁版簡報製作區塊")
+        else:
+            only_html_slide_off = st.button("關閉網頁版簡報製作區塊")
+        if only_html_slide_on:
             st.session_state['steep_running'] = "html_slide_補做"
             st.rerun()
+        if only_html_slide_off:
+            st.session_state['steep_running'] = False
+            st.rerun()
+
+
+        
 
     if st.button("進階設定"):
         developer_option()
@@ -164,27 +175,7 @@ if 'steep_prompt_6' not in st.session_state:
     st.session_state['steep_prompt_6'] = PromptManager.STEEP.step6_prompt
 if "debug_mode" not in st.session_state:
     st.session_state["debug_mode"] = False
-st.session_state["ym_mapping"] = {
-    '2024': {
-        'January': ["2024-01-01", "2024-01-31", 1],
-        'February': ["2024-02-01", "2024-02-29", 2],
-        'March': ["2024-03-01", "2024-03-31", 3],
-        'April': ["2024-04-01", "2024-04-30", 1],
-        'May': ["2024-05-01", "2024-05-31", 2],
-        'June': ["2024-06-01", "2024-06-30", 3],
-        'July': ["2024-07-01", "2024-07-31", 1],
-        'August': ["2024-08-01", "2024-08-31", 2],
-        'September': ["2024-09-01", "2024-10-01", 3],
-        'October': ["2024-10-01", "2024-10-31", 1],
-        'November': ["2024-11-01", "2024-11-27", 2],
-        'December': ["2024-12-01", "2024-12-31", 3],
-    },
-    '2025': {
-        "January": ["2025-01-01", "2025-01-31"],
-        "February": ["2025-02-01", "2025-02-28"],
-        "March": ["2025-03-01", "2025-03-31"]
-
- }}
+st.session_state["ym_mapping"] = ym_mapping
     
 
 
@@ -230,6 +221,7 @@ def main():
         # with subcol2:
         #     user_email = st.text_input("電子郵件地址")
         # *** Date input ***
+
         st.subheader("選擇新聞來源之時間範圍")
         subcol3, subcol4 = st.columns((1/2, 1/2))
         with subcol3:
@@ -274,6 +266,9 @@ def main():
 
             if st.button("點擊編輯 System prompt"):
                 PromptManager.STEEP.prompt_editor()
+
+    
+    slide_generate_box = st.empty()
 
     # *** Check if the inputs are valid ***
     # COND1 - 7 為必須滿足的條件。COND8 為建議滿足的條件。
@@ -364,6 +359,7 @@ def main():
     if st.session_state['steep_running'] == 'step1':
         console_box_1.empty()
         console_box_2.empty()
+        slide_generate_box.empty()
         with console_box_1.container(border = True):
 
             st.subheader("進度報告")
@@ -422,6 +418,7 @@ def main():
     elif st.session_state['steep_running'] == 'step2':
         console_box_1.empty()
         console_box_2.empty()
+        slide_generate_box.empty()
         with console_box_2.container(border = True):
             st.subheader("進度報告")
 
@@ -535,6 +532,7 @@ def main():
     elif st.session_state['steep_running'] == 'step3': 
         # ** Generate Flexible Web Slides with HTML & CSS (by AI)
         console_box_2.empty()
+        slide_generate_box.empty()
         with console_box_2.container(border = True):
             # * Undo button
             if st.button("Undo", key = 'back_to_step2'):
@@ -567,38 +565,56 @@ def main():
 
     elif st.session_state['steep_running'] == 'html_slide_補做':
 
-        cccl, cccc, cccr = st.columns(3)
-        with cccl:
-            month = st.selectbox("Month", ['January', "February", "March"])
-            start_date = st.session_state['ym_mapping']['2025'][month][0]
-            end_date = st.session_state['ym_mapping']['2025'][month][1]
+        with slide_generate_box.container():
 
-        with cccc:
-            topic = st.selectbox("Topic", ['social', 'technological', 'economic', 'environmental', 'political', 'business_and_investment'])
-        with cccr:
+            st.divider()
+            st.subheader("單純製作網頁版簡報：")
+            st.info("請確保對應月份、主題的月報 JSON 檔已生成")
+            cccl, cccr = st.columns(2)
+            with cccl:
+                month = st.selectbox("Month", st.session_state['ym_mapping']['2025'].keys())
+                start_date = st.session_state['ym_mapping']['2025'][month][0]
+                end_date = st.session_state['ym_mapping']['2025'][month][1]
+
+            with cccr:
+                topic = st.selectbox("Topic", ['social', 'technological', 'economic', 'environmental', 'political', 'business_and_investment'])
+            
             submittt = st.button("確認送出")
 
-        if submittt:
-            with st.spinner("正在製作簡報..."):
-                filename = f"{topic}_trends_{start_date}-{end_date}_html.txt"
-                st.write(filename)
-                chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
-                json_body = DataManager.get_files(f"{topic}_trend_report_{start_date}-{end_date}.json", 'json')
-                json_body = DataManager.b64_to_json(json_body)
-                html_slide_output = LlmManager.llm_api_call(chain, (json.dumps(json_body) + f"\n\n主題名稱：{topic}\n\n時間段：{start_date} to {end_date}").strip())
-                st.html(html_slide_output['output'])
+            if submittt:
+                with st.spinner("正在製作簡報..."):
+                    filename = f"{topic}_trends_{start_date}-{end_date}_html.txt"
+                    chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
+
+                    try:
+                        json_body = DataManager.get_files(f"{topic}_trend_report_{start_date}-{end_date}.json", 'json')
+                        json_body = DataManager.b64_to_json(json_body)
+                        html_slide_output = LlmManager.llm_api_call(chain, (json.dumps(json_body) + f"\n\n主題名稱：{topic}\n\n時間段：{start_date} to {end_date}").strip())
+                        with st.expander("點擊展開"):
+                            st.html(html_slide_output['output'])
+
+                        # ** POST BACK to DB & 串 ARCHIVE PAGE
+                        status = DataManager.post_files(
+                            filename,
+                            html_slide_output['output'],
+                            str(dt.datetime.today() + dt.timedelta(365)), 
+                            st.session_state['user_name'], 
+                            st.session_state['user_email']
+                        )
+                        st.write(status)
+                        SessionManager.send_notification_email("Wally", "huang0jin@gmail.com", "completed")
+                        st.success("簡報製作完成")
+
+                    # * 確認對應月份、主題之趨勢報告 JSON 檔案已經完成（需作為產生網頁版簡報的基礎）
+                    except ValueError:
+                        st.error("""該月份之趨勢報告 JSON 尚未製作。你可以：
+    1. 直接用 STEEP 月報產生器，一條龍製作完全部（包含 JSON, pptx, 以及網頁版簡報
+    2. 先做完 JSON 檔案之後，再回訪此區塊，製作網頁版簡報""")
+                        
+                    except Exception as e:
+                        st.warning(e)
                 
-                # ** POST BACK to DB & 串 ARCHIVE PAGE
-                status = DataManager.post_files(
-                    filename,
-                    html_slide_output['output'],
-                    str(dt.datetime.today() + dt.timedelta(365)), 
-                    st.session_state['user_name'], 
-                    st.session_state['user_email']
-                )
-                st.write(status)
-                SessionManager.send_notification_email("Wally", "huang0jin@gmail.com", "completed")
-            st.success("簡報製作完成")
+                
 
 
 

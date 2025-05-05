@@ -217,9 +217,8 @@ class DataManager:
         try:
             response = http.post(url, json = payload, headers = headers)
             st.info(f"File {json.loads(response.content)['file_name']} has been updated to III's database")
-        except:
+        except Exception as e:
             response = http.post(url, json = payload, headers = headers)
-            st.warning(response.content)
 
         return response
     

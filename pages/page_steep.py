@@ -141,9 +141,9 @@ if 'steep_end' not in st.session_state:
 if 'steep_topic' not in st.session_state:
     st.session_state['steep_topic'] = None
 if 'user_name' not in st.session_state:
-    st.session_state['user_name'] = None
+    st.session_state['user_name'] = 'Wally'
 if 'user_email' not in st.session_state:
-    st.session_state['user_email'] = None
+    st.session_state['user_email'] = 'Wally'
 if 'CLAUDE_KEY' not in st.session_state:
     st.session_state['CLAUDE_KEY'] = ""
 if 'OPENAI_KEY' not in st.session_state:
@@ -597,6 +597,7 @@ def main():
                     st.session_state['user_email']
                 )
                 st.write(status)
+                SessionManager.send_notification_email("Wally", "huang0jin@gmail.com", "completed")
             st.success("簡報製作完成")
 
 

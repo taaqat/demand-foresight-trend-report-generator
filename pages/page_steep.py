@@ -588,13 +588,14 @@ def main():
                 html_slide_output = LlmManager.llm_api_call(chain, (json.dumps(json_body) + f"\n\n主題名稱：{topic}\n\n時間段：{start_date} to {end_date}").strip())
                 
                 # ** POST BACK to DB & 串 ARCHIVE PAGE
-                DataManager.post_files(
+                status = DataManager.post_files(
                     filename,
                     html_slide_output['output'],
                     str(dt.datetime.today() + dt.timedelta(365)), 
                     st.session_state['user_name'], 
                     st.session_state['user_email']
                 )
+                st.write(status)
             st.success("簡報製作完成")
 
 

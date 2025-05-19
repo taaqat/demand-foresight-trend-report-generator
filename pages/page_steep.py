@@ -396,11 +396,11 @@ def main():
                 "style": {"top": "0.46rem", "right": "0.4rem"},
                 "hasText": True
                 }]         # * -> code editor 右上角的 Save 按鈕。點擊後，使用者變更後的資料將被存放置 session_state。
-
-            response_dict = code_editor(json.dumps({"trends_with_events": st.session_state['steep_trends_with_events']}, indent = 4, ensure_ascii = False), lang = 'json',
-                                        buttons = bs,
-                                        height=[10, 20],
-                                        options = {"wrap": True})
+            if 'steep_trends_with_events' in st.session_state:
+                response_dict = code_editor(json.dumps({"trends_with_events": st.session_state['steep_trends_with_events']}, indent = 4, ensure_ascii = False), lang = 'json',
+                                            buttons = bs,
+                                            height=[10, 20],
+                                            options = {"wrap": True})
 
             if st.button("送出，開始推論:red[**（送出前記得點擊右上角按鈕儲存變更）**]"):
 

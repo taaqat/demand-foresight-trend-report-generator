@@ -253,7 +253,7 @@ class DataManager:
             try:
                 return response.json()['file_content']
             except Exception as e:
-                st.write(e)
+                # st.write(e)
                 raise ValueError("No such file in the database!")
         
     # *****************************************

@@ -233,8 +233,7 @@ def main():
 
             st.html(html_body)
         except Exception as e:
-            st.warning("該主題之月報尚未生成！")
-            st.warning(e)
+            st.warning(str(e) + " 該月份該主題之月報尚未製作完成！")
 
         
 

@@ -38,7 +38,10 @@ def gen_trend_report_customized(title: str, start_date: str, end_date: str, user
             data = summarize_all(raw_data, user_name, user_email, title, start_date, end_date)
 
     else:
-        merged_raw = pd.concat([raw_data[['重點摘要', '關鍵數據']], uploaded_data[['重點摘要', '關鍵數據']]])
+        if raw_data.empty:
+            merged_raw = uploaded_data
+        else:
+            merged_raw = pd.concat([raw_data[['重點摘要', '關鍵數據']], uploaded_data[['重點摘要', '關鍵數據']]])
         data = summarize_all(merged_raw, user_name, user_email, title, start_date, end_date)
 
     # -------------------------------------------------------------------------------------

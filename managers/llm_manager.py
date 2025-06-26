@@ -32,7 +32,7 @@ class LlmManager:
     @st.dialog("請選擇欲使用的語言模型")
     def model_selection():
 
-        model_selected = st.selectbox("請選擇欲使用的語言模型", ["claude-3-7-sonnet-20250219", "gpt-4o"])
+        model_selected = st.selectbox("請選擇欲使用的語言模型", ["claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "gpt-4o"])
         if st.button("確認"):
             st.session_state['model_type'] = model_selected
             st.rerun()
@@ -47,6 +47,14 @@ class LlmManager:
         
         if st.session_state['model_type'] == 'claude-3-7-sonnet-20250219':
             model = ChatAnthropic(model = 'claude-3-7-sonnet-20250219',
+                                    api_key = CLAUDE_KEY,
+                                    max_tokens = 8000,
+                                    temperature = 0.0,
+                                    verbose = True
+                                    )
+            return model
+        elif st.session_state['model_type'] == 'claude-sonnet-4-20250514':
+            model = ChatAnthropic(model = 'claude-sonnet-4-20250514',
                                     api_key = CLAUDE_KEY,
                                     max_tokens = 8000,
                                     temperature = 0.0,

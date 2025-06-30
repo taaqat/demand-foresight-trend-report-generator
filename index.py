@@ -254,7 +254,7 @@ def main():
                     with cl2025:
                         topic_selection = st.selectbox("選擇主題", ['social', 'economic', 'environmental', 'technological', 'political', 'business_and_investment'], key = '2025_topic')
                     with cr2025:
-                        month = st.selectbox("選擇月份", st.session_state['ym_mapping']['2025'].keys(), key = '2025_month')
+                        month = st.selectbox("選擇月份", list(st.session_state['ym_mapping']['2025'].keys())[::-1], key = '2025_month')
                     load_steep_2025(topic_selection, month, cl2025, cr2025)
 
     render()

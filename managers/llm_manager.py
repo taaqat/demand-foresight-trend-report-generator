@@ -107,6 +107,8 @@ class LlmManager:
     @staticmethod
     def llm_api_call(chain, in_message):
 
+        in_message = in_message.strip()
+
         summary_json = ""                      # initialize output value
 
         # This function ensures the return value from LLM is complete
@@ -116,7 +118,7 @@ class LlmManager:
             response = chain.invoke({"input": in_message, "memory": memory})
             while response.usage_metadata["output_tokens"] >= 5000:
                 memory += response.content
-                response = chain.invoke({"input": in_message, "memory": memory})
+                response = chain.invoke({"input": in_message.strip() if isinstance(in_message, str) else "N/A", "memory": memory})
             memory += str(response.content)
 
             if st.session_state['debug_mode']:

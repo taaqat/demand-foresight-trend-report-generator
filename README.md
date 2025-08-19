@@ -81,6 +81,99 @@ Then install required packages:
 pip install -r requirements.txt
 ```
 
+Then configure your `.streamlit` folder
+- `.streamlit/config.toml`
+    You can change the theme setting in this file. The following is the example usage. You can modify at will. For details, please refer to [this link](https://docs.streamlit.io/develop/api-reference/configuration/config.toml).
+    ```
+    [theme]
+    primaryColor="#baad8d"
+    backgroundColor="#FFFFFF"
+    secondaryBackgroundColor="#ebebeb"
+    textColor="#31333F"
+    font="sans serif"
+
+    [client]
+    showErrorDetails = "full"
+    toolbarMode = "auto"
+    showSidebarNavigation = false
+    ```
+- `.streamlit/secrets.toml`
+    This file is used to store your credentials, including LLM api keys and google service account credential. Please configure as follows:
+    ```
+    CLAUDE_KEY = ""
+    OPENAI_KEY = ""
+    III_KEY = "Please request the III key from admin (鴻壹)"
+
+    [connections.gsheets]
+    spreadsheet = "https://docs.google.com/spreadsheets/d/1r2dfV1ubKywv5RjcLCB6wTfa25O9_s1kSm8grvw7p9w/edit?gid=0#gid=0"
+
+    type = "service_account"
+    project_id =  "YOUR_PROJECT_ID"
+    private_key_id = "YOUR_PRIVATE_KEY_ID"
+    private_key = "YOUR_PRIVATE_KEY"
+    client_email = "YOUR_CLIENT_EMAIL"
+    client_id = "YOUR_CLIENT_ID"
+    auth_uri = "https://accounts.google.com/o/oauth2/auth"
+    token_uri = "https://oauth2.googleapis.com/token"
+    auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+    client_x509_cert_url = "YOUR_CERT_URL"
+    universe_domain = "googleapis.com"
+
+    [connections.gsheets2]
+    spreadsheet = "https://docs.google.com/spreadsheets/d/1XjqihYMdblq6DZxP4_f6U3mWnGMcUxfhVXfhfMys4-Q/edit?gid=0#gid=0"
+    type = "service_account"
+    project_id =  "YOUR_PROJECT_ID"
+    private_key_id = "YOUR_PRIVATE_KEY_ID"
+    private_key = "YOUR_PRIVATE_KEY"
+    client_email = "YOUR_CLIENT_EMAIL"
+    client_id = "YOUR_CLIENT_ID"
+    auth_uri = "https://accounts.google.com/o/oauth2/auth"
+    token_uri = "https://oauth2.googleapis.com/token"
+    auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+    client_x509_cert_url = "YOUR_CERT_URL"
+    universe_domain = "googleapis.com"
+
+
+    [connections.gsauth]
+    spreadsheet = "https://docs.google.com/spreadsheets/d/1eUn0aOFSnHh3oOLEExeD5lr306RNqNQdpterkPbEXWY/edit?gid=0#gid=0"
+    type = "service_account"
+    project_id =  "YOUR_PROJECT_ID"
+    private_key_id = "YOUR_PRIVATE_KEY_ID"
+    private_key = "YOUR_PRIVATE_KEY"
+    client_email = "YOUR_CLIENT_EMAIL"
+    client_id = "YOUR_CLIENT_ID"
+    auth_uri = "https://accounts.google.com/o/oauth2/auth"
+    token_uri = "https://oauth2.googleapis.com/token"
+    auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+    client_x509_cert_url = "YOUR_CERT_URL"
+    universe_domain = "googleapis.com"
+
+    [permission]
+    authenticate = false
+    trend_report_generator = true
+    theme_based_generator = true
+    gallery = true 
+    chat_tool = true
+    visualization = false
+    user_token = false
+
+
+    [gsheet-credits]
+    credits = '''{
+  "type": "service_account",
+  "project_id": "YOUR_PROJECT_ID",
+  "private_key_id": "YOUR_PRIVATE_KEY_ID",
+  "private_key": "YOUR_PRIVATE_KEY",
+  "client_email": "YOUR_CLIENT_EMAIL",
+  "client_id": "YOUR_CLIENT_ID",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "YOUR_CERT_URL",
+  "universe_domain": "googleapis.com"
+    }'''
+    ```
+
 Finally, execute by the following command:
 ```
 streamlit run index.py

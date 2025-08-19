@@ -1,5 +1,47 @@
 # Demand Foresight Trend Report Generator
-## Project Introduction
+## Flowchart
+> 以 Steep 月報生成流程為例
+```mermaid
+flowchart LR
+    IIIDB[(**DTRI News Database**)] --> Fetch(Fetch Data in given month)
+    Fetch --> A[(Day 1 news)] --> DaySum(**steep_summary.py**)
+    Fetch --> B[(Day 2 news)] --> DaySum
+    Fetch --> C[(Day 3 news)] --> DaySum
+    Fetch --> Etc[(Day ... news)] --> DaySum
+
+    DaySum --> MonthSum[(Monthly Summary)] --> Gen(**steep_generate.py**)
+    Gen --> Out1[(Output in JSON)]
+
+    Out1 --> Exp(**export_manager.py**)
+    Exp --> Exc[(Output in Excel)]
+    Exp --> Ppt[(Output in Pptx)]
+    Exc --> F1[Downloadable in **archive.py**]
+    Ppt --> F[Downloadable in **index.py**]
+
+    Out1 --> HTMLGEN(**Claude**)
+    HTMLGEN --> HTMLSlide[(HTML Slides)] --> F3[Display in **index.py**]
+
+```
+
+## Web Service
+Deployed on Streamlit Cloud Platform.
+> Link to **[this page](https://demand-foresight-trend-report-generator-main.streamlit.app/)**
+
+## Build Setup (Local)
+Clone the repository by the following command:
+```
+git clone https://github.com/taaqat/demand-foresight-trend-report-generator.git
+```
+
+Then install required packages:
+```
+pip install -r requirements.txt
+```
+
+Finally, execute by the following command:
+```
+streamlit run index.py
+```
 
 ## Structures
 ```
@@ -33,11 +75,11 @@ This file serves as the application's entry point and is primarily responsible f
 
 - Authentication
 - Introduction
-- STEEP +B Yearly Trend Report Gallery
+- STEEP +B Monthly Trend Report Gallery
 
 
 
-### pages (front end)
+### pages (front end, mainly composed of streamlit api)
 Page files are python scripts that display UIs by streamlit, including:
 
 #### `page_demo.py`: 
@@ -120,7 +162,7 @@ This file defines functions that associate with **data export**. Functions that 
 
 #### `llm_manager.py` -> `LlmManager`
 
-This file manages everything associated with LLM API call. We use Claude as our model.
+This file manages everything associated with LLM API call. 
 
 - `model_select()`: Expand a streamlit dialog form to ask user to select the model type to be used.
 

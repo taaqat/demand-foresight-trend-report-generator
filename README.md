@@ -66,7 +66,7 @@ Exp --> L
 
 
 
-## Web Service
+## Web Service (Cloud)
 Deployed on Streamlit Cloud Platform.
 > Link to **[this page](https://demand-foresight-trend-report-generator-main.streamlit.app/)**
 

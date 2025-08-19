@@ -1,16 +1,16 @@
 # Demand Foresight Trend Report Generator
-## Flowchart
-> 以 Steep 月報生成流程為例
+## Tool Explanation by Flowchart
+> Steep 月報產生器
 ```mermaid
 flowchart LR
-    IIIDB[(**DTRI News Database**)] --> Fetch(Fetch Data in given month)
+    IIIDB[(**DTRI Database**)] --> Fetch(Fetch News Data in given month)
     Fetch --> A[(Day 1 news)] --> DaySum(**steep_summary.py**)
     Fetch --> B[(Day 2 news)] --> DaySum
     Fetch --> C[(Day 3 news)] --> DaySum
     Fetch --> Etc[(Day ... news)] --> DaySum
 
     DaySum --> MonthSum[(Monthly Summary)] --> Gen(**steep_generate.py**)
-    Gen --> Out1[(Output in JSON)]
+    Gen --> Out1[(Trend Report in JSON)]
 
     Out1 --> Exp(**export_manager.py**)
     Exp --> Exc[(Output in Excel)]
@@ -21,7 +21,50 @@ flowchart LR
     Out1 --> HTMLGEN(**Claude**)
     HTMLGEN --> HTMLSlide[(HTML Slides)] --> F3[Display in **index.py**]
 
+
 ```
+
+> 特定主題報告產生器
+```mermaid
+flowchart LR
+    IIIDB[(**DTRI News Database**)] --> Fetch(Query Data by <br>**time** and **keywords**) --> FilteredRaw[(**Filtered Data**)]
+    
+    UserD[(**User Uploaded News Data**)] --> Conc[Concatenation]
+    FilteredRaw --> Conc
+
+    Conc --> Split(Split into batches)
+    Split --> A[(Batch 1 news)] --> BatchSum(**self_select_summary.py**)
+    Split --> B[(Batch 2 news)] --> BatchSum
+    Split --> C[(Batch 3 news)] --> BatchSum
+    Split --> Etc[(Batch ... news)] --> BatchSum
+
+    BatchSum --> MonthSum[(Summarized News)] --> Gen(**self_select_generate.py**)
+    Gen --> Out1[(Trend Report in JSON)]
+
+    subgraph "關鍵數據提取（非必要）"
+        Pdf[(研究報告資料)] -.-> Extract[提取 PDF 報告中<br> 與趨勢有關的**關鍵數據**]
+        Out1 -.-> Extract
+        Extract -.-> Out1
+    end
+    
+
+    Out1 --> Exp(**export_manager.py**)
+    
+
+
+    Exp --> Exc[(Output in Excel)]
+    Exp --> Ppt[(Output in Pptx)]
+```
+
+> 新聞摘要產生器
+```mermaid
+flowchart LR
+L@{ shape: lin-cyl, label: "**Google Sheet Database** <br> Provided by User" } 
+Raw[(News Data <br> Uploaded by User)] --> Exp(**summarizer.py**<br>LLM summarize)
+Exp --> L
+```
+
+
 
 ## Web Service
 Deployed on Streamlit Cloud Platform.

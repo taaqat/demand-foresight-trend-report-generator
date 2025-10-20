@@ -2,7 +2,8 @@ from dotenv import dotenv_values                                   # read api ke
 from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from langchain.schema import HumanMessage
+# from langchain.schema import HumanMessage
+from langchain_core.messages import HumanMessage
 import streamlit as st
 import json
 import time

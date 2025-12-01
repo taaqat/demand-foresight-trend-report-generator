@@ -136,9 +136,9 @@ if 'steep_end' not in st.session_state:
 if 'steep_topic' not in st.session_state:
     st.session_state['steep_topic'] = None
 if 'user_name' not in st.session_state:
-    st.session_state['user_name'] = None
+    st.session_state['user_name'] = 'Wally'
 if 'user_email' not in st.session_state:
-    st.session_state['user_email'] = None
+    st.session_state['user_email'] = 'Wally'
 if 'CLAUDE_KEY' not in st.session_state:
     st.session_state['CLAUDE_KEY'] = ""
 if 'OPENAI_KEY' not in st.session_state:
@@ -147,6 +147,16 @@ if 'KEY_verified' not in st.session_state:
     st.session_state['KEY_verified'] = False
 if "model_type" not in st.session_state:
     st.session_state['model_type'] = ""
+if 'analysis_model_type' not in st.session_state:
+    st.session_state['analysis_model_type'] = ""
+if 'report_model_type' not in st.session_state:
+    st.session_state['report_model_type'] = ""
+if 'use_same_model' not in st.session_state:
+    st.session_state['use_same_model'] = True
+if 'analysis_model' not in st.session_state:
+    st.session_state['analysis_model'] = None
+if 'report_model' not in st.session_state:
+    st.session_state['report_model'] = None
 if 'steep_running' not in st.session_state:
     st.session_state['steep_running'] = False
 if 'steep_prompt_3' not in st.session_state:
@@ -167,6 +177,16 @@ if st.session_state['model_type'] == "":
     st.info("**請先選擇欲使用的語言模型**")
     if st.button("點擊開啟選單"):
         LlmManager.model_selection()
+else:
+    # 顯示當前模型配置
+    if st.session_state.get('use_same_model', True):
+        st.success(f"✓ 已選擇模型：{st.session_state['model_type']}")
+    else:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.success(f"✓ 分析模型：{st.session_state.get('analysis_model_type', '')}")
+        with col2:
+            st.success(f"✓ 報表模型：{st.session_state.get('report_model_type', '')}")
 
 
 
@@ -516,7 +536,7 @@ def main():
 
             try:
                 with st.spinner("正在生成網頁版簡報..."):
-                    chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
+                    chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['report_model'])
                     html_slide_output = LlmManager.llm_api_call(chain, json.dumps(st.session_state['steep_json_result']) + f"\n\n主題名稱：{st.session_state['steep_topic']}\n\n時間段：{st.session_state['steep_start']} to {st.session_state['steep_end']}")
                     filename = f"{st.session_state['steep_topic']}_trends_{st.session_state['steep_start']}-{st.session_state['steep_end']}_html.txt"
                     # ** POST BACK to DB & 串 ARCHIVE PAGE
@@ -557,6 +577,8 @@ if st.secrets['permission']['user_token'] == True:
             pass
     else:
         if st.session_state['model']:
+            st.session_state['analysis_model'] = LlmManager.init_analysis_model()
+            st.session_state['report_model'] = LlmManager.init_report_model()
             main()
             
         else:
@@ -566,6 +588,8 @@ else:
     st.session_state['CLAUDE_KEY'] = st.secrets['CLAUDE_KEY']
     st.session_state['OPENAI_KEY'] = st.secrets['OPENAI_KEY']
     st.session_state['model'] = LlmManager.init_model()
+    st.session_state['analysis_model'] = LlmManager.init_analysis_model()
+    st.session_state['report_model'] = LlmManager.init_report_model()
     if st.session_state['model']:
         main()
         

@@ -18,7 +18,7 @@ from io import BytesIO
 def daily_summarize(in_message):
 
     chain = LlmManager.create_prompt_chain(sys_prompt = PromptManager.STEEP.step1_prompt,
-                                           model = st.session_state['model'])
+                                           model = st.session_state['analysis_model'])
 
     return LlmManager.llm_api_call(chain, in_message)
 

@@ -28,11 +28,42 @@ class LlmManager:
     @staticmethod
     @st.dialog("請選擇欲使用的語言模型")
     def model_selection():
-
-        model_selected = st.selectbox("請選擇欲使用的語言模型", ["claude-3-7-sonnet-20250219", "gpt-4o"])
-        if st.button("確認"):
-            st.session_state['model_type'] = model_selected
-            st.rerun()
+        st.subheader("模型配置選項")
+        
+        use_same = st.radio(
+            "選擇模型配置方式",
+            ["分析與報表使用同一模型", "分析與報表使用不同模型"],
+            index=0
+        )
+        
+        if use_same == "分析與報表使用同一模型":
+            model_selected = st.selectbox(
+                "請選擇欲使用的語言模型", 
+                ["claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "gpt-4o"]
+            )
+            if st.button("確認"):
+                st.session_state['use_same_model'] = True
+                st.session_state['analysis_model_type'] = model_selected
+                st.session_state['report_model_type'] = model_selected
+                st.session_state['model_type'] = model_selected  # 保留向後兼容
+                st.rerun()
+        else:
+            analysis_model = st.selectbox(
+                "分析使用的模型",
+                ["claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "gpt-4o"],
+                key="analysis_model_select"
+            )
+            report_model = st.selectbox(
+                "報表生成使用的模型",
+                ["claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "gpt-4o"],
+                key="report_model_select"
+            )
+            if st.button("確認"):
+                st.session_state['use_same_model'] = False
+                st.session_state['analysis_model_type'] = analysis_model
+                st.session_state['report_model_type'] = report_model
+                st.session_state['model_type'] = analysis_model  # 預設使用分析模型
+                st.rerun()
     
 
     # * initialize model
@@ -50,6 +81,14 @@ class LlmManager:
                                     verbose = True
                                     )
             return model
+        elif st.session_state['model_type'] == 'claude-sonnet-4-20250514':
+            model = ChatAnthropic(model = 'claude-sonnet-4-20250514',
+                                    api_key = CLAUDE_KEY,
+                                    max_tokens = 8000,
+                                    temperature = 0.0,
+                                    verbose = True
+                                    )
+            return model
         elif st.session_state['model_type'] == 'gpt-4o':
             model = ChatOpenAI(model = 'gpt-4o',
                                api_key = OPENAI_KEY,
@@ -60,6 +99,72 @@ class LlmManager:
         
         else:
             return None
+    
+    # * initialize analysis model
+    @staticmethod
+    def init_analysis_model():
+        CLAUDE_KEY = st.session_state['CLAUDE_KEY']
+        OPENAI_KEY = st.session_state['OPENAI_KEY']
+        model_type = st.session_state.get('analysis_model_type', st.session_state.get('model_type', ''))
+        
+        if model_type == 'claude-3-7-sonnet-20250219':
+            return ChatAnthropic(
+                model='claude-3-7-sonnet-20250219',
+                api_key=CLAUDE_KEY,
+                max_tokens=8000,
+                temperature=0.0,
+                verbose=True
+            )
+        elif model_type == 'claude-sonnet-4-20250514':
+            return ChatAnthropic(
+                model='claude-sonnet-4-20250514',
+                api_key=CLAUDE_KEY,
+                max_tokens=8000,
+                temperature=0.0,
+                verbose=True
+            )
+        elif model_type == 'gpt-4o':
+            return ChatOpenAI(
+                model='gpt-4o',
+                api_key=OPENAI_KEY,
+                max_tokens=16000,
+                temperature=0.0,
+                verbose=True
+            )
+        return None
+    
+    # * initialize report model
+    @staticmethod
+    def init_report_model():
+        CLAUDE_KEY = st.session_state['CLAUDE_KEY']
+        OPENAI_KEY = st.session_state['OPENAI_KEY']
+        model_type = st.session_state.get('report_model_type', st.session_state.get('model_type', ''))
+        
+        if model_type == 'claude-3-7-sonnet-20250219':
+            return ChatAnthropic(
+                model='claude-3-7-sonnet-20250219',
+                api_key=CLAUDE_KEY,
+                max_tokens=8000,
+                temperature=0.0,
+                verbose=True
+            )
+        elif model_type == 'claude-sonnet-4-20250514':
+            return ChatAnthropic(
+                model='claude-sonnet-4-20250514',
+                api_key=CLAUDE_KEY,
+                max_tokens=8000,
+                temperature=0.0,
+                verbose=True
+            )
+        elif model_type == 'gpt-4o':
+            return ChatOpenAI(
+                model='gpt-4o',
+                api_key=OPENAI_KEY,
+                max_tokens=16000,
+                temperature=0.0,
+                verbose=True
+            )
+        return None
     
     # * test if the api key is valid
     @staticmethod

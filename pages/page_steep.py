@@ -577,6 +577,12 @@ if st.secrets['permission']['user_token'] == True:
             pass
     else:
         if st.session_state['model']:
+            # 確保 analysis_model_type 和 report_model_type 有值
+            if not st.session_state.get('analysis_model_type'):
+                st.session_state['analysis_model_type'] = st.session_state['model_type']
+            if not st.session_state.get('report_model_type'):
+                st.session_state['report_model_type'] = st.session_state['model_type']
+            
             st.session_state['analysis_model'] = LlmManager.init_analysis_model()
             st.session_state['report_model'] = LlmManager.init_report_model()
             main()
@@ -588,8 +594,16 @@ else:
     st.session_state['CLAUDE_KEY'] = st.secrets['CLAUDE_KEY']
     st.session_state['OPENAI_KEY'] = st.secrets['OPENAI_KEY']
     st.session_state['model'] = LlmManager.init_model()
+    
+    # 確保 analysis_model_type 和 report_model_type 有值
+    if not st.session_state.get('analysis_model_type'):
+        st.session_state['analysis_model_type'] = st.session_state['model_type']
+    if not st.session_state.get('report_model_type'):
+        st.session_state['report_model_type'] = st.session_state['model_type']
+    
     st.session_state['analysis_model'] = LlmManager.init_analysis_model()
     st.session_state['report_model'] = LlmManager.init_report_model()
+    
     if st.session_state['model']:
         main()
         

@@ -124,7 +124,7 @@ This file manages everything associated with LLM API call. We use Claude as our 
 
 - `model_select()`: Expand a streamlit dialog form to ask user to select the model type to be used.
 
-- `init_model()`: Initialize LLM client according to user-selected model type (**claude-3.5-sonnet / gpt-4o**).
+- `init_model()`: Initialize LLM client according to user-selected model type (**claude-3.5-sonnet / gpt-5.1**).
 
 - `api_key_verify()`: Verify the API key based on model type selected by the user. 
 

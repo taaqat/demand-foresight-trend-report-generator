@@ -39,7 +39,7 @@ class LlmManager:
         if use_same == "分析與報表使用同一模型":
             model_selected = st.selectbox(
                 "請選擇欲使用的語言模型", 
-                ["claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "gpt-5.1"]
+                ["claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "gpt-4o"]
             )
             if st.button("確認"):
                 st.session_state['use_same_model'] = True
@@ -50,12 +50,12 @@ class LlmManager:
         else:
             analysis_model = st.selectbox(
                 "分析使用的模型",
-                ["claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "gpt-5.1"],
+                ["claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "gpt-4o"],
                 key="analysis_model_select"
             )
             report_model = st.selectbox(
                 "報表生成使用的模型",
-                ["claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "gpt-5.1"],
+                ["claude-sonnet-4-20250514", "claude-3-7-sonnet-20250219", "gpt-4o"],
                 key="report_model_select"
             )
             if st.button("確認"):
@@ -89,8 +89,8 @@ class LlmManager:
                                     verbose = True
                                     )
             return model
-        elif st.session_state['model_type'] == 'gpt-5.1':
-            model = ChatOpenAI(model = 'gpt-5.1',
+        elif st.session_state['model_type'] == 'gpt-4o':
+            model = ChatOpenAI(model = 'gpt-4o',
                                api_key = OPENAI_KEY,
                                max_tokens = 16000,
                                temperature = 0.0,
@@ -123,9 +123,9 @@ class LlmManager:
                 temperature=0.0,
                 verbose=True
             )
-        elif model_type == 'gpt-5.1':
+        elif model_type == 'gpt-4o':
             return ChatOpenAI(
-                model='gpt-5.1',
+                model='gpt-4o',
                 api_key=OPENAI_KEY,
                 max_tokens=16000,
                 temperature=0.0,
@@ -156,9 +156,9 @@ class LlmManager:
                 temperature=0.0,
                 verbose=True
             )
-        elif model_type == 'gpt-5.1':
+        elif model_type == 'gpt-4o':
             return ChatOpenAI(
-                model='gpt-5.1',
+                model='gpt-4o',
                 api_key=OPENAI_KEY,
                 max_tokens=16000,
                 temperature=0.0,
@@ -178,9 +178,9 @@ class LlmManager:
     def customize_token(model_selected):
 
         model_alias = {"claude-3-7-sonnet-20250219": "Claude_3.7",
-                       "gpt-5.1": "OpenAI"}[model_selected]
+                       "gpt-4o": "OpenAI"}[model_selected]
         model_key = {"claude-3-7-sonnet-20250219": "CLAUDE_KEY",
-                       "gpt-5.1": "OPENAI_KEY"}[model_selected]
+                       "gpt-4o": "OPENAI_KEY"}[model_selected]
 
         tk = st.text_input(f"請輸入您的 {model_alias} API Key")
         if st.button("確認"):

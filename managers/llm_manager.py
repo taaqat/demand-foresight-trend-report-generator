@@ -113,48 +113,77 @@ class LlmManager:
         summary_json = ""                      # initialize output value
 
         # This function ensures the return value from LLM is complete
-        def run_with_memory(chain, in_message) -> str:
+        def run_with_memory(chain, in_message, retry_count=0, max_retries=5) -> str:
             memory = ""
             
-            response = chain.invoke({"input": in_message, "memory": memory})
-            while response.usage_metadata["output_tokens"] >= 5000:
-                memory += response.content
-                response = chain.invoke({"input": in_message.strip() if isinstance(in_message, str) else "N/A", "memory": memory})
-            memory += str(response.content)
+            try:
+                response = chain.invoke({"input": in_message, "memory": memory})
+                while response.usage_metadata["output_tokens"] >= 5000:
+                    memory += response.content
+                    response = chain.invoke({"input": in_message.strip() if isinstance(in_message, str) else "N/A", "memory": memory})
+                memory += str(response.content)
 
-            if st.session_state['debug_mode']:
-                st.write(memory)
+                if st.session_state['debug_mode']:
+                    st.write(memory)
+                    
+                return memory
+            
+            except Exception as e:
+                # Exponential backoff: 5, 10, 20, 40, 80 seconds
+                wait_time = 5 * (2 ** retry_count)
                 
-            return memory
+                if retry_count < max_retries:
+                    st.warning(f"API call failed (attempt {retry_count + 1}/{max_retries + 1}): {str(e)}. Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    return run_with_memory(chain, in_message, retry_count + 1, max_retries)
+                else:
+                    st.error(f"API call failed after {max_retries + 1} attempts. Error: {str(e)}")
+                    raise Exception(f"Claude API failed after {max_retries + 1} attempts: {str(e)}")
         
-        summary_json = DataManager.find_json_object(run_with_memory(chain, in_message))
+        try:
+            summary_json = DataManager.find_json_object(run_with_memory(chain, in_message))
+        except Exception as e:
+            st.error(f"Initial API call failed completely: {str(e)}")
+            summary_json = None
+            
         if st.session_state['debug_mode']:
             st.write(summary_json)
 
         fail_count = 0
-        while (summary_json in ["null", "DecodeError", None]):
-            # While encountering error, first let Claude rest for 10 secs
-            time.sleep(10)
+        max_retries = 10
+        
+        while (summary_json in ["null", "DecodeError", None]) and fail_count < max_retries:
+            # Exponential backoff for retry attempts
+            wait_time = 10 * (1.5 ** fail_count)  # 10, 15, 22.5, 33.75, 50.6... seconds
+            st.warning(f"Invalid JSON response (attempt {fail_count + 1}/{max_retries}). Retrying with split strategy in {wait_time:.1f} seconds...")
+            time.sleep(wait_time)
 
-            memory = ""
+            try:
+                memory = ""
 
-            cutting_points = [i * (len(in_message) // 2) for i in range(1, 2)]
-            intermediate = [
-                run_with_memory(chain, in_message[:cutting_points[0]]),
-                run_with_memory(chain, in_message[cutting_points[0]:])
-            ]
+                cutting_points = [i * (len(in_message) // 2) for i in range(1, 2)]
+                intermediate = [
+                    run_with_memory(chain, in_message[:cutting_points[0]]),
+                    run_with_memory(chain, in_message[cutting_points[0]:])
+                ]
 
-            response = chain.invoke({"input": "\n\n".join(intermediate), "memory": memory})
-            while response.usage_metadata["output_tokens"] >= 5000:
-                memory += response.content
                 response = chain.invoke({"input": "\n\n".join(intermediate), "memory": memory})
-            memory += str(response.content)
-            summary_json = DataManager.find_json_object(memory)
+                while response.usage_metadata["output_tokens"] >= 5000:
+                    memory += response.content
+                    response = chain.invoke({"input": "\n\n".join(intermediate), "memory": memory})
+                memory += str(response.content)
+                summary_json = DataManager.find_json_object(memory)
+                
+            except Exception as e:
+                st.warning(f"Retry attempt {fail_count + 1} failed: {str(e)}")
+                summary_json = None
 
             fail_count += 1
 
-            if fail_count == 10:
-                print("Claude model crushed more than 10 times during runtime. Please consider re-running...")
+            if fail_count >= max_retries:
+                error_msg = f"Claude model failed {max_retries} times during runtime. Please check your API key, rate limits, or try again later."
+                st.error(error_msg)
+                raise Exception(error_msg)
 
         return summary_json
         

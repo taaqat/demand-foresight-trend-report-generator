@@ -111,9 +111,11 @@ class LlmManager:
         in_message = in_message.strip()
 
         summary_json = ""                      # initialize output value
+        last_api_response = ""                 # track last API response for debugging
 
         # This function ensures the return value from LLM is complete
         def run_with_memory(chain, in_message, retry_count=0, max_retries=5) -> str:
+            nonlocal last_api_response
             memory = ""
             
             try:
@@ -122,6 +124,7 @@ class LlmManager:
                     memory += response.content
                     response = chain.invoke({"input": in_message.strip() if isinstance(in_message, str) else "N/A", "memory": memory})
                 memory += str(response.content)
+                last_api_response = memory  # Save the response
 
                 if st.session_state['debug_mode']:
                     st.write(memory)
@@ -150,16 +153,18 @@ class LlmManager:
             st.write(summary_json)
 
         fail_count = 0
-        max_retries = 10
+        max_retries = 3
         increased_token_limit = False
+        current_max_tokens = 8000  # Default value for Claude models
         
         while (summary_json in ["null", "DecodeError", None]) and fail_count < max_retries:
-            # After 3 failed attempts, increase max_tokens to 10240
-            if fail_count == 3 and not increased_token_limit:
-                st.warning("Increasing max_tokens to 10240 for better JSON parsing...")
+            # After 1 failed attempts, increase max_tokens to 10240
+            if fail_count == 1 and not increased_token_limit:
+                current_max_tokens = 10240
+                st.warning(f"Increasing max_tokens from 8000 to {current_max_tokens} for better JSON parsing...")
                 try:
                     # Recreate model with larger max_tokens
-                    new_model = LlmManager.init_model(max_tokens=10240)
+                    new_model = LlmManager.init_model(max_tokens=current_max_tokens)
                     # Recreate chain with the new model - extract prompt from existing chain
                     # The chain is prompt | model, so we need to get the prompt part
                     if hasattr(chain, 'first'):
@@ -171,23 +176,28 @@ class LlmManager:
                     increased_token_limit = True
                 except Exception as e:
                     st.warning(f"Could not increase max_tokens: {str(e)}. Continuing with original settings...")
+                    current_max_tokens = 8000  # Reset if failed
             
             # Exponential backoff for retry attempts
             wait_time = 10 * (1.5 ** fail_count)  # 10, 15, 22.5, 33.75, 50.6... seconds
-            st.warning(f"Invalid JSON response (attempt {fail_count + 1}/{max_retries}). Retrying with split strategy in {wait_time:.1f} seconds...")
+            st.warning(f"Invalid JSON response (attempt {fail_count + 1}/{max_retries}, max_tokens={current_max_tokens}). Retrying with split strategy in {wait_time:.1f} seconds...")
             time.sleep(wait_time)
 
             try:
                 memory = ""
 
+                # Split Strategy: Divide input into 2 halves, process separately, then combine results
+                # This helps when the full input is too large or complex for the model to process in one go
                 cutting_points = [i * (len(in_message) // 2) for i in range(1, 2)]
                 intermediate = [
-                    run_with_memory(chain, in_message[:cutting_points[0]]),
-                    run_with_memory(chain, in_message[cutting_points[0]:])
+                    run_with_memory(chain, in_message[:cutting_points[0]]),  # Process first half
+                    run_with_memory(chain, in_message[cutting_points[0]:])   # Process second half
                 ]
 
+                # Combine the two processed halves and send to model for final synthesis
                 response = chain.invoke({"input": "\n\n".join(intermediate), "memory": memory})
                 while response.usage_metadata["output_tokens"] >= 5000:
+                last_api_response = memory  # Save the split strategy response
                     memory += response.content
                     response = chain.invoke({"input": "\n\n".join(intermediate), "memory": memory})
                 memory += str(response.content)
@@ -202,6 +212,24 @@ class LlmManager:
             if fail_count >= max_retries:
                 error_msg = f"Claude model failed {max_retries} times during runtime. Please check your API key, rate limits, or try again later."
                 st.error(error_msg)
+                s for debugging
+                try:
+                    import base64
+                    
+                    # Download link for input message
+                    b64_input = base64.b64encode(in_message.encode('utf-8')).decode('utf-8')
+                    download_input = f'<a href="data:text/plain;base64,{b64_input}" download="failed_input_debug.txt">下載原始輸入檔案</a>'
+                    
+                    # Download link for API response
+                    b64_response = base64.b64encode(last_api_response.encode('utf-8')).decode('utf-8')
+                    download_response = f'<a href="data:text/plain;base64,{b64_response}" download="failed_api_response_debug.txt">下載 API 回覆檔案</a>'
+                    
+                    st.markdown(f"{download_input} | {download_response}", unsafe_allow_html=True)
+                    st.info(f"輸入訊息長度: {len(in_message)} 字元 | API 回覆長度: {len(last_api_response_allow_html=True)
+                    st.info(f"輸入訊息長度: {len(in_message)} 字元")
+                except Exception as e:
+                    st.warning(f"無法生成下載連結: {str(e)}")
+                
                 raise Exception(error_msg)
 
         return summary_json

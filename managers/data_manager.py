@@ -91,16 +91,25 @@ class DataManager:
                         st.write(f"URL: {prepared_request.url}")
                     
                     try:
-                        response = http.post(url, end_point_params, headers = headers)
-                    except urllib3.exceptions.NewConnectionError as e:
-                        st.write(f"Connection failed: {e}")
-                        st.write(response.content)
+                        response = http.post(url, end_point_params, headers = headers, timeout=30)
+                    except (urllib3.exceptions.NewConnectionError, 
+                            requests.exceptions.ConnectionError,
+                            requests.exceptions.Timeout) as e:
+                        st.error(f"Connection failed: {e}")
+                        st.warning("Retrying connection...")
+                        continue
+                    except Exception as e:
+                        st.error(f"Unexpected error during request: {e}")
+                        break
                     
                     # PRINT HTTPS Error Messege if we encounter errors
                     if response.status_code == 200:
                         pass 
                     else:
-                        st.write(response.content)
+                        st.warning(f"HTTP Error {response.status_code}: {response.content}")
+                        if response.status_code >= 500:
+                            st.warning("Server error, retrying...")
+                            continue
 
                     # Clean data into pd.DataFrame format
                     data = response.json()['data']
@@ -140,16 +149,25 @@ class DataManager:
                     st.write(f"URL: {prepared_request.url}")
                 
                 try:
-                    response = http.post(url, end_point_params, headers = headers)
-                except urllib3.exceptions.NewConnectionError as e:
-                    st.write(f"Connection failed: {e}")
-                    st.write(response.content)
+                    response = http.post(url, end_point_params, headers = headers, timeout=30)
+                except (urllib3.exceptions.NewConnectionError, 
+                        requests.exceptions.ConnectionError,
+                        requests.exceptions.Timeout) as e:
+                    st.error(f"Connection failed: {e}")
+                    st.warning("Retrying connection...")
+                    continue
+                except Exception as e:
+                    st.error(f"Unexpected error during request: {e}")
+                    break
                 
                 # PRINT HTTPS Error Messege if we encounter errors
                 if response.status_code == 200:
                     pass 
                 else:
-                    st.write(response.content)
+                    st.warning(f"HTTP Error {response.status_code}: {response.content}")
+                    if response.status_code >= 500:
+                        st.warning("Server error, retrying...")
+                        continue
 
                 # Clean data into pd.DataFrame format
                 data = response.json()['data']

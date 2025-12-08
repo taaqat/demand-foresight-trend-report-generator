@@ -52,30 +52,30 @@ STEEP(social.Technology.Economic.Environment.Political)+B(Business and investmen
 
 # *** Response Schema *** 
 ```
-{{
-"{date}": {{
+{{{{
+"{date}": {{{{
     "Social(社會)": "把同個類別的重點新聞串成一個字串，並用兩個空行符號隔開，且在開頭幫我用數字編號",
     "Technological(科技)": "",
     "Economic(經濟)": "",
     "Environmental(環境)": "",
     "Political(政治)": "",
     "Business and Investment(投資)": ""
-}}
-}}
+}}}}
+}}}}
 ```
 
 假若沒有足夠的「經濟」相關新聞：
 ```
-{{
-"{date}": {{
+{{{{
+"{date}": {{{{
     "Social(社會)": "把同個類別的重點新聞串成一個字串，並用兩個空行符號隔開，且在開頭幫我用數字編號",
     "Technological(科技)": "把同個類別的重點新聞串成一個字串，並用兩個空行符號隔開，且在開頭幫我用數字編號",
     "Economic(經濟)": "NA",
     "Environmental(環境)": "把同個類別的重點新聞串成一個字串，並用兩個空行符號隔開，且在開頭幫我用數字編號",
     "Political(政治)": "把同個類別的重點新聞串成一個字串，並用兩個空行符號隔開，且在開頭幫我用數字編號",
     "Business and Investment(投資)": "把同個類別的重點新聞串成一個字串，並用兩個空行符號隔開，且在開頭幫我用數字編號"
-}}
-}}
+}}}}
+}}}}
 ```
 **按照以上範例JSON格式回答，不要亂加子標題**
 **請確實針對內容裡的雙引號前面加上\進行轉義**

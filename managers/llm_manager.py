@@ -197,10 +197,10 @@ class LlmManager:
                 # Combine the two processed halves and send to model for final synthesis
                 response = chain.invoke({"input": "\n\n".join(intermediate), "memory": memory})
                 while response.usage_metadata["output_tokens"] >= 5000:
-                last_api_response = memory  # Save the split strategy response
                     memory += response.content
                     response = chain.invoke({"input": "\n\n".join(intermediate), "memory": memory})
                 memory += str(response.content)
+                last_api_response = memory  # Save the split strategy response
                 summary_json = DataManager.find_json_object(memory)
                 
             except Exception as e:
@@ -212,7 +212,8 @@ class LlmManager:
             if fail_count >= max_retries:
                 error_msg = f"Claude model failed {max_retries} times during runtime. Please check your API key, rate limits, or try again later."
                 st.error(error_msg)
-                s for debugging
+                
+                # Provide download links for debugging
                 try:
                     import base64
                     
@@ -225,8 +226,7 @@ class LlmManager:
                     download_response = f'<a href="data:text/plain;base64,{b64_response}" download="failed_api_response_debug.txt">下載 API 回覆檔案</a>'
                     
                     st.markdown(f"{download_input} | {download_response}", unsafe_allow_html=True)
-                    st.info(f"輸入訊息長度: {len(in_message)} 字元 | API 回覆長度: {len(last_api_response_allow_html=True)
-                    st.info(f"輸入訊息長度: {len(in_message)} 字元")
+                    st.info(f"輸入訊息長度: {len(in_message)} 字元 | API 回覆長度: {len(last_api_response)} 字元")
                 except Exception as e:
                     st.warning(f"無法生成下載連結: {str(e)}")
                 

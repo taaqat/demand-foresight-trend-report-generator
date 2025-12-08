@@ -41,7 +41,7 @@ class LlmManager:
 
     # * initialize model
     @staticmethod
-    def init_model():
+    def init_model(max_tokens=None):
         CLAUDE_KEY = st.session_state['CLAUDE_KEY']
         OPENAI_KEY = st.session_state['OPENAI_KEY']
        
@@ -49,7 +49,7 @@ class LlmManager:
         if st.session_state['model_type'] == 'claude-3-7-sonnet-20250219':
             model = ChatAnthropic(model = 'claude-3-7-sonnet-20250219',
                                     api_key = CLAUDE_KEY,
-                                    max_tokens = 8000,
+                                    max_tokens = max_tokens if max_tokens else 8000,
                                     temperature = 0.0,
                                     verbose = True
                                     )
@@ -57,7 +57,7 @@ class LlmManager:
         elif st.session_state['model_type'] == 'claude-sonnet-4-20250514':
             model = ChatAnthropic(model = 'claude-sonnet-4-20250514',
                                     api_key = CLAUDE_KEY,
-                                    max_tokens = 8000,
+                                    max_tokens = max_tokens if max_tokens else 8000,
                                     temperature = 0.0,
                                     verbose = True
                                     )
@@ -65,7 +65,7 @@ class LlmManager:
         elif st.session_state['model_type'] == 'gpt-4o':
             model = ChatOpenAI(model = 'gpt-4o',
                                api_key = OPENAI_KEY,
-                               max_tokens = 16000,
+                               max_tokens = max_tokens if max_tokens else 16000,
                                temperature = 0.0,
                                verbose = True)
             return model
@@ -151,8 +151,27 @@ class LlmManager:
 
         fail_count = 0
         max_retries = 10
+        increased_token_limit = False
         
         while (summary_json in ["null", "DecodeError", None]) and fail_count < max_retries:
+            # After 3 failed attempts, increase max_tokens to 10240
+            if fail_count == 3 and not increased_token_limit:
+                st.warning("Increasing max_tokens to 10240 for better JSON parsing...")
+                try:
+                    # Recreate model with larger max_tokens
+                    new_model = LlmManager.init_model(max_tokens=10240)
+                    # Recreate chain with the new model - extract prompt from existing chain
+                    # The chain is prompt | model, so we need to get the prompt part
+                    if hasattr(chain, 'first'):
+                        chain = chain.first | new_model
+                    else:
+                        # Fallback: chain might be directly accessible
+                        prompt_part = chain.steps[0] if hasattr(chain, 'steps') else chain
+                        chain = prompt_part | new_model
+                    increased_token_limit = True
+                except Exception as e:
+                    st.warning(f"Could not increase max_tokens: {str(e)}. Continuing with original settings...")
+            
             # Exponential backoff for retry attempts
             wait_time = 10 * (1.5 ** fail_count)  # 10, 15, 22.5, 33.75, 50.6... seconds
             st.warning(f"Invalid JSON response (attempt {fail_count + 1}/{max_retries}). Retrying with split strategy in {wait_time:.1f} seconds...")

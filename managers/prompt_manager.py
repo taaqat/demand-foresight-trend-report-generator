@@ -152,7 +152,7 @@ class PromptManager:
             # *** Response Schema *** 
             ```
             (
-                "Batch {batch}": (
+                "Batch {{batch}}": (
                     "重點新聞摘要": ["***把重點新聞存成一個 list，且在開頭幫我用數字編號***"]
                 )
             )

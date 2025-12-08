@@ -25,8 +25,11 @@ prompts/
 STEEP 分析流程用於產業趨勢報告生成，包含 6 個主要步驟：
 
 ### Step 1: 每日新聞 STEEP 分類
-- **變數名稱**: `step1_prompt`
+- **變數名稱**: `step1_prompt(date)`
+- **類型**: 靜態方法（需要動態參數）
 - **檔案來源**: `prompts/steep_step1_categorize.txt`
+- **參數**: 
+  - `date`: 日期字串（格式：YYYY-MM-DD）
 - **用途**: 將每日新聞按 STEEP+B 框架分類
   - S - Social (社會)
   - T - Technological (科技)
@@ -35,13 +38,17 @@ STEEP 分析流程用於產業趨勢報告生成，包含 6 個主要步驟：
   - P - Political (政治)
   - B - Business and Investment (投資)
 - **輸入**: 原始新聞文本
-- **輸出**: JSON 格式的分類結果，每個類別包含 3-5 則重點新聞摘要
+- **輸出**: JSON 格式的分類結果，以日期為 key，每個類別包含 3-5 則重點新聞摘要
+- **範例**: `PromptManager.STEEP.step1_prompt("2024-01-01")`
 
 ---
 
 ### Step 2: 每日新聞分類（首個版本）
-- **變數名稱**: `step2_categorize_prompt`
+- **變數名稱**: `step2_categorize_prompt(date)`
+- **類型**: 靜態方法（需要動態參數）
 - **檔案來源**: `prompts/steep_step2_categorize.txt`
+- **參數**: 
+  - `date`: 日期字串（格式：YYYY-MM-DD）
 - **用途**: 對每日新聞進行詳細的 STEEP 分類並生成摘要
 - **特點**: 
   - 每則新聞摘要 60-100 字
@@ -49,6 +56,7 @@ STEEP 分析流程用於產業趨勢報告生成，包含 6 個主要步驟：
   - Economic 列出 1-4 則（優先列舉央行、通膨、匯率相關）
   - 其他類別各 3-4 則
 - **輸出**: 以日期為 key 的 JSON 格式分類結果
+- **範例**: `PromptManager.STEEP.step2_categorize_prompt("2024-01-01")`
 
 ---
 
@@ -199,22 +207,62 @@ SELF_SELECT 流程用於使用者自選主題的趨勢分析：
 - **用途**: 將 JSON 格式趨勢報告轉換成 HTML & CSS 網頁式簡報
 - **輸出**: 完整的 HTML 程式碼（含 CSS 樣式）
 
----
+---Prompt 模板與動態參數處理
 
-## 📝 重要注意事項
-
-### 為什麼某些 prompt 不抽取成文字檔？
-
-1. **需要動態參數的 prompt**（如 `step2_prompt(topic, ver)`）：
-   - 必須使用 f-string 來動態替換 `{topic}` 和 `{ver}`
-   - 若抽取成文字檔，無法進行動態替換
+1. **使用文字檔 + `.format()` 方法的 prompt**（如 `step1_prompt(date)`, `step2_categorize_prompt(date)`）：
+   - Prompt 文字存放在 `.txt` 檔案中
+   - 使用 `{date}` 作為佔位符
+   - 在 `prompt_manager.py` 中載入為模板，透過靜態方法接收參數並用 `.format()` 替換
+   - **優點**: 避免雙倍轉義，prompt 內容清晰易讀，易於維護
    
-2. **Lambda 函數形式的 prompt**（SELF_SELECT 類別）：
+2. **使用 f-string 的 prompt**（如 `step2_prompt(topic, ver)`）：
+   - 直接在 `prompt_manager.py` 中定義為 f-string 函數
+   - 需要動態替換多個變數 `{topic}` 和 `{ver}`
+   - **原因**: f-string 可以直接在字串中嵌入複雜邏輯
+   
+3. **Lambda 函數形式的 prompt**（SELF_SELECT 類別）：
    - 包含複雜的參數邏輯和預設值
    - 保持為 Python 函數更靈活
 
 ### 轉義規則差異
 
+- **文字檔 + `.format()` 方法**：使用正常的 JSON 格式 `{ }`，在變數位置使用 `{date}`
+- **f-string 中**：需要雙倍轉義 `{{{{ }}}}`
+
+這就是為什麼將 prompt 抽取到文字檔搭配 `.format()` 可以避免雙倍轉義的問題！
+
+### 實作範例
+
+```python
+# 文字檔內容 (steep_step1_categorize.txt)
+{
+"{date}": {
+    "Social(社會)": "..."
+}
+}
+
+# prompt_manager.py
+with open('steep_step1_categorize.txt', 'r', encoding='utf-8') as f:
+    _step1_prompt_template = f.read()
+
+@staticmethod
+def step1_prompt(date):
+    return PromptManager.STEEP._step1_prompt_template.format(date=date)
+
+## 🔄 更新記錄
+
+### 2025-12-08
+- 將 `step1_prompt` 和 `step2_categorize_prompt` 改為靜態方法，支援動態日期參數
+- 修改對應的 `.txt` 檔案，將 `***輸入的日期***` 改為 `{date}` 佔位符
+- 使用 `.format()` 方法進行參數替換，避免 f-string 的雙倍轉義問題
+- 更新文件說明，新增實作範例
+
+---
+
+# 使用方式
+prompt = PromptManager.STEEP.step1_prompt("2024-01-01")
+# 結果會將 {date} 替換為 "2024-01-01"
+```
 - **文字檔中**：使用正常的 JSON 格式 `{ }` 
 - **f-string 中**：需要雙倍轉義 `{{{{ }}}}`
 

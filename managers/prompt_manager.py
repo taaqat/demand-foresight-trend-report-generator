@@ -10,11 +10,21 @@ class PromptManager:
         _prompt_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'prompts')
         
         with open(os.path.join(_prompt_dir, 'steep_step1_categorize.txt'), 'r', encoding='utf-8') as f:
-            step1_prompt = f.read()
+            _step1_prompt_template = f.read()
+        
+        @staticmethod
+        def step1_prompt(date):
+            """Generate step1 prompt with the given date"""
+            return PromptManager.STEEP._step1_prompt_template.format(date=date)
         
         # *** step 2: categorize daily news (first version)
         with open(os.path.join(_prompt_dir, 'steep_step2_categorize.txt'), 'r', encoding='utf-8') as f:
-            step2_categorize_prompt = f.read()
+            _step2_categorize_prompt_template = f.read()
+        
+        @staticmethod
+        def step2_categorize_prompt(date):
+            """Generate step2 categorize prompt with the given date"""
+            return PromptManager.STEEP._step2_categorize_prompt_template.format(date=date)
         
         # *** step 2: three versions trend report
         def step2_prompt(topic, ver):

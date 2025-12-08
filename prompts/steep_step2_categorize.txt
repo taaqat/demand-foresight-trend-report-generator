@@ -52,8 +52,7 @@ STEEP(social.Technology.Economic.Environment.Political)+B(Business and investmen
 
 # *** Response Schema *** 
 ```
-{{{{
-"{date}": {{{{
+{{{{ "{date}": {{{{
     "Social(社會)": "把同個類別的重點新聞串成一個字串，並用兩個空行符號隔開，且在開頭幫我用數字編號",
     "Technological(科技)": "",
     "Economic(經濟)": "",
@@ -66,8 +65,7 @@ STEEP(social.Technology.Economic.Environment.Political)+B(Business and investmen
 
 假若沒有足夠的「經濟」相關新聞：
 ```
-{{{{
-"{date}": {{{{
+{{{{ "{date}": {{{{
     "Social(社會)": "把同個類別的重點新聞串成一個字串，並用兩個空行符號隔開，且在開頭幫我用數字編號",
     "Technological(科技)": "把同個類別的重點新聞串成一個字串，並用兩個空行符號隔開，且在開頭幫我用數字編號",
     "Economic(經濟)": "NA",

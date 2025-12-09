@@ -33,6 +33,42 @@ if "model_type" not in st.session_state:
 #  {'2024 MONTH': [START_DATE, END_DATE, PIC_PATH]}
 st.session_state["ym_mapping"] = ym_mapping
 
+# * 根據資料庫中實際存在的報表來過濾可用月份
+def filter_available_months(year_key):
+    """
+    檢查資料庫中該年份實際有哪些月份的報表，只返回有資料的月份
+    """
+    try:
+        df = SessionManager.steep_database('fetch')
+        
+        # 取得該年份的所有月份
+        all_months = list(st.session_state["ym_mapping"][year_key].keys())
+        
+        # 檢查每個月份是否有任何主題的報表
+        available_months = {}
+        for month in all_months:
+            month_dates = st.session_state["ym_mapping"][year_key][month]
+            start_date = month_dates[0]
+            end_date = month_dates[1]
+            
+            # 檢查資料庫中是否存在該月份的報表
+            has_data = df[
+                (df['start_date'] == start_date) & 
+                (df['end_date'] == end_date)
+            ].shape[0] > 0
+            
+            if has_data:
+                available_months[month] = month_dates
+        
+        # 如果沒有任何資料，至少返回第一個月份（避免空列表）
+        if not available_months and all_months:
+            available_months[all_months[0]] = st.session_state["ym_mapping"][year_key][all_months[0]]
+            
+        return available_months
+    except:
+        # 如果查詢失敗，返回所有月份
+        return st.session_state["ym_mapping"][year_key]
+
 
 # ***************************************************
 # *** Sidebar Configuration
@@ -280,12 +316,15 @@ def main():
                     with cl2025:
                         topic_selection = st.selectbox("選擇主題", ['social', 'economic', 'environmental', 'technological', 'political', 'business_and_investment'], key = '2025_topic')
                     with cr2025:
+                        # 取得實際有資料的月份列表
+                        available_months_dict = filter_available_months('2025')
+                        months_list = list(available_months_dict.keys())[::-1]
+                        
                         # 使用實際載入的月份或預設月份
-                        months_list = list(st.session_state['ym_mapping']['2025'].keys())[::-1]
-                        default_month = st.session_state.get('actual_2025_month', months_list[0])
+                        default_month = st.session_state.get('actual_2025_month', months_list[0] if months_list else None)
                         
                         # 確保 default_month 在列表中
-                        if default_month in months_list:
+                        if default_month and default_month in months_list:
                             default_index = months_list.index(default_month)
                         else:
                             default_index = 0

@@ -1,26 +1,70 @@
-ym_mapping = {
-    '2024': {
-        'January': ["2024-01-01", "2024-01-31", 1],
-        'February': ["2024-02-01", "2024-02-29", 2],
-        'March': ["2024-03-01", "2024-03-31", 3],
-        'April': ["2024-04-01", "2024-04-30", 1],
-        'May': ["2024-05-01", "2024-05-31", 2],
-        'June': ["2024-06-01", "2024-06-30", 3],
-        'July': ["2024-07-01", "2024-07-31", 1],
-        'August': ["2024-08-01", "2024-08-31", 2],
-        'September': ["2024-09-01", "2024-10-01", 3],
-        'October': ["2024-10-01", "2024-10-31", 1],
-        'November': ["2024-11-01", "2024-11-27", 2],
-        'December': ["2024-12-01", "2024-12-31", 3],
-    },
-    '2025': {
-        "January": ["2025-01-01", "2025-01-31"],
-        "February": ["2025-02-01", "2025-02-28"],
-        "March": ["2025-03-01", "2025-03-31"],
-        "April": ["2025-04-01", "2025-04-30"],
-        "May": ["2025-05-01", "2025-05-31"],
-        "June": ["2025-06-01", "2025-06-30"],
-        "July": ["2025-07-01", "2025-07-31"]
+import datetime
+import calendar
 
+def generate_ym_mapping():
+    """
+    自動生成年月對照表，從2024年到當前年月
+    """
+    mapping = {}
+    current_date = datetime.date.today()
+    current_year = current_date.year
+    current_month = current_date.month
+    
+    month_names = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ]
+    
+    # 生成2024年的資料（保留原有的圖片ID）
+    pic_ids_2024 = [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]
+    mapping['2024'] = {}
+    for month_idx in range(12):
+        month_name = month_names[month_idx]
+        year = 2024
+        month_num = month_idx + 1
+        
+        # 取得該月的最後一天
+        last_day = calendar.monthrange(year, month_num)[1]
+        
+        # 特殊處理：9月的結束日期原本是10-01，11月是11-27
+        if month_num == 9:
+            end_date = f"{year}-10-01"
+        elif month_num == 11:
+            end_date = f"{year}-11-27"
+        else:
+            end_date = f"{year}-{month_num:02d}-{last_day}"
+        
+        mapping['2024'][month_name] = [
+            f"{year}-{month_num:02d}-01",
+            end_date,
+            pic_ids_2024[month_idx]
+        ]
+    
+    # 生成2025年至今的資料
+    mapping['2025'] = {}
+    end_year = current_year if current_year >= 2025 else 2025
+    
+    for year in range(2025, end_year + 1):
+        year_key = str(year)
+        if year_key not in mapping:
+            mapping[year_key] = {}
+        
+        # 決定要生成到哪個月
+        max_month = current_month if year == current_year else 12
+        
+        for month_idx in range(max_month):
+            month_name = month_names[month_idx]
+            month_num = month_idx + 1
+            
+            # 取得該月的最後一天
+            last_day = calendar.monthrange(year, month_num)[1]
+            
+            mapping[year_key][month_name] = [
+                f"{year}-{month_num:02d}-01",
+                f"{year}-{month_num:02d}-{last_day}"
+            ]
+    
+    return mapping
 
- }}
+# 自動生成年月對照表
+ym_mapping = generate_ym_mapping()

@@ -227,10 +227,6 @@ def main():
                 # 如果找到檔案
                 found = True
                 actual_month = check_month
-                
-                # 如果不是選定的月份，顯示提示訊息
-                if check_month != month:
-                    st.info(f"📌 {month} 月報尚未完成，顯示最近一期：{check_month} 月報")
 
                 with cl:
                     download_btn_l = st.download_button(

@@ -300,7 +300,7 @@ class LlmManager:
             # After 1 failed attempts, increase max_tokens to 10240
             if fail_count == 1 and not increased_token_limit:
                 current_max_tokens = 10240
-                st.warning(f"Increasing max_tokens from 8000 to {current_max_tokens} for better JSON parsing...")
+                st.info(f"Increasing max_tokens from 8000 to {current_max_tokens} for better JSON parsing...")
                 try:
                     # Recreate model with larger max_tokens
                     new_model = LlmManager.init_model(max_tokens=current_max_tokens)
@@ -348,28 +348,33 @@ class LlmManager:
 
             fail_count += 1
 
-            if fail_count >= max_retries:
-                error_msg = f"Claude model failed {max_retries} times during runtime. Please check your API key, rate limits, or try again later."
-                st.error(error_msg)
+        # Show success message if we recovered from failures
+        if fail_count > 0 and summary_json not in ["null", "DecodeError", None]:
+            st.success(f"✅ JSON parsing succeeded after {fail_count} retry attempt(s) (max_tokens={current_max_tokens})")
+        
+        # Handle max retries exceeded
+        if fail_count >= max_retries and summary_json in ["null", "DecodeError", None]:
+            error_msg = f"Claude model failed {max_retries} times during runtime. Please check your API key, rate limits, or try again later."
+            st.error(error_msg)
+            
+            # Provide download links for debugging
+            try:
+                import base64
                 
-                # Provide download links for debugging
-                try:
-                    import base64
-                    
-                    # Download link for input message
-                    b64_input = base64.b64encode(in_message.encode('utf-8')).decode('utf-8')
-                    download_input = f'<a href="data:text/plain;base64,{b64_input}" download="failed_input_debug.txt">下載原始輸入檔案</a>'
-                    
-                    # Download link for API response
-                    b64_response = base64.b64encode(last_api_response.encode('utf-8')).decode('utf-8')
-                    download_response = f'<a href="data:text/plain;base64,{b64_response}" download="failed_api_response_debug.txt">下載 API 回覆檔案</a>'
-                    
-                    st.markdown(f"{download_input} | {download_response}", unsafe_allow_html=True)
-                    st.info(f"輸入訊息長度: {len(in_message)} 字元 | API 回覆長度: {len(last_api_response)} 字元")
-                except Exception as e:
-                    st.warning(f"無法生成下載連結: {str(e)}")
+                # Download link for input message
+                b64_input = base64.b64encode(in_message.encode('utf-8')).decode('utf-8')
+                download_input = f'<a href="data:text/plain;base64,{b64_input}" download="failed_input_debug.txt">下載原始輸入檔案</a>'
                 
-                raise Exception(error_msg)
+                # Download link for API response
+                b64_response = base64.b64encode(last_api_response.encode('utf-8')).decode('utf-8')
+                download_response = f'<a href="data:text/plain;base64,{b64_response}" download="failed_api_response_debug.txt">下載 API 回覆檔案</a>'
+                
+                st.markdown(f"{download_input} | {download_response}", unsafe_allow_html=True)
+                st.info(f"輸入訊息長度: {len(in_message)} 字元 | API 回覆長度: {len(last_api_response)} 字元")
+            except Exception as e:
+                st.warning(f"無法生成下載連結: {str(e)}")
+            
+            raise Exception(error_msg)
 
         return summary_json
         

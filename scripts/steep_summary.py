@@ -15,9 +15,9 @@ import openpyxl
 import json, base64, os
 from io import BytesIO
 
-def daily_summarize(in_message):
+def daily_summarize(in_message, date):
 
-    chain = LlmManager.create_prompt_chain(sys_prompt = PromptManager.STEEP.step1_prompt,
+    chain = LlmManager.create_prompt_chain(sys_prompt = PromptManager.STEEP.step1_prompt(date),
                                            model = st.session_state['analysis_model'])
 
     return LlmManager.llm_api_call(chain, in_message)
@@ -64,7 +64,7 @@ def monthly_summary(start_date: str, end_date: str,  user_name, user_email, dail
                 
                 # with st.expander('raw'):
                 #     st.write(in_message)
-                response = daily_summarize(in_message)
+                response = daily_summarize(in_message, str(now))
                 month_out.update(response)
 
 
@@ -82,7 +82,7 @@ def monthly_summary(start_date: str, end_date: str,  user_name, user_email, dail
                 DataManager.post_files(file_name = f"Daily_Summary_{now}.json", file_content = encoded_json_str, 
                             expiration = str(dt.datetime.today() + dt.timedelta(90)), user_name = user_name, user_email = user_email)
         else:
-            response = daily_summarize(in_message)
+            response = daily_summarize(in_message, str(now))
             month_out.update(response)
 
 

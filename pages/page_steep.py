@@ -8,6 +8,7 @@ from managers.export_manager import ExportManager
 from managers.llm_manager import LlmManager
 from managers.prompt_manager import PromptManager
 from managers.session_manager import SessionManager
+from managers.constants import *
 
 from scripts.steep_generate import gen_trend_report_1, gen_trend_report_2
 
@@ -94,6 +95,21 @@ with st.sidebar:
             ]:
                 del st.session_state[session]
             st.rerun()
+        only_html_slide_on  = False
+        only_html_slide_off = False
+        if st.session_state['steep_running'] != "html_slide_補做":
+            only_html_slide_on  = st.button("開啟網頁版簡報製作區塊")
+        else:
+            only_html_slide_off = st.button("關閉網頁版簡報製作區塊")
+        if only_html_slide_on:
+            st.session_state['steep_running'] = "html_slide_補做"
+            st.rerun()
+        if only_html_slide_off:
+            st.session_state['steep_running'] = False
+            st.rerun()
+
+
+        
 
     if st.button("進階設定"):
         developer_option()
@@ -167,7 +183,9 @@ if 'steep_prompt_5' not in st.session_state:
     st.session_state['steep_prompt_5'] = PromptManager.STEEP.step5_prompt
 if 'steep_prompt_6' not in st.session_state:
     st.session_state['steep_prompt_6'] = PromptManager.STEEP.step6_prompt
-
+if "debug_mode" not in st.session_state:
+    st.session_state["debug_mode"] = False
+st.session_state["ym_mapping"] = ym_mapping
     
 
 
@@ -197,11 +215,11 @@ def main():
 
     # *** left column: user input; right column: progress and results
     left_col, right_col = st.columns((1/2, 1/2))
-    with left_col:
-        st.info("使用前請至 DEMO Videos 頁面觀看說明影片")
+    # with left_col:
+    #     st.info("使用前請至 DEMO Videos 頁面觀看說明影片")
 
     with right_col:
-        st.error("**執行後至完成前，請不要對頁面進行操作，以免直接重來。**", icon="⚠️")
+        # st.error("**執行後至完成前，請不要對頁面進行操作，以免直接重來。**", icon="⚠️")
         console_box_1 = st.empty()
         console_box_2 = st.empty()
         output_box = st.empty()
@@ -215,14 +233,15 @@ def main():
 
     # *************************** Left Column - User Input ***************************
     with left_col:
-        st.subheader("基本資料輸入")
-        subcol1, subcol2 = st.columns((1/2, 1/2))
-        with subcol1:
-            user_name = st.text_input("你的暱稱")
-        # st.info("Please type in your email address so that we can send the results to you when completed")
-        with subcol2:
-            user_email = st.text_input("電子郵件地址")
+        # st.subheader("基本資料輸入")
+        # subcol1, subcol2 = st.columns((1/2, 1/2))
+        # with subcol1:
+        #     user_name = st.text_input("你的暱稱")
+        # # st.info("Please type in your email address so that we can send the results to you when completed")
+        # with subcol2:
+        #     user_email = st.text_input("電子郵件地址")
         # *** Date input ***
+
         st.subheader("選擇新聞來源之時間範圍")
         subcol3, subcol4 = st.columns((1/2, 1/2))
         with subcol3:
@@ -268,11 +287,14 @@ def main():
             if st.button("點擊編輯 System prompt"):
                 PromptManager.STEEP.prompt_editor()
 
+    
+    slide_generate_box = st.empty()
+
     # *** Check if the inputs are valid ***
     # COND1 - 7 為必須滿足的條件。COND8 為建議滿足的條件。
     existing_projects = SessionManager.steep_database(method = 'fetch')
-    COND1 = user_name != ""
-    COND2 = user_email != ""
+    # COND1 = user_name != ""
+    # COND2 = user_email != ""
     COND3 = start_date <= dt.date.today()
     COND4 = end_date <= dt.date.today()
     COND5 = start_date < end_date
@@ -312,12 +334,12 @@ def main():
     if submission:
         
         # *** first, check all input schema is required ***
-        if not COND1:
-            with left_col:
-                st.warning('Please input your nickname!')
-        if not COND2:
-            with left_col:
-                st.warning('Please input your email address!')
+        # if not COND1:
+        #     with left_col:
+        #         st.warning('Please input your nickname!')
+        # if not COND2:
+        #     with left_col:
+        #         st.warning('Please input your email address!')
         if not COND3:
             with left_col:
                 st.warning('Starting Date should not be later than today!!')
@@ -336,7 +358,7 @@ def main():
 
         
         # *** If the input date format is valid -> run
-        if COND1 & COND2 & COND3 & COND4 & COND5 & COND6 & COND7:
+        if COND3 & COND4 & COND5 & COND6 & COND7:  # COND1 & COND2 & 
 
             if (start_date == st.session_state['steep_start']) & (end_date == st.session_state['steep_end']):
                 st.cache_data.clear()
@@ -344,8 +366,8 @@ def main():
             st.session_state['steep_start'] = start_date
             st.session_state['steep_end'] = end_date
             st.session_state['steep_topic'] = topic_to_deal
-            st.session_state['user_name'] = user_name
-            st.session_state['user_email'] = user_email
+            st.session_state['user_name'] = "Wally"
+            st.session_state['user_email'] = "huang0jin@gmail.com"
             if 'steep_summary' in st.session_state:
                 del st.session_state['steep_summary']
             if 'fetched_raw' in st.session_state:
@@ -357,6 +379,7 @@ def main():
     if st.session_state['steep_running'] == 'step1':
         console_box_1.empty()
         console_box_2.empty()
+        slide_generate_box.empty()
         with console_box_1.container(border = True):
 
             st.subheader("進度報告")
@@ -382,10 +405,8 @@ def main():
                 st.warning(error)
                 SessionManager.send_notification_email(st.session_state['user_name'], st.session_state['user_email'], 'failed', error)
 
-
-            # ** 生成基本趨勢報告框架和分類事件之後，開啟 code editor 以供使用者調整內容。後續推論將以使用者修改過後的內容為基礎。
-            # ** 確保 steep_trends_with_events 已經生成後才顯示 code editor
             if 'steep_trends_with_events' in st.session_state:
+                # ** 生成基本趨勢報告框架和分類事件之後，開啟 code editor 以供使用者調整內容。後續推論將以使用者修改過後的內容為基礎。
                 st.info("趨勢報告的基礎架構已生成，如下。請確認是否有要修改的地方。\n\n若有修改，記得點擊右側儲存按鈕後再送出。")
                 bs = [{
                     "name": "→點擊儲存變更",
@@ -395,22 +416,21 @@ def main():
                     "style": {"top": "0.46rem", "right": "0.4rem"},
                     "hasText": True
                     }]         # * -> code editor 右上角的 Save 按鈕。點擊後，使用者變更後的資料將被存放置 session_state。
-
                 response_dict = code_editor(json.dumps({"trends_with_events": st.session_state['steep_trends_with_events']}, indent = 4, ensure_ascii = False), lang = 'json',
                                             buttons = bs,
                                             height=[10, 20],
                                             options = {"wrap": True})
 
-                if st.button("送出，開始推論:red[**（送出前記得點擊右上角按鈕儲存變更）**]"):
+            if st.button("送出，開始推論:red[**（送出前記得點擊右上角按鈕儲存變更）**]"):
 
-                    try:
-                        st.session_state['steep_trends_with_events_modified'] = json.loads(response_dict['text'])['trends_with_events']
-                        st.session_state['steep_running'] = 'step2'
-                        st.rerun()
+                try:
+                    st.session_state['steep_trends_with_events_modified'] = json.loads(response_dict['text'])['trends_with_events']
+                    st.session_state['steep_running'] = 'step2'
+                    st.rerun()
 
-                    except json.decoder.JSONDecodeError:
-                        st.warning("JSON 結構無效。請**點擊儲存變更**，並確保內容為有效 JSON 格式")
-                        st.stop()
+                except json.decoder.JSONDecodeError:
+                    st.warning("JSON 結構無效。請**點擊儲存變更**，並確保內容為有效 JSON 格式")
+                    st.stop()
             else:
                 st.info("正在生成趨勢報告基礎架構，請稍候...")
 
@@ -419,6 +439,7 @@ def main():
     elif st.session_state['steep_running'] == 'step2':
         console_box_1.empty()
         console_box_2.empty()
+        slide_generate_box.empty()
         with console_box_2.container(border = True):
             st.subheader("進度報告")
 
@@ -532,6 +553,7 @@ def main():
     elif st.session_state['steep_running'] == 'step3': 
         # ** Generate Flexible Web Slides with HTML & CSS (by AI)
         console_box_2.empty()
+        slide_generate_box.empty()
         with console_box_2.container(border = True):
             # * Undo button
             if st.button("Undo", key = 'back_to_step2'):
@@ -561,6 +583,59 @@ def main():
 
             SessionManager.session_state_clear('steep')
             st.session_state['steep_running'] = False
+
+    elif st.session_state['steep_running'] == 'html_slide_補做':
+
+        with slide_generate_box.container():
+
+            st.divider()
+            st.subheader("單純製作網頁版簡報：")
+            st.info("請確保對應月份、主題的月報 JSON 檔已生成")
+            cccl, cccr = st.columns(2)
+            with cccl:
+                month = st.selectbox("Month", st.session_state['ym_mapping']['2025'].keys())
+                start_date = st.session_state['ym_mapping']['2025'][month][0]
+                end_date = st.session_state['ym_mapping']['2025'][month][1]
+
+            with cccr:
+                topic = st.selectbox("Topic", ['social', 'technological', 'economic', 'environmental', 'political', 'business_and_investment'])
+            
+            submittt = st.button("確認送出")
+
+            if submittt:
+                with st.spinner("正在製作簡報..."):
+                    filename = f"{topic}_trends_{start_date}-{end_date}_html.txt"
+                    chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
+
+                    try:
+                        json_body = DataManager.get_files(f"{topic}_trend_report_{start_date}-{end_date}.json", 'json')
+                        json_body = DataManager.b64_to_json(json_body)
+                        html_slide_output = LlmManager.llm_api_call(chain, (json.dumps(json_body) + f"\n\n主題名稱：{topic}\n\n時間段：{start_date} to {end_date}").strip())
+                        with st.expander("點擊展開"):
+                            st.html(html_slide_output['output'])
+
+                        # ** POST BACK to DB & 串 ARCHIVE PAGE
+                        status = DataManager.post_files(
+                            filename,
+                            html_slide_output['output'],
+                            str(dt.datetime.today() + dt.timedelta(365)), 
+                            st.session_state['user_name'], 
+                            st.session_state['user_email']
+                        )
+                        st.write(status)
+                        SessionManager.send_notification_email("Wally", "huang0jin@gmail.com", "completed")
+                        st.success("簡報製作完成")
+
+                    # * 確認對應月份、主題之趨勢報告 JSON 檔案已經完成（需作為產生網頁版簡報的基礎）
+                    except ValueError:
+                        st.error("""該月份之趨勢報告 JSON 尚未製作。你可以：
+    1. 直接用 STEEP 月報產生器，一條龍製作完全部（包含 JSON, pptx, 以及網頁版簡報
+    2. 先做完 JSON 檔案之後，再回訪此區塊，製作網頁版簡報""")
+                        
+                    except Exception as e:
+                        st.warning(e)
+                
+                
 
 
 

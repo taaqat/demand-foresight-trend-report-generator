@@ -14,3 +14,4 @@ streamlit-authenticator
 streamlit-code-editor
 oauth2client
 PyYAML
+pypdf

@@ -1,5 +1,183 @@
 # Demand Foresight Trend Report Generator
-## Project Introduction
+## Tool Explanation by Flowchart
+> Steep 月報產生器
+```mermaid
+flowchart LR
+    IIIDB[(**DTRI Database**)] --> Fetch(Fetch News Data in given month)
+    Fetch --> A[(Day 1 news)] --> DaySum(**steep_summary.py**)
+    Fetch --> B[(Day 2 news)] --> DaySum
+    Fetch --> C[(Day 3 news)] --> DaySum
+    Fetch --> Etc[(Day ... news)] --> DaySum
+
+    DaySum --> MonthSum[(Monthly Summary)] --> Gen(**steep_generate.py**)
+    Gen --> Out1[(Trend Report in JSON)]
+
+    Out1 --> Exp(**export_manager.py**)
+    Exp --> Exc[(Output in Excel)]
+    Exp --> Ppt[(Output in Pptx)]
+    Exc --> F1[Downloadable in **archive.py**]
+    Ppt --> F[Downloadable in **index.py**]
+
+    Out1 --> HTMLGEN(**Claude**)
+    HTMLGEN --> HTMLSlide[(HTML Slides)] --> F3[Display in **index.py**]
+
+
+```
+
+> 特定主題報告產生器
+```mermaid
+flowchart LR
+    IIIDB[(**DTRI News Database**)] --> Fetch(Query Data by <br>**time** and **keywords**) --> FilteredRaw[(**Filtered Data**)]
+    
+    UserD[(**User Uploaded News Data**)] --> Conc[Concatenation]
+    FilteredRaw --> Conc
+
+    Conc --> Split(Split into batches)
+    Split --> A[(Batch 1 news)] --> BatchSum(**self_select_summary.py**)
+    Split --> B[(Batch 2 news)] --> BatchSum
+    Split --> C[(Batch 3 news)] --> BatchSum
+    Split --> Etc[(Batch ... news)] --> BatchSum
+
+    BatchSum --> MonthSum[(Summarized News)] --> Gen(**self_select_generate.py**)
+    Gen --> Out1[(Trend Report in JSON)]
+
+    subgraph "關鍵數據提取（非必要）"
+        Pdf[(研究報告資料)] -.-> Extract[提取 PDF 報告中<br> 與趨勢有關的**關鍵數據**]
+        Out1 -.-> Extract
+        Extract -.-> Out1
+    end
+    
+
+    Out1 --> Exp(**export_manager.py**)
+    
+
+
+    Exp --> Exc[(Output in Excel)]
+    Exp --> Ppt[(Output in Pptx)]
+```
+
+> 新聞摘要產生器
+```mermaid
+flowchart LR
+L@{ shape: lin-cyl, label: "**Google Sheet Database** <br> Provided by User" } 
+Raw[(News Data <br> Uploaded by User)] --> Exp(**summarizer.py**<br>LLM summarize)
+Exp --> L
+```
+
+
+
+## Web Service (Cloud)
+Deployed on Streamlit Cloud Platform.
+> Link to **[this page](https://demand-foresight-trend-report-generator-main.streamlit.app/)**
+
+## Build Setup (Local)
+Clone the repository by the following command:
+```
+git clone https://github.com/taaqat/demand-foresight-trend-report-generator.git
+```
+
+Then install required packages:
+```
+pip install -r requirements.txt
+```
+
+Then configure your `.streamlit` folder
+- `.streamlit/config.toml`
+    You can change the theme setting in this file. The following is the example usage. You can modify at will. For details, please refer to [this link](https://docs.streamlit.io/develop/api-reference/configuration/config.toml).
+    ```
+    [theme]
+    primaryColor="#baad8d"
+    backgroundColor="#FFFFFF"
+    secondaryBackgroundColor="#ebebeb"
+    textColor="#31333F"
+    font="sans serif"
+
+    [client]
+    showErrorDetails = "full"
+    toolbarMode = "auto"
+    showSidebarNavigation = false
+    ```
+- `.streamlit/secrets.toml`
+    This file is used to store your credentials, including LLM api keys and google service account credential. Please configure as follows:
+    ```
+    CLAUDE_KEY = ""
+    OPENAI_KEY = ""
+    III_KEY = "Please request the III key from admin (鴻壹)"
+
+    [connections.gsheets]
+    spreadsheet = "https://docs.google.com/spreadsheets/d/1r2dfV1ubKywv5RjcLCB6wTfa25O9_s1kSm8grvw7p9w/edit?gid=0#gid=0"
+
+    type = "service_account"
+    project_id =  "YOUR_PROJECT_ID"
+    private_key_id = "YOUR_PRIVATE_KEY_ID"
+    private_key = "YOUR_PRIVATE_KEY"
+    client_email = "YOUR_CLIENT_EMAIL"
+    client_id = "YOUR_CLIENT_ID"
+    auth_uri = "https://accounts.google.com/o/oauth2/auth"
+    token_uri = "https://oauth2.googleapis.com/token"
+    auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+    client_x509_cert_url = "YOUR_CERT_URL"
+    universe_domain = "googleapis.com"
+
+    [connections.gsheets2]
+    spreadsheet = "https://docs.google.com/spreadsheets/d/1XjqihYMdblq6DZxP4_f6U3mWnGMcUxfhVXfhfMys4-Q/edit?gid=0#gid=0"
+    type = "service_account"
+    project_id =  "YOUR_PROJECT_ID"
+    private_key_id = "YOUR_PRIVATE_KEY_ID"
+    private_key = "YOUR_PRIVATE_KEY"
+    client_email = "YOUR_CLIENT_EMAIL"
+    client_id = "YOUR_CLIENT_ID"
+    auth_uri = "https://accounts.google.com/o/oauth2/auth"
+    token_uri = "https://oauth2.googleapis.com/token"
+    auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+    client_x509_cert_url = "YOUR_CERT_URL"
+    universe_domain = "googleapis.com"
+
+
+    [connections.gsauth]
+    spreadsheet = "https://docs.google.com/spreadsheets/d/1eUn0aOFSnHh3oOLEExeD5lr306RNqNQdpterkPbEXWY/edit?gid=0#gid=0"
+    type = "service_account"
+    project_id =  "YOUR_PROJECT_ID"
+    private_key_id = "YOUR_PRIVATE_KEY_ID"
+    private_key = "YOUR_PRIVATE_KEY"
+    client_email = "YOUR_CLIENT_EMAIL"
+    client_id = "YOUR_CLIENT_ID"
+    auth_uri = "https://accounts.google.com/o/oauth2/auth"
+    token_uri = "https://oauth2.googleapis.com/token"
+    auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+    client_x509_cert_url = "YOUR_CERT_URL"
+    universe_domain = "googleapis.com"
+
+    [permission]
+    authenticate = false
+    trend_report_generator = true
+    theme_based_generator = true
+    gallery = true 
+    chat_tool = true
+    visualization = false
+    user_token = false
+
+
+    [gsheet-credits]
+    credits = '''{
+  "type": "service_account",
+  "project_id": "YOUR_PROJECT_ID",
+  "private_key_id": "YOUR_PRIVATE_KEY_ID",
+  "private_key": "YOUR_PRIVATE_KEY",
+  "client_email": "YOUR_CLIENT_EMAIL",
+  "client_id": "YOUR_CLIENT_ID",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "YOUR_CERT_URL",
+  "universe_domain": "googleapis.com"
+    }'''
+    ```
+
+Finally, execute by the following command:
+```
+streamlit run index.py
+```
 
 ## Structures
 ```
@@ -33,11 +211,11 @@ This file serves as the application's entry point and is primarily responsible f
 
 - Authentication
 - Introduction
-- STEEP +B Yearly Trend Report Gallery
+- STEEP +B Monthly Trend Report Gallery
 
 
 
-### pages (front end)
+### pages (front end, mainly composed of streamlit api)
 Page files are python scripts that display UIs by streamlit, including:
 
 #### `page_demo.py`: 
@@ -120,7 +298,7 @@ This file defines functions that associate with **data export**. Functions that 
 
 #### `llm_manager.py` -> `LlmManager`
 
-This file manages everything associated with LLM API call. We use Claude as our model.
+This file manages everything associated with LLM API call. 
 
 - `model_select()`: Expand a streamlit dialog form to ask user to select the model type to be used.
 

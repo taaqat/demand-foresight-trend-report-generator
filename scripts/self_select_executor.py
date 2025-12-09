@@ -2,7 +2,7 @@
 # ** Executor: define main functions to be run after user submits the form
 
 from .self_select_summary import summarize_all
-from .self_select_generate import gen_trend_report_customized
+from .self_select_generate import gen_trend_report_customized, get_key_data_per_report
 from .steep_summary import monthly_summary
 from .steep_generate import gen_trend_report
 from managers.data_manager import DataManager
@@ -41,6 +41,7 @@ class Executor:
             result = gen_trend_report_customized(
                 title, start_date, end_date, user_name, user_email, raw_data, cols, additional, uploaded_data
             )
+            st.session_state['self_select_result'] = result
             finish = time.time()
             
             st.write(f'💫 {title} trend report completed! {round(finish - begin, 3)} seconds spent.')
@@ -50,10 +51,6 @@ class Executor:
             DataManager.post_files(filename, res_pptx_bs, str(dt.datetime.today() + dt.timedelta(365)), user_name, user_email)
             
             SessionManager.self_select_database('update', title, keywords, start_date, end_date, user_name, user_email, dt.date.today())
-            try:
-                SessionManager.session_state_clear('self-select')
-            except:
-                pass
             
             # *** generate excels and post
             b64_excel = ExportManager.SELF_SELECT.create_excel(start_date, end_date, title)   
@@ -68,3 +65,19 @@ class Executor:
             pass
         
         SessionManager.send_notification_email(user_name, user_email, type = 'completed')
+
+    def get_all_pdfs_key_data(title, trend_report_json):
+
+        progress_bar = st.progress(0, "正在從調查報告 / 研究報告中提取關鍵數據與案例...")
+        length = len(st.session_state['pdfs_raw'].keys())
+        count = 0
+
+        for pdf_file_name, pdf_text in st.session_state['pdfs_raw'].items():
+            progress_bar.progress(count/length, f"({count*100/length:.2f}%) {pdf_file_name}")
+
+            pdf_text = "\n".join(pdf_text)
+            get_key_data_per_report(title, trend_report_json, pdf_text, pdf_file_name) 
+
+            count += 1
+            
+        progress_bar.progress(1.0, f"完成！")

@@ -11,6 +11,7 @@ from streamlit_authenticator import Hasher
 from managers.session_manager import SessionManager
 from managers.data_manager import DataManager
 from managers.llm_manager import LlmManager
+from managers.constants import *
 
 
 # *********** Config ***********
@@ -30,25 +31,43 @@ if "model_type" not in st.session_state:
 
 # * configure the start-date, end-date, and theme picture path for year month in 2024
 #  {'2024 MONTH': [START_DATE, END_DATE, PIC_PATH]}
-st.session_state["ym_mapping"] = {
-    '2024': {
-        'January': ["2024-01-01", "2024-01-31", 1],
-        'February': ["2024-02-01", "2024-02-29", 2],
-        'March': ["2024-03-01", "2024-03-31", 3],
-        'April': ["2024-04-01", "2024-04-30", 1],
-        'May': ["2024-05-01", "2024-05-31", 2],
-        'June': ["2024-06-01", "2024-06-30", 3],
-        'July': ["2024-07-01", "2024-07-31", 1],
-        'August': ["2024-08-01", "2024-08-31", 2],
-        'September': ["2024-09-01", "2024-10-01", 3],
-        'October': ["2024-10-01", "2024-10-31", 1],
-        'November': ["2024-11-01", "2024-11-27", 2],
-        'December': ["2024-12-01", "2024-12-31", 3],
-    },
-    '2025': {
-        "January": ["2025-01-01", "2025-01-31"],
-        "February": ["2025-02-01", "2025-02-28"]
- }}
+st.session_state["ym_mapping"] = ym_mapping
+
+# * 根據資料庫中實際存在的報表來過濾可用月份
+def filter_available_months(year_key):
+    """
+    檢查資料庫中該年份實際有哪些月份的報表，只返回有資料的月份
+    """
+    try:
+        df = SessionManager.steep_database('fetch')
+        
+        # 取得該年份的所有月份
+        all_months = list(st.session_state["ym_mapping"][year_key].keys())
+        
+        # 檢查每個月份是否有任何主題的報表
+        available_months = {}
+        for month in all_months:
+            month_dates = st.session_state["ym_mapping"][year_key][month]
+            start_date = month_dates[0]
+            end_date = month_dates[1]
+            
+            # 檢查資料庫中是否存在該月份的報表
+            has_data = df[
+                (df['start_date'] == start_date) & 
+                (df['end_date'] == end_date)
+            ].shape[0] > 0
+            
+            if has_data:
+                available_months[month] = month_dates
+        
+        # 如果沒有任何資料，至少返回第一個月份（避免空列表）
+        if not available_months and all_months:
+            available_months[all_months[0]] = st.session_state["ym_mapping"][year_key][all_months[0]]
+            
+        return available_months
+    except:
+        # 如果查詢失敗，返回所有月份
+        return st.session_state["ym_mapping"][year_key]
 
 
 # ***************************************************
@@ -219,38 +238,65 @@ def main():
     
     
     
-    # * Function for loading STEEP +B monthly report in 2024 *
+    # * Function for loading STEEP +B monthly report in 2025 *
     def load_steep_2025(topic_selection, month, cl, cr):
         
-        period = "-".join(st.session_state['ym_mapping']['2025'][month])
-        try:
-            filename_html = topic_selection + '_trends_' + period + '_html.txt'
-            filename_pptx = topic_selection + '_trends_' + period + '.pptx'
+        # 取得所有可用的月份列表（按時間順序）
+        available_months = list(st.session_state['ym_mapping']['2025'].keys())
+        current_month_idx = available_months.index(month)
+        
+        # 從選定的月份開始，往前尋找有檔案的月份
+        found = False
+        actual_month = month
+        
+        for i in range(current_month_idx, -1, -1):
+            check_month = available_months[i]
+            period = "-".join(st.session_state['ym_mapping']['2025'][check_month])
+            
+            try:
+                filename_html = topic_selection + '_trends_' + period + '_html.txt'
+                filename_pptx = topic_selection + '_trends_' + period + '.pptx'
 
-            html_body = DataManager.get_files(filename_html, 'txt')
-            pptx_body = DataManager.b64_to_pptx_IO(DataManager.get_files(filename_pptx, 'pptx'))
+                html_body = DataManager.get_files(filename_html, 'txt')
+                pptx_body = DataManager.b64_to_pptx_IO(DataManager.get_files(filename_pptx, 'pptx'))
+                
+                # 如果找到檔案
+                found = True
+                actual_month = check_month
+                
+                # 更新 session state 以同步下拉選單
+                if check_month != month:
+                    st.session_state['actual_2025_month'] = check_month
+                    st.rerun()
 
-            with cl:
-                download_btn_l = st.download_button(
-                    label = "下載 HTML 檔案",
-                    data = html_body,
-                    file_name = topic_selection + '_trends_' + period + '.html',
-                    type="primary",
-                    icon=":material/download:",
-                    mime="html"
-                )
-            with cr:
-                download_btn_r = st.download_button(
-                    label = "下載 Pptx 檔案",
-                    data = pptx_body,
-                    file_name = topic_selection + "_trends_" + period + '.pptx',
-                    icon = ":material/download:",
-                    mime = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                )
+                with cl:
+                    download_btn_l = st.download_button(
+                        label = "下載 HTML 檔案",
+                        data = html_body,
+                        file_name = topic_selection + '_trends_' + period + '.html',
+                        type="primary",
+                        icon=":material/download:",
+                        mime="html"
+                    )
+                with cr:
+                    download_btn_r = st.download_button(
+                        label = "下載 Pptx 檔案",
+                        data = pptx_body,
+                        file_name = topic_selection + "_trends_" + period + '.pptx',
+                        icon = ":material/download:",
+                        mime = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                    )
 
-            st.html(html_body)
-        except:
-            st.warning("該主題之月報尚未生成！")
+                st.html(html_body)
+                break
+                
+            except Exception as e:
+                # 繼續檢查上一個月
+                continue
+        
+        if not found:
+            st.warning(f"該主題（{topic_selection}）目前尚無任何月報資料！")
+
         
 
     # * User choose the year month *
@@ -270,7 +316,25 @@ def main():
                     with cl2025:
                         topic_selection = st.selectbox("選擇主題", ['social', 'economic', 'environmental', 'technological', 'political', 'business_and_investment'], key = '2025_topic')
                     with cr2025:
-                        month = st.selectbox("選擇月份", ['January', "February"], key = '2025_month')
+                        # 取得實際有資料的月份列表
+                        available_months_dict = filter_available_months('2025')
+                        months_list = list(available_months_dict.keys())[::-1]
+                        
+                        # 使用實際載入的月份或預設月份
+                        default_month = st.session_state.get('actual_2025_month', months_list[0] if months_list else None)
+                        
+                        # 確保 default_month 在列表中
+                        if default_month and default_month in months_list:
+                            default_index = months_list.index(default_month)
+                        else:
+                            default_index = 0
+                            
+                        month = st.selectbox("選擇月份", months_list, index=default_index, key = '2025_month')
+                        
+                        # 清除實際月份的 session state，避免重複 rerun
+                        if 'actual_2025_month' in st.session_state and st.session_state['actual_2025_month'] == month:
+                            del st.session_state['actual_2025_month']
+                            
                     load_steep_2025(topic_selection, month, cl2025, cr2025)
 
     render()

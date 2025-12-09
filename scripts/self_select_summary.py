@@ -32,7 +32,7 @@ def summarize_all(raw_data, user_name, user_email, title, start_date, end_date, 
     st_bar = st.progress(0, "(0%) Summarizing news...")            # progress bar on streamlit UI
 
     # *** Divide the raw data into groups. Each group has 100 rows ***
-    chunk_size = len(raw_data) // 5 if len(raw_data) // 5 != 0 else len(raw_data)
+    chunk_size = len(raw_data) // 10 if len(raw_data) // 10 != 0 else len(raw_data)
     chunks = [raw_data.iloc[i:i + chunk_size] for i in range(0, len(raw_data), chunk_size)]
   
     # *** Summarization ***
@@ -41,7 +41,7 @@ def summarize_all(raw_data, user_name, user_email, title, start_date, end_date, 
         for index, row in chunk.iterrows():
             # print(f"Row {index}: date={row['date']}, 重點摘要={row['重點摘要']}, 關鍵數據={row['關鍵數據']}")
             if row["重點摘要"] != "" :
-                contents.append(row["重點摘要"] + "\n" + str(row["關鍵數據"]))
+                contents.append(str(row["重點摘要"]) + "\n" + str(row["關鍵數據"]))
                 
         in_message = f"****** Batch {i + 1} ******" + "\n" +"\n\n".join(contents) + "\n\n" + "*"*100
         response = in_group_summarize(in_message, title, i + 1)

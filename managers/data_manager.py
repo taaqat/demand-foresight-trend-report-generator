@@ -8,6 +8,7 @@ import datetime as dt
 import base64
 import time
 import re
+from pypdf import PdfReader
 from time import sleep
 
 import urllib3
@@ -90,16 +91,25 @@ class DataManager:
                         st.write(f"URL: {prepared_request.url}")
                     
                     try:
-                        response = http.post(url, end_point_params, headers = headers)
-                    except urllib3.exceptions.NewConnectionError as e:
-                        st.write(f"Connection failed: {e}")
-                        st.write(response.content)
+                        response = http.post(url, end_point_params, headers = headers, timeout=30)
+                    except (urllib3.exceptions.NewConnectionError, 
+                            requests.exceptions.ConnectionError,
+                            requests.exceptions.Timeout) as e:
+                        st.error(f"Connection failed: {e}")
+                        st.warning("Retrying connection...")
+                        continue
+                    except Exception as e:
+                        st.error(f"Unexpected error during request: {e}")
+                        break
                     
                     # PRINT HTTPS Error Messege if we encounter errors
                     if response.status_code == 200:
                         pass 
                     else:
-                        st.write(response.content)
+                        st.warning(f"HTTP Error {response.status_code}: {response.content}")
+                        if response.status_code >= 500:
+                            st.warning("Server error, retrying...")
+                            continue
 
                     # Clean data into pd.DataFrame format
                     data = response.json()['data']
@@ -139,16 +149,25 @@ class DataManager:
                     st.write(f"URL: {prepared_request.url}")
                 
                 try:
-                    response = http.post(url, end_point_params, headers = headers)
-                except urllib3.exceptions.NewConnectionError as e:
-                    st.write(f"Connection failed: {e}")
-                    st.write(response.content)
+                    response = http.post(url, end_point_params, headers = headers, timeout=30)
+                except (urllib3.exceptions.NewConnectionError, 
+                        requests.exceptions.ConnectionError,
+                        requests.exceptions.Timeout) as e:
+                    st.error(f"Connection failed: {e}")
+                    st.warning("Retrying connection...")
+                    continue
+                except Exception as e:
+                    st.error(f"Unexpected error during request: {e}")
+                    break
                 
                 # PRINT HTTPS Error Messege if we encounter errors
                 if response.status_code == 200:
                     pass 
                 else:
-                    st.write(response.content)
+                    st.warning(f"HTTP Error {response.status_code}: {response.content}")
+                    if response.status_code >= 500:
+                        st.warning("Server error, retrying...")
+                        continue
 
                 # Clean data into pd.DataFrame format
                 data = response.json()['data']
@@ -215,10 +234,9 @@ class DataManager:
         http.mount("http://", adapter) 
         try:
             response = http.post(url, json = payload, headers = headers)
-            # st.info(f"File {json.loads(response.content)['file_name']} has been updated to III's database")
-        except:
+            st.info(f"File {json.loads(response.content)['file_name']} has been updated to III's database")
+        except Exception as e:
             response = http.post(url, json = payload, headers = headers)
-            st.warning(response.content)
 
         return response
     
@@ -253,6 +271,7 @@ class DataManager:
             try:
                 return response.json()['file_content']
             except Exception as e:
+                # st.write(e)
                 raise ValueError("No such file in the database!")
         
     # *****************************************
@@ -360,6 +379,17 @@ class DataManager:
             return data
         except:
             raise UnicodeDecodeError("Encountered Errors while tranforming base64 to dataframe. Please ensure the original data format to be 'pptx'.")
+        
+    # --- Transform Base64 formatted json to Json format data
+    @staticmethod
+    def b64_to_json(b64_str):
+        try:
+            data = base64.b64decode(b64_str)
+            data = json.loads(data)
+
+            return data
+        except:
+            raise UnicodeDecodeError("Encountered Errors while tranforming base64 to dataframe. Please ensure the original data format to be 'pptx'.")
             
 
     # --- Get output download link (to render on UI with st.markdown())
@@ -443,4 +473,17 @@ class DataManager:
                     
         else:
             return None
+        
+    # --- Load user uploaded pdf data
+    def load_pdfs(uploaded):
+
+        '''load pdf data from user upload with caching'''
+        reader = PdfReader(uploaded)
+        number_of_pages = len(reader.pages)
+        texts = []
+        for i in range(number_of_pages):
+            page = reader.pages[i]
+            texts.append(f"【page {i}】\n" + page.extract_text())
+
+        return texts
      

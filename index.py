@@ -202,38 +202,63 @@ def main():
     
     
     
-    # * Function for loading STEEP +B monthly report in 2024 *
+    # * Function for loading STEEP +B monthly report in 2025 *
     def load_steep_2025(topic_selection, month, cl, cr):
         
-        period = "-".join(st.session_state['ym_mapping']['2025'][month])
-        try:
-            filename_html = topic_selection + '_trends_' + period + '_html.txt'
-            filename_pptx = topic_selection + '_trends_' + period + '.pptx'
+        # 取得所有可用的月份列表（按時間順序）
+        available_months = list(st.session_state['ym_mapping']['2025'].keys())
+        current_month_idx = available_months.index(month)
+        
+        # 從選定的月份開始，往前尋找有檔案的月份
+        found = False
+        actual_month = month
+        
+        for i in range(current_month_idx, -1, -1):
+            check_month = available_months[i]
+            period = "-".join(st.session_state['ym_mapping']['2025'][check_month])
+            
+            try:
+                filename_html = topic_selection + '_trends_' + period + '_html.txt'
+                filename_pptx = topic_selection + '_trends_' + period + '.pptx'
 
-            html_body = DataManager.get_files(filename_html, 'txt')
-            pptx_body = DataManager.b64_to_pptx_IO(DataManager.get_files(filename_pptx, 'pptx'))
+                html_body = DataManager.get_files(filename_html, 'txt')
+                pptx_body = DataManager.b64_to_pptx_IO(DataManager.get_files(filename_pptx, 'pptx'))
+                
+                # 如果找到檔案
+                found = True
+                actual_month = check_month
+                
+                # 如果不是選定的月份，顯示提示訊息
+                if check_month != month:
+                    st.info(f"📌 {month} 月報尚未完成，顯示最近一期：{check_month} 月報")
 
-            with cl:
-                download_btn_l = st.download_button(
-                    label = "下載 HTML 檔案",
-                    data = html_body,
-                    file_name = topic_selection + '_trends_' + period + '.html',
-                    type="primary",
-                    icon=":material/download:",
-                    mime="html"
-                )
-            with cr:
-                download_btn_r = st.download_button(
-                    label = "下載 Pptx 檔案",
-                    data = pptx_body,
-                    file_name = topic_selection + "_trends_" + period + '.pptx',
-                    icon = ":material/download:",
-                    mime = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                )
+                with cl:
+                    download_btn_l = st.download_button(
+                        label = "下載 HTML 檔案",
+                        data = html_body,
+                        file_name = topic_selection + '_trends_' + period + '.html',
+                        type="primary",
+                        icon=":material/download:",
+                        mime="html"
+                    )
+                with cr:
+                    download_btn_r = st.download_button(
+                        label = "下載 Pptx 檔案",
+                        data = pptx_body,
+                        file_name = topic_selection + "_trends_" + period + '.pptx',
+                        icon = ":material/download:",
+                        mime = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                    )
 
-            st.html(html_body)
-        except Exception as e:
-            st.warning(str(e) + " 該月份該主題之月報尚未製作完成！")
+                st.html(html_body)
+                break
+                
+            except Exception as e:
+                # 繼續檢查上一個月
+                continue
+        
+        if not found:
+            st.warning(f"該主題（{topic_selection}）目前尚無任何月報資料！")
 
         
 

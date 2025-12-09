@@ -227,6 +227,11 @@ def main():
                 # 如果找到檔案
                 found = True
                 actual_month = check_month
+                
+                # 更新 session state 以同步下拉選單
+                if check_month != month:
+                    st.session_state['actual_2025_month'] = check_month
+                    st.rerun()
 
                 with cl:
                     download_btn_l = st.download_button(
@@ -275,7 +280,22 @@ def main():
                     with cl2025:
                         topic_selection = st.selectbox("選擇主題", ['social', 'economic', 'environmental', 'technological', 'political', 'business_and_investment'], key = '2025_topic')
                     with cr2025:
-                        month = st.selectbox("選擇月份", list(st.session_state['ym_mapping']['2025'].keys())[::-1], key = '2025_month')
+                        # 使用實際載入的月份或預設月份
+                        months_list = list(st.session_state['ym_mapping']['2025'].keys())[::-1]
+                        default_month = st.session_state.get('actual_2025_month', months_list[0])
+                        
+                        # 確保 default_month 在列表中
+                        if default_month in months_list:
+                            default_index = months_list.index(default_month)
+                        else:
+                            default_index = 0
+                            
+                        month = st.selectbox("選擇月份", months_list, index=default_index, key = '2025_month')
+                        
+                        # 清除實際月份的 session state，避免重複 rerun
+                        if 'actual_2025_month' in st.session_state and st.session_state['actual_2025_month'] == month:
+                            del st.session_state['actual_2025_month']
+                            
                     load_steep_2025(topic_selection, month, cl2025, cr2025)
 
     render()

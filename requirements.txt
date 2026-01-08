@@ -15,3 +15,7 @@ streamlit-code-editor
 oauth2client
 PyYAML
 pypdf
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0

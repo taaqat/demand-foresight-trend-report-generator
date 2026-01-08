@@ -8,7 +8,7 @@ from managers.export_manager import ExportManager
 from managers.llm_manager import LlmManager
 from managers.prompt_manager import PromptManager
 from managers.session_manager import SessionManager
-from managers.constants import *
+from managers.constants import FEATURE_FLAGS, ym_mapping
 
 from scripts.steep_generate import gen_trend_report_1, gen_trend_report_2
 
@@ -562,13 +562,26 @@ def main():
 
             try:
                 with st.spinner("正在生成網頁版簡報..."):
-                    chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['report_model'])
-                    html_slide_output = LlmManager.llm_api_call(chain, json.dumps(st.session_state['steep_json_result']) + f"\n\n主題名稱：{st.session_state['steep_topic']}\n\n時間段：{st.session_state['steep_start']} to {st.session_state['steep_end']}")
+                    # 根據 feature flag 決定使用 LLMs 或直接轉換
+                    if FEATURE_FLAGS.get('use_llms_convert_json_to_html', False):
+                        # 使用 LLMs 生成 HTML
+                        chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['report_model'])
+                        html_slide_output = LlmManager.llm_api_call(chain, json.dumps(st.session_state['steep_json_result']) + f"\n\n主題名稱：{st.session_state['steep_topic']}\n\n時間段：{st.session_state['steep_start']} to {st.session_state['steep_end']}")
+                        html_content = html_slide_output['output']
+                    else:
+                        # 直接轉換 JSON 為 HTML（不使用 LLMs）
+                        html_content = ExportManager.SELF_SELECT.create_html(
+                            topic=st.session_state['steep_topic'],
+                            data=st.session_state['steep_json_result'],
+                            start_date=st.session_state['steep_start'],
+                            end_date=st.session_state['steep_end']
+                        )
+                    
                     filename = f"{st.session_state['steep_topic']}_trends_{st.session_state['steep_start']}-{st.session_state['steep_end']}_html.txt"
                     # ** POST BACK to DB & 串 ARCHIVE PAGE
                     DataManager.post_files(
                         filename,
-                        html_slide_output['output'],
+                        html_content,
                         str(dt.datetime.today() + dt.timedelta(365)), 
                         st.session_state['user_name'], 
                         st.session_state['user_email']
@@ -579,7 +592,7 @@ def main():
         with output_box.container():
             st.success("HTML簡報生成完畢！已回傳至 III Database！")
             with st.expander("Expand to preview"):
-                st.markdown(html_slide_output['output'], unsafe_allow_html = True)    
+                st.markdown(html_content, unsafe_allow_html = True)    
 
             SessionManager.session_state_clear('steep')
             st.session_state['steep_running'] = False
@@ -605,19 +618,33 @@ def main():
             if submittt:
                 with st.spinner("正在製作簡報..."):
                     filename = f"{topic}_trends_{start_date}-{end_date}_html.txt"
-                    chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
 
                     try:
                         json_body = DataManager.get_files(f"{topic}_trend_report_{start_date}-{end_date}.json", 'json')
                         json_body = DataManager.b64_to_json(json_body)
-                        html_slide_output = LlmManager.llm_api_call(chain, (json.dumps(json_body) + f"\n\n主題名稱：{topic}\n\n時間段：{start_date} to {end_date}").strip())
+                        
+                        # 根據 feature flag 決定使用 LLMs 或直接轉換
+                        if FEATURE_FLAGS.get('use_llms_convert_json_to_html', False):
+                            # 使用 LLMs 生成 HTML
+                            chain = LlmManager.create_prompt_chain(PromptManager.Others.gen_html_slides, st.session_state['model'])
+                            html_slide_output = LlmManager.llm_api_call(chain, (json.dumps(json_body) + f"\n\n主題名稱：{topic}\n\n時間段：{start_date} to {end_date}").strip())
+                            html_content = html_slide_output['output']
+                        else:
+                            # 直接轉換 JSON 為 HTML（不使用 LLMs）
+                            html_content = ExportManager.SELF_SELECT.create_html(
+                                topic=topic,
+                                data=json_body,
+                                start_date=start_date,
+                                end_date=end_date
+                            )
+                        
                         with st.expander("點擊展開"):
-                            st.html(html_slide_output['output'])
+                            st.html(html_content)
 
                         # ** POST BACK to DB & 串 ARCHIVE PAGE
                         status = DataManager.post_files(
                             filename,
-                            html_slide_output['output'],
+                            html_content,
                             str(dt.datetime.today() + dt.timedelta(365)), 
                             st.session_state['user_name'], 
                             st.session_state['user_email']

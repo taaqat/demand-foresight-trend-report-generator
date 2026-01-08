@@ -1,6 +1,12 @@
 import datetime
 import calendar
 
+# *** Feature Flags ***
+FEATURE_FLAGS = {
+    # 是否使用 LLMs 將 JSON 轉成 HTML（預設 False，使用直接轉換）
+    'use_llms_convert_json_to_html': False
+}
+
 def generate_ym_mapping():
     """
     自動生成年月對照表，從2024年到當前年月

@@ -1,6 +1,9 @@
 # 
-# *** Export Manager: Manages the data transformation process (eg: from JSON to excel, pptx ...)
+# *** Export Manager: Manages the data transformation process (eg: from JSON to excel, pptx, html ...)
 from managers.data_manager import DataManager
+from managers.constants import FEATURE_FLAGS
+from managers.html_converter import TrendReportHTMLConverter
+from typing import Dict, Any, Optional
 
 import collections 
 import collections.abc
@@ -650,6 +653,33 @@ class ExportManager:
             buffer.close()
 
             return b64_excel
+        
+        @staticmethod
+        def create_html(topic: str, data: Dict[str, Any], start_date: str, end_date: str, 
+                       custom_theme: Optional[str] = None) -> str:
+            """
+            將 JSON 趨勢報告轉換為 HTML
+            
+            Args:
+                topic: 報告主題/類別
+                data: JSON 趨勢報告資料
+                start_date: 開始日期
+                end_date: 結束日期
+                custom_theme: 自訂主題（可選）
+            
+            Returns:
+                HTML 字串
+            """
+            date_range = f"{start_date}-{end_date}"
+            
+            converter = TrendReportHTMLConverter(
+                data=data,
+                category=topic,
+                date_range=date_range,
+                custom_theme=custom_theme
+            )
+            
+            return converter.generate_html()
 
 
 
